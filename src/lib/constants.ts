@@ -5,7 +5,7 @@ export const SITE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://actant.io";
 
 export const NAV_ITEMS = {
   marketing: [
-    { label: "Features", href: "/#features" },
+    { label: "Pricing", href: "/pricing" },
     { label: "Docs", href: "/docs" },
     { label: "Marketplace", href: "/marketplace" },
   ],
@@ -18,6 +18,10 @@ export const NAV_ITEMS = {
     {
       title: "Getting Started",
       items: [{ label: "Introduction", href: "/docs/getting-started" }],
+    },
+    {
+      title: "CLI",
+      items: [{ label: "Installation & Usage", href: "/docs/cli" }],
     },
     {
       title: "Agents",

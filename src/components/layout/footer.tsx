@@ -4,6 +4,7 @@ import { SITE_NAME } from "@/lib/constants";
 const FOOTER_LINKS = [
   { label: "GitHub", href: "https://github.com/actant-io" },
   { label: "Docs", href: "/docs" },
+  { label: "Pricing", href: "/pricing" },
   { label: "Marketplace", href: "/marketplace" },
 ];
 

@@ -8,11 +8,11 @@ import { PermissionsTab } from "@/components/builder/tabs/permissions-tab";
 import { RulesTab } from "@/components/builder/tabs/rules-tab";
 import type { ConfigState } from "@/hooks/use-config";
 import type { McpServer, Rule, SkillEntry } from "@/types/config";
+import type { Template } from "@/types/marketplace";
 
 interface BuilderTabsProps {
   state: ConfigState;
   setInstructions: (content: string) => void;
-  setTemplateId: (id: string | undefined) => void;
   addSkill: (skill: SkillEntry) => void;
   removeSkill: (skillId: string) => void;
   addMcpServer: (server: McpServer) => void;
@@ -20,15 +20,17 @@ interface BuilderTabsProps {
   updateMcpServer: (name: string, server: McpServer) => void;
   setPermission: (tool: string, value: "allow" | "ask" | "deny") => void;
   removePermission: (tool: string) => void;
+  setAllPermissions: (permissions: Record<string, "allow" | "ask" | "deny">) => void;
   addRule: (rule: Rule) => void;
   removeRule: (index: number) => void;
   updateRule: (index: number, rule: Rule) => void;
+  addRulesBatch: (rules: Rule[]) => void;
+  onLoadTemplate: (template: Template) => void;
 }
 
 export function BuilderTabs({
   state,
   setInstructions,
-  setTemplateId,
   addSkill,
   removeSkill,
   addMcpServer,
@@ -36,9 +38,12 @@ export function BuilderTabs({
   updateMcpServer,
   setPermission,
   removePermission,
+  setAllPermissions,
   addRule,
   removeRule,
   updateRule,
+  addRulesBatch,
+  onLoadTemplate,
 }: BuilderTabsProps) {
   return (
     <Tabs defaultValue="instructions" className="px-6 py-6">
@@ -54,8 +59,9 @@ export function BuilderTabs({
         <InstructionsTab
           content={state.instructions.content}
           templateId={state.instructions.templateId}
+          targetAgent={state.targetAgent}
           setInstructions={setInstructions}
-          setTemplateId={setTemplateId}
+          onLoadTemplate={onLoadTemplate}
         />
       </TabsContent>
 
@@ -82,6 +88,7 @@ export function BuilderTabs({
           permissions={state.permissions}
           setPermission={setPermission}
           removePermission={removePermission}
+          onApplyPreset={setAllPermissions}
         />
       </TabsContent>
 
@@ -91,6 +98,7 @@ export function BuilderTabs({
           addRule={addRule}
           removeRule={removeRule}
           updateRule={updateRule}
+          onApplyPreset={addRulesBatch}
         />
       </TabsContent>
     </Tabs>

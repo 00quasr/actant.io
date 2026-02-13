@@ -16,7 +16,7 @@ export async function getProfile(id: string): Promise<Profile | null> {
 
 export async function updateProfile(
   id: string,
-  data: { display_name?: string; bio?: string; avatar_url?: string; github_username?: string }
+  data: { username?: string; display_name?: string; bio?: string; avatar_url?: string; github_username?: string }
 ): Promise<Profile> {
   const supabase = createClient();
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -7,120 +8,57 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { listTemplates } from "@/services/templates";
+import type { AgentType } from "@/types/config";
+import type { Template } from "@/types/marketplace";
 
 interface TemplatePickerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSelect: (content: string, id: string) => void;
+  targetAgent: AgentType;
+  onSelect: (template: Template) => void;
 }
 
-const TEMPLATES = [
-  {
-    id: "frontend-react",
-    name: "Frontend (React/Next.js)",
-    description: "Best practices for React and Next.js development",
-    content: `## Project
-Stack: Next.js (App Router), TypeScript, Tailwind CSS
+export function TemplatePicker({
+  open,
+  onOpenChange,
+  targetAgent,
+  onSelect,
+}: TemplatePickerProps) {
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [loading, setLoading] = useState(false);
 
-## Code Style
-- TypeScript strict mode, no \`any\`
-- Functional components with named exports
-- Tailwind for all styling, no CSS modules
-- Use server components by default, \`"use client"\` only when needed
-- Prefer \`const\` arrow functions for utilities
+  useEffect(() => {
+    if (!open) return;
 
-## Patterns
-- Co-locate components with their pages
-- Use Zod for all validation
-- Prefer server actions over API routes
-- Use \`loading.tsx\` and \`error.tsx\` for route-level states
+    let cancelled = false;
 
-## Testing
-- Prefer integration tests with Testing Library
-- Test behavior, not implementation details
-`,
-  },
-  {
-    id: "backend-node",
-    name: "Backend (Node/Express)",
-    description: "Node.js backend development guidelines",
-    content: `## Project
-Stack: Node.js, TypeScript, Express/Fastify
+    async function fetch() {
+      setLoading(true);
+      try {
+        const data = await listTemplates(targetAgent);
+        if (!cancelled) {
+          setTemplates(data);
+        }
+      } catch {
+        if (!cancelled) {
+          setTemplates([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
 
-## Code Style
-- TypeScript strict mode
-- Use dependency injection
-- Async/await over callbacks
-- Structured error handling with custom error classes
+    fetch();
+    return () => {
+      cancelled = true;
+    };
+  }, [open, targetAgent]);
 
-## Patterns
-- Controller -> Service -> Repository layers
-- Validate all inputs at the boundary with Zod
-- Use middleware for auth and error handling
-- Log structured JSON, never console.log
-
-## Testing
-- Unit test services with mocked dependencies
-- Integration test API endpoints
-- Use factories for test data
-`,
-  },
-  {
-    id: "fullstack",
-    name: "Full Stack",
-    description: "Complete full-stack development configuration",
-    content: `## Project
-Stack: Next.js, TypeScript, Supabase, Tailwind CSS
-
-## Code Style
-- TypeScript strict mode, no \`any\`
-- Named exports everywhere
-- Functional components
-- Tailwind for styling
-
-## Frontend
-- Server components by default
-- Client components only for interactivity
-- Use Zod for form validation
-- Optimistic UI updates
-
-## Backend
-- Use server actions for mutations
-- API routes only for webhooks and external integrations
-- Row Level Security on all tables
-- Type-safe database queries
-
-## Git
-- Conventional commits: type(scope): message
-- Feature branches off main
-`,
-  },
-  {
-    id: "general",
-    name: "General",
-    description: "General-purpose coding assistant configuration",
-    content: `## Code Style
-- Write clean, readable code
-- Meaningful variable and function names
-- Small, focused functions
-- DRY but not prematurely abstracted
-
-## Principles
-- KISS: Keep it simple
-- YAGNI: Don't build what you don't need
-- Favor composition over inheritance
-- Write tests for critical paths
-
-## Communication
-- Explain changes before making them
-- Ask clarifying questions when requirements are ambiguous
-- Suggest simpler alternatives when appropriate
-`,
-  },
-];
-
-export function TemplatePicker({ open, onOpenChange, onSelect }: TemplatePickerProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
@@ -130,19 +68,43 @@ export function TemplatePicker({ open, onOpenChange, onSelect }: TemplatePickerP
             Start with a template and customize it for your project.
           </DialogDescription>
         </DialogHeader>
+
         <div className="space-y-2">
-          {TEMPLATES.map((template) => (
-            <button
-              key={template.id}
-              className="w-full text-left rounded-lg border p-4 hover:bg-accent transition-colors"
-              onClick={() => onSelect(template.content, template.id)}
-            >
-              <div className="font-medium text-sm">{template.name}</div>
-              <div className="text-xs text-muted-foreground mt-1">
-                {template.description}
+          {loading ? (
+            Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="rounded-lg border p-4 space-y-2">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-3 w-full" />
               </div>
-            </button>
-          ))}
+            ))
+          ) : templates.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-4 text-center">
+              No templates available for this agent type.
+            </p>
+          ) : (
+            templates.map((template) => (
+              <button
+                key={template.id}
+                className="w-full text-left rounded-lg border p-4 hover:bg-accent transition-colors"
+                onClick={() => onSelect(template)}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-sm">{template.name}</span>
+                  {template.is_featured && (
+                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                      Featured
+                    </Badge>
+                  )}
+                  <Badge variant="outline" className="text-[10px]">
+                    {template.use_case}
+                  </Badge>
+                </div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  {template.description}
+                </div>
+              </button>
+            ))
+          )}
         </div>
       </DialogContent>
     </Dialog>

@@ -15,9 +15,11 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { PlanBadge } from "@/components/billing/plan-badge";
 import { NAV_ITEMS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { useAuth } from "@/hooks/use-auth";
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Pencil2Icon,
@@ -56,6 +58,8 @@ function NavItems({ onNavigate }: { onNavigate?: () => void }) {
 }
 
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
+  const { profile } = useAuth();
+
   return (
     <div className="flex h-full flex-col">
       <div className="px-4 py-5">
@@ -70,6 +74,16 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       <div className="flex-1 px-3">
         <NavItems onNavigate={onNavigate} />
       </div>
+      {profile && (
+        <div className="border-t px-4 py-3">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground truncate">
+              {profile.display_name || profile.username || "User"}
+            </span>
+            <PlanBadge plan={profile.plan ?? "free"} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -7,8 +7,29 @@ export interface Profile {
   avatar_url: string | null;
   bio: string | null;
   github_username: string | null;
+  plan: "free" | "pro";
+  generation_credits_used: number;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface McpProvider {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  icon_url: string | null;
+  type: "stdio" | "sse" | "streamable-http";
+  default_command: string | null;
+  default_args: string[];
+  default_url: string | null;
+  required_env_keys: string[];
+  category: "database" | "cloud" | "devtools" | "monitoring" | "ai" | "general";
+  documentation_url: string | null;
+  is_featured: boolean;
+  created_at: string;
 }
 
 export interface Config {

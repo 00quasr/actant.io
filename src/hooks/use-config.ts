@@ -34,6 +34,10 @@ type ConfigAction =
   | { type: "REMOVE_RULE"; payload: number }
   | { type: "UPDATE_RULE"; payload: { index: number; rule: Rule } }
   | { type: "LOAD_CONFIG"; payload: AgentConfig & { id?: string } }
+  | { type: "LOAD_GENERATED_CONFIG"; payload: AgentConfig }
+  | { type: "LOAD_TEMPLATE"; payload: { instructions: AgentConfig["instructions"]; rules: Rule[]; mcpServers: McpServer[]; permissions: Record<string, "allow" | "ask" | "deny"> } }
+  | { type: "SET_ALL_PERMISSIONS"; payload: Record<string, "allow" | "ask" | "deny"> }
+  | { type: "ADD_RULES_BATCH"; payload: Rule[] }
   | { type: "RESET" }
   | { type: "SET_SAVING"; payload: boolean }
   | { type: "SET_SAVED" };
@@ -126,7 +130,8 @@ function configReducer(state: ConfigState, action: ConfigAction): ConfigState {
         isDirty: true,
       };
     case "REMOVE_PERMISSION": {
-      const { [action.payload]: _, ...rest } = state.permissions;
+      const rest = { ...state.permissions };
+      delete rest[action.payload];
       return { ...state, permissions: rest, isDirty: true };
     }
     case "ADD_RULE":
@@ -145,8 +150,33 @@ function configReducer(state: ConfigState, action: ConfigAction): ConfigState {
         ),
         isDirty: true,
       };
+    case "SET_ALL_PERMISSIONS":
+      return { ...state, permissions: action.payload, isDirty: true };
+    case "ADD_RULES_BATCH":
+      return { ...state, rules: [...state.rules, ...action.payload], isDirty: true };
     case "LOAD_CONFIG":
       return createInitialState(action.payload);
+    case "LOAD_GENERATED_CONFIG":
+      return {
+        ...state,
+        name: action.payload.name || state.name,
+        description: action.payload.description || state.description,
+        instructions: action.payload.instructions,
+        skills: action.payload.skills,
+        mcpServers: action.payload.mcpServers,
+        permissions: action.payload.permissions,
+        rules: action.payload.rules,
+        isDirty: true,
+      };
+    case "LOAD_TEMPLATE":
+      return {
+        ...state,
+        instructions: action.payload.instructions,
+        rules: action.payload.rules,
+        mcpServers: action.payload.mcpServers,
+        permissions: action.payload.permissions,
+        isDirty: true,
+      };
     case "RESET":
       return createInitialState();
     case "SET_SAVING":
@@ -233,6 +263,25 @@ export function useConfig(initial?: Partial<AgentConfig> & { id?: string }) {
       dispatch({ type: "LOAD_CONFIG", payload: config }),
     []
   );
+  const loadGeneratedConfig = useCallback(
+    (config: AgentConfig) =>
+      dispatch({ type: "LOAD_GENERATED_CONFIG", payload: config }),
+    []
+  );
+  const loadTemplate = useCallback(
+    (template: { instructions: AgentConfig["instructions"]; rules: Rule[]; mcpServers: McpServer[]; permissions: Record<string, "allow" | "ask" | "deny"> }) =>
+      dispatch({ type: "LOAD_TEMPLATE", payload: template }),
+    []
+  );
+  const setAllPermissions = useCallback(
+    (permissions: Record<string, "allow" | "ask" | "deny">) =>
+      dispatch({ type: "SET_ALL_PERMISSIONS", payload: permissions }),
+    []
+  );
+  const addRulesBatch = useCallback(
+    (rules: Rule[]) => dispatch({ type: "ADD_RULES_BATCH", payload: rules }),
+    []
+  );
   const reset = useCallback(() => dispatch({ type: "RESET" }), []);
 
   return {
@@ -254,6 +303,10 @@ export function useConfig(initial?: Partial<AgentConfig> & { id?: string }) {
     removeRule,
     updateRule,
     loadConfig,
+    loadGeneratedConfig,
+    loadTemplate,
+    setAllPermissions,
+    addRulesBatch,
     reset,
   };
 }

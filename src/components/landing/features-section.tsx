@@ -4,6 +4,7 @@ import {
   Share2Icon,
   StackIcon,
 } from "@radix-ui/react-icons";
+import { FadeIn } from "./fade-in";
 
 const FEATURES = [
   {
@@ -34,20 +35,31 @@ const FEATURES = [
 
 export function FeaturesSection() {
   return (
-    <section id="features" className="px-6 py-20 sm:py-28">
+    <section id="features" className="bg-muted/30 px-6 py-16 sm:py-24">
       <div className="mx-auto max-w-5xl">
-        <h2 className="text-center text-2xl font-bold tracking-tight sm:text-3xl">
-          Everything you need
-        </h2>
-        <div className="mt-16 grid gap-12 sm:grid-cols-2">
-          {FEATURES.map((feature) => (
-            <div key={feature.title} className="flex flex-col gap-3">
-              <feature.icon className="size-5 text-foreground" />
-              <h3 className="text-base font-semibold">{feature.title}</h3>
-              <p className="text-sm leading-relaxed text-muted-foreground">
-                {feature.description}
-              </p>
-            </div>
+        <FadeIn>
+          <p className="text-center text-xs font-medium uppercase tracking-wider text-muted-foreground mb-3">
+            Features
+          </p>
+          <h2 className="text-center text-2xl font-bold tracking-tight sm:text-3xl">
+            Everything you need
+          </h2>
+        </FadeIn>
+        <div className="mt-10 grid gap-4 sm:grid-cols-2">
+          {FEATURES.map((feature, i) => (
+            <FadeIn key={feature.title} delay={i * 80}>
+              <div className="h-full rounded-lg border bg-background p-5 flex gap-4 transition-all duration-200 hover:border-foreground/20 hover:-translate-y-0.5">
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted">
+                  <feature.icon className="size-4 text-foreground" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-sm font-semibold">{feature.title}</h3>
+                  <p className="text-sm leading-relaxed text-muted-foreground">
+                    {feature.description}
+                  </p>
+                </div>
+              </div>
+            </FadeIn>
           ))}
         </div>
       </div>

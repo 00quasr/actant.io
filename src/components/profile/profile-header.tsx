@@ -12,15 +12,15 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
     <div className="flex items-start gap-4">
       <Avatar size="lg">
         {profile.avatar_url && (
-          <AvatarImage src={profile.avatar_url} alt={profile.display_name ?? ""} />
+          <AvatarImage src={profile.avatar_url} alt={profile.display_name || ""} />
         )}
         <AvatarFallback>
-          {(profile.display_name ?? profile.username ?? "U")[0].toUpperCase()}
+          {(profile.display_name || profile.username || "U")[0].toUpperCase()}
         </AvatarFallback>
       </Avatar>
       <div className="space-y-1">
         <h1 className="text-xl font-semibold">
-          {profile.display_name ?? profile.username}
+          {profile.display_name || profile.username || "Unknown"}
         </h1>
         {profile.bio && (
           <p className="text-sm text-muted-foreground">{profile.bio}</p>

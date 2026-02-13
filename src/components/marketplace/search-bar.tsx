@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { Input } from "@/components/ui/input";
@@ -11,17 +11,26 @@ export function SearchBar() {
   const searchParams = useSearchParams();
   const [query, setQuery] = useState(searchParams.get("q") ?? "");
   const debouncedQuery = useDebounce(query, 300);
+  const isFirstRender = useRef(true);
+  const searchParamsRef = useRef(searchParams);
 
   useEffect(() => {
-    const params = new URLSearchParams(searchParams.toString());
+    searchParamsRef.current = searchParams;
+  });
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    const params = new URLSearchParams(searchParamsRef.current.toString());
     if (debouncedQuery) {
       params.set("q", debouncedQuery);
     } else {
       params.delete("q");
     }
-    params.delete("page");
     router.push(`/marketplace?${params.toString()}`);
-  }, [debouncedQuery, router, searchParams]);
+  }, [debouncedQuery, router]);
 
   return (
     <div className="relative">

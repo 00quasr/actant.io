@@ -8,26 +8,31 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Separator } from "@/components/ui/separator";
 import {
   Form,
   FormField,
   FormItem,
   FormLabel,
   FormControl,
+  FormDescription,
   FormMessage,
 } from "@/components/ui/form";
+import { PlanBadge } from "@/components/billing/plan-badge";
 import { profileSchema, type ProfileInput } from "@/validations/profile";
 import { getProfile, updateProfile } from "@/services/profiles";
 import { useAuth } from "@/hooks/use-auth";
 
 export default function ProfileSettingsPage() {
   const router = useRouter();
-  const { user, loading: authLoading } = useAuth();
+  const { user, profile, loading: authLoading } = useAuth();
   const [saving, setSaving] = useState(false);
+  const [managingBilling, setManagingBilling] = useState(false);
 
   const form = useForm<ProfileInput>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
+      username: "",
       display_name: "",
       bio: "",
       github_username: "",
@@ -36,12 +41,13 @@ export default function ProfileSettingsPage() {
 
   useEffect(() => {
     if (!user) return;
-    getProfile(user.id).then((profile) => {
-      if (profile) {
+    getProfile(user.id).then((p) => {
+      if (p) {
         form.reset({
-          display_name: profile.display_name ?? "",
-          bio: profile.bio ?? "",
-          github_username: profile.github_username ?? "",
+          username: p.username ?? "",
+          display_name: p.display_name ?? "",
+          bio: p.bio ?? "",
+          github_username: p.github_username ?? "",
         });
       }
     });
@@ -61,6 +67,30 @@ export default function ProfileSettingsPage() {
     }
   }
 
+  async function handleManageBilling() {
+    setManagingBilling(true);
+    try {
+      const res = await fetch("/api/stripe/portal", { method: "POST" });
+      if (!res.ok) throw new Error("Failed to open billing portal");
+      const data = await res.json();
+      window.location.href = data.url;
+    } catch {
+      toast.error("Failed to open billing portal");
+      setManagingBilling(false);
+    }
+  }
+
+  async function handleUpgrade() {
+    try {
+      const res = await fetch("/api/stripe/checkout", { method: "POST" });
+      if (!res.ok) throw new Error("Failed to start checkout");
+      const data = await res.json();
+      window.location.href = data.url;
+    } catch {
+      toast.error("Failed to start checkout");
+    }
+  }
+
   if (authLoading) {
     return null;
   }
@@ -71,6 +101,23 @@ export default function ProfileSettingsPage() {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <FormField
+            control={form.control}
+            name="username"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Username</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="your-username" />
+                </FormControl>
+                <FormDescription>
+                  Your unique identifier. Will be used in your profile URL.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={form.control}
             name="display_name"
@@ -123,6 +170,41 @@ export default function ProfileSettingsPage() {
           </div>
         </form>
       </Form>
+
+      <Separator className="my-8" />
+
+      <div className="space-y-4">
+        <h2 className="text-lg font-semibold tracking-tight">Billing</h2>
+        <div className="rounded-lg border p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium">Current Plan</span>
+                <PlanBadge plan={profile?.plan ?? "free"} />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {profile?.plan === "pro"
+                  ? "Unlimited AI generations"
+                  : `${profile?.generation_credits_used ?? 0} / 5 free generations used`}
+              </p>
+            </div>
+            {profile?.plan === "pro" ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleManageBilling}
+                disabled={managingBilling}
+              >
+                {managingBilling ? "Loading..." : "Manage Subscription"}
+              </Button>
+            ) : (
+              <Button size="sm" onClick={handleUpgrade}>
+                Upgrade to Pro
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

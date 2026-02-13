@@ -5,6 +5,7 @@ import { PlusIcon, TrashIcon, Pencil1Icon } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { RuleEditor } from "@/components/builder/tabs/rule-editor";
+import { RULE_PRESETS } from "@/lib/presets";
 import type { Rule } from "@/types/config";
 
 interface RulesTabProps {
@@ -12,9 +13,10 @@ interface RulesTabProps {
   addRule: (rule: Rule) => void;
   removeRule: (index: number) => void;
   updateRule: (index: number, rule: Rule) => void;
+  onApplyPreset: (rules: Rule[]) => void;
 }
 
-export function RulesTab({ rules, addRule, removeRule, updateRule }: RulesTabProps) {
+export function RulesTab({ rules, addRule, removeRule, updateRule, onApplyPreset }: RulesTabProps) {
   const [editorOpen, setEditorOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
@@ -40,6 +42,21 @@ export function RulesTab({ rules, addRule, removeRule, updateRule }: RulesTabPro
 
   return (
     <div className="space-y-4">
+      <div className="flex flex-wrap gap-2">
+        <span className="text-xs text-muted-foreground self-center mr-1">Presets:</span>
+        {RULE_PRESETS.map((preset) => (
+          <Button
+            key={preset.id}
+            variant="outline"
+            size="sm"
+            onClick={() => onApplyPreset(preset.rules)}
+            title={preset.description}
+          >
+            {preset.label}
+          </Button>
+        ))}
+      </div>
+
       {rules.length > 0 && (
         <div className="space-y-2">
           {rules.map((rule, index) => (

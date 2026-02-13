@@ -5,6 +5,8 @@ import dynamic from "next/dynamic";
 import type { Extension } from "@codemirror/state";
 import { Button } from "@/components/ui/button";
 import { TemplatePicker } from "@/components/builder/tabs/template-picker";
+import type { AgentType } from "@/types/config";
+import type { Template } from "@/types/marketplace";
 
 const CodeMirror = dynamic(() => import("@uiw/react-codemirror"), {
   ssr: false,
@@ -16,14 +18,16 @@ const CodeMirror = dynamic(() => import("@uiw/react-codemirror"), {
 interface InstructionsTabProps {
   content: string;
   templateId?: string;
+  targetAgent: AgentType;
   setInstructions: (content: string) => void;
-  setTemplateId: (id: string | undefined) => void;
+  onLoadTemplate: (template: Template) => void;
 }
 
 export function InstructionsTab({
   content,
+  targetAgent,
   setInstructions,
-  setTemplateId,
+  onLoadTemplate,
 }: InstructionsTabProps) {
   const [showPreview, setShowPreview] = useState(false);
   const [templateOpen, setTemplateOpen] = useState(false);
@@ -41,9 +45,8 @@ export function InstructionsTab({
     loadExtensions();
   }, [loadExtensions]);
 
-  const handleTemplateSelect = (templateContent: string, id: string) => {
-    setInstructions(templateContent);
-    setTemplateId(id);
+  const handleTemplateSelect = (template: Template) => {
+    onLoadTemplate(template);
     setTemplateOpen(false);
   };
 
@@ -99,6 +102,7 @@ export function InstructionsTab({
       <TemplatePicker
         open={templateOpen}
         onOpenChange={setTemplateOpen}
+        targetAgent={targetAgent}
         onSelect={handleTemplateSelect}
       />
     </div>

@@ -5,17 +5,20 @@ import { PlusIcon } from "@radix-ui/react-icons";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { PermissionRow } from "@/components/builder/tabs/permission-row";
+import { PERMISSION_PRESETS } from "@/lib/presets";
 
 interface PermissionsTabProps {
   permissions: Record<string, "allow" | "ask" | "deny">;
   setPermission: (tool: string, value: "allow" | "ask" | "deny") => void;
   removePermission: (tool: string) => void;
+  onApplyPreset: (permissions: Record<string, "allow" | "ask" | "deny">) => void;
 }
 
 export function PermissionsTab({
   permissions,
   setPermission,
   removePermission,
+  onApplyPreset,
 }: PermissionsTabProps) {
   const [newTool, setNewTool] = useState("");
 
@@ -37,6 +40,21 @@ export function PermissionsTab({
 
   return (
     <div className="space-y-4">
+      <div className="flex flex-wrap gap-2">
+        <span className="text-xs text-muted-foreground self-center mr-1">Presets:</span>
+        {PERMISSION_PRESETS.map((preset) => (
+          <Button
+            key={preset.id}
+            variant="outline"
+            size="sm"
+            onClick={() => onApplyPreset(preset.permissions)}
+            title={preset.description}
+          >
+            {preset.label}
+          </Button>
+        ))}
+      </div>
+
       {entries.length > 0 ? (
         <div className="space-y-2">
           <div className="grid grid-cols-[1fr_auto_auto] gap-2 px-2 text-xs text-muted-foreground font-medium">

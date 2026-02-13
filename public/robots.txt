@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://actant.io/sitemap.xml

@@ -7,6 +7,10 @@ import {
   MagnifyingGlassIcon,
   PersonIcon,
   HamburgerMenuIcon,
+  FileTextIcon,
+  LayoutIcon,
+  HeartIcon,
+  GearIcon,
 } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,34 +29,50 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Pencil2Icon,
   MagnifyingGlassIcon,
   PersonIcon,
+  FileTextIcon,
+  LayoutIcon,
+  HeartIcon,
+  GearIcon,
 };
 
 function NavItems({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
 
   return (
-    <nav className="flex flex-col gap-1" aria-label="Main navigation">
-      {NAV_ITEMS.app.map((item) => {
-        const Icon = ICON_MAP[item.icon];
-        const isActive = pathname === item.href;
+    <nav className="flex flex-col gap-6" aria-label="Main navigation">
+      {NAV_ITEMS.app.map((group) => (
+        <div key={group.title}>
+          <p className="mb-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            {group.title}
+          </p>
+          <div className="flex flex-col gap-1">
+            {group.items.map((item) => {
+              const Icon = ICON_MAP[item.icon];
+              const isActive =
+                item.href === "/builder"
+                  ? pathname === "/builder"
+                  : pathname.startsWith(item.href);
 
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            onClick={onNavigate}
-            className={cn(
-              "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-              isActive
-                ? "bg-secondary text-foreground"
-                : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
-            )}
-          >
-            {Icon && <Icon className="size-4 shrink-0" />}
-            {item.label}
-          </Link>
-        );
-      })}
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={onNavigate}
+                  className={cn(
+                    "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                    isActive
+                      ? "bg-secondary text-foreground"
+                      : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
+                  )}
+                >
+                  {Icon && <Icon className="size-4 shrink-0" />}
+                  {item.label}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      ))}
     </nav>
   );
 }
@@ -77,9 +97,13 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       {profile && (
         <div className="border-t px-4 py-3">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground truncate">
+            <Link
+              href="/profile"
+              onClick={onNavigate}
+              className="text-sm text-muted-foreground truncate hover:text-foreground transition-colors"
+            >
               {profile.display_name || profile.username || "User"}
-            </span>
+            </Link>
             <PlanBadge plan={profile.plan ?? "free"} />
           </div>
         </div>

@@ -10,9 +10,27 @@ export const NAV_ITEMS = {
     { label: "Marketplace", href: "/marketplace" },
   ],
   app: [
-    { label: "Builder", href: "/builder", icon: "Pencil2Icon" },
-    { label: "Marketplace", href: "/marketplace", icon: "MagnifyingGlassIcon" },
-    { label: "Profile", href: "/profile", icon: "PersonIcon" },
+    {
+      title: "Build",
+      items: [
+        { label: "New Config", href: "/builder", icon: "Pencil2Icon" },
+        { label: "My Configs", href: "/configs", icon: "FileTextIcon" },
+        { label: "Templates", href: "/templates", icon: "LayoutIcon" },
+      ],
+    },
+    {
+      title: "Discover",
+      items: [
+        { label: "Marketplace", href: "/marketplace", icon: "MagnifyingGlassIcon" },
+        { label: "Favorites", href: "/favorites", icon: "HeartIcon" },
+      ],
+    },
+    {
+      title: "Account",
+      items: [
+        { label: "Settings", href: "/profile/settings", icon: "GearIcon" },
+      ],
+    },
   ],
   docs: [
     {

@@ -12,9 +12,10 @@ import { OnboardingWizard } from "@/components/builder/onboarding-wizard";
 
 interface BuilderShellProps {
   initialConfig?: AgentConfig & { id?: string };
+  initialTemplate?: Template;
 }
 
-export function BuilderShell({ initialConfig }: BuilderShellProps) {
+export function BuilderShell({ initialConfig, initialTemplate }: BuilderShellProps) {
   const {
     state,
     dispatch,
@@ -39,16 +40,10 @@ export function BuilderShell({ initialConfig }: BuilderShellProps) {
   } = useConfig(initialConfig);
 
   const { saveStatus } = useAutoSave(state, state.id, dispatch);
-  const [showWizard, setShowWizard] = useState(!initialConfig);
+  const [showWizard, setShowWizard] = useState(!initialConfig && !initialTemplate);
   const [previewVisible, setPreviewVisible] = useState(true);
   const [templatePickerOpen, setTemplatePickerOpen] = useState(false);
   const [generateOpen, setGenerateOpen] = useState(false);
-
-  useEffect(() => {
-    if (initialConfig) {
-      dispatch({ type: "LOAD_CONFIG", payload: initialConfig });
-    }
-  }, [initialConfig, dispatch]);
 
   const handleLoadTemplate = (template: Template) => {
     const instructions = template.instructions as { content: string; templateId?: string };
@@ -63,6 +58,20 @@ export function BuilderShell({ initialConfig }: BuilderShellProps) {
       permissions,
     });
   };
+
+  useEffect(() => {
+    if (initialConfig) {
+      dispatch({ type: "LOAD_CONFIG", payload: initialConfig });
+    }
+  }, [initialConfig, dispatch]);
+
+  useEffect(() => {
+    if (initialTemplate) {
+      handleLoadTemplate(initialTemplate);
+      setTargetAgent(initialTemplate.target_agent);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialTemplate]);
 
   const handleWizardComplete = (config: {
     targetAgent: AgentType;
@@ -113,7 +122,7 @@ export function BuilderShell({ initialConfig }: BuilderShellProps) {
         onGenerateOpenChange={setGenerateOpen}
       />
       <div className="flex flex-1 min-h-0">
-        <div className={`flex-1 min-h-0 overflow-y-auto ${previewVisible ? "lg:w-3/5" : "w-full"}`}>
+        <div className={`flex-1 min-w-0 min-h-0 overflow-y-auto ${previewVisible ? "lg:w-3/5" : "w-full"}`}>
           <BuilderTabs
             state={state}
             setInstructions={setInstructions}
@@ -133,7 +142,7 @@ export function BuilderShell({ initialConfig }: BuilderShellProps) {
           />
         </div>
         {previewVisible && (
-          <div className="hidden lg:block lg:w-2/5 border-l min-h-0">
+          <div className="hidden lg:block lg:w-2/5 min-w-0 border-l min-h-0 overflow-hidden">
             <LivePreview state={state} />
           </div>
         )}

@@ -53,7 +53,9 @@ export function UserConfigCard({ config }: UserConfigCardProps) {
         <CardHeader className="pb-2">
           <div className="flex items-start justify-between gap-2">
             <CardTitle className="text-sm truncate">{config.name}</CardTitle>
-            <AgentBadge agent={config.target_agent} />
+            <div className="flex items-center gap-1.5 shrink-0">
+              <AgentBadge agent={config.target_agent} />
+            </div>
           </div>
           {config.description && (
             <CardDescription className="line-clamp-2">

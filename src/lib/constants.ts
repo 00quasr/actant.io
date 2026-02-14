@@ -14,7 +14,7 @@ export const NAV_ITEMS = {
       title: "Build",
       items: [
         { label: "New Config", href: "/builder", icon: "Pencil2Icon" },
-        { label: "My Configs", href: "/configs", icon: "FileTextIcon" },
+        { label: "My Library", href: "/configs", icon: "FileTextIcon" },
         { label: "Templates", href: "/templates", icon: "LayoutIcon" },
       ],
     },

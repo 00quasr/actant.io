@@ -29,10 +29,19 @@ export function exportOpenCode(config: AgentConfig): ExportFile[] {
   if (Object.keys(mcp).length > 0) output.mcp = mcp;
   if (Object.keys(permission).length > 0) output.permission = permission;
 
-  return [
+  const files: ExportFile[] = [
     {
       path: "opencode.json",
       content: JSON.stringify(output, null, 2),
     },
   ];
+
+  // Docs
+  if (config.docs) {
+    for (const [filename, content] of Object.entries(config.docs)) {
+      if (content) files.push({ path: filename, content });
+    }
+  }
+
+  return files;
 }

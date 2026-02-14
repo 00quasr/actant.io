@@ -5,6 +5,7 @@ export interface SearchParams {
   q?: string;
   agent?: string;
   use_case?: string;
+  document_type?: string;
   sort?: string;
   page?: number;
   limit?: number;
@@ -12,7 +13,7 @@ export interface SearchParams {
 
 export async function searchListings(params: SearchParams): Promise<{ data: Listing[]; count: number }> {
   const supabase = createClient();
-  const { q, agent, use_case, sort, page = 1, limit = 12 } = params;
+  const { q, agent, use_case, document_type, sort, page = 1, limit = 12 } = params;
   const from = (page - 1) * limit;
   const to = from + limit - 1;
 
@@ -32,6 +33,11 @@ export async function searchListings(params: SearchParams): Promise<{ data: List
   if (use_case) {
     const useCases = use_case.split(",");
     query = query.in("use_case", useCases);
+  }
+
+  if (document_type) {
+    const docTypes = document_type.split(",");
+    query = query.in("document_type", docTypes);
   }
 
   switch (sort) {
@@ -95,6 +101,7 @@ export async function publishConfig(
       target_agent: config.target_agent,
       use_case: metadata.use_case,
       tags: metadata.tags,
+      document_type: config.document_type ?? "agent-config",
     })
     .select()
     .single();

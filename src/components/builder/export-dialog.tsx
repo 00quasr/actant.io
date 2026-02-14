@@ -54,6 +54,7 @@ export function ExportDialog({ open, onOpenChange, state }: ExportDialogProps) {
         mcpServers: state.mcpServers,
         permissions: state.permissions,
         rules: state.rules,
+        docs: state.docs,
       });
       setResult(exportResult);
     } catch {
@@ -65,16 +66,27 @@ export function ExportDialog({ open, onOpenChange, state }: ExportDialogProps) {
     if (!result) return;
     setDownloading(true);
     try {
-      const blob = await createZipBlob(result);
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${state.name || "agent-config"}-${targetAgent}.zip`;
-      a.click();
-      URL.revokeObjectURL(url);
+      if (result.files.length === 1) {
+        const file = result.files[0];
+        const blob = new Blob([file.content], { type: "text/plain" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = file.path;
+        a.click();
+        URL.revokeObjectURL(url);
+      } else {
+        const blob = await createZipBlob(result);
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${state.name || "config"}-${targetAgent}.zip`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
       toast.success("Configuration exported successfully");
     } catch {
-      toast.error("Failed to export configuration");
+      toast.error("Failed to export");
     } finally {
       setDownloading(false);
     }
@@ -128,7 +140,7 @@ export function ExportDialog({ open, onOpenChange, state }: ExportDialogProps) {
             disabled={!result || downloading}
           >
             <DownloadIcon />
-            {downloading ? "Downloading..." : "Download ZIP"}
+            {downloading ? "Downloading..." : result && result.files.length === 1 ? "Download" : "Download ZIP"}
           </Button>
         </DialogFooter>
       </DialogContent>

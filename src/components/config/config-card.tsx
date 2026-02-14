@@ -16,7 +16,9 @@ export function ConfigCard({ listing }: ConfigCardProps) {
         <CardHeader className="pb-0">
           <div className="flex items-start justify-between gap-2">
             <CardTitle className="text-sm">{listing.title}</CardTitle>
-            <AgentBadge agent={listing.target_agent} />
+            <div className="flex items-center gap-1.5 shrink-0">
+              <AgentBadge agent={listing.target_agent} />
+            </div>
           </div>
           <CardDescription className="line-clamp-2">
             {listing.description}

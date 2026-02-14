@@ -57,12 +57,21 @@ export function exportClaudeCode(config: AgentConfig): ExportFile[] {
   for (const skill of enabledSkills) {
     const params = skill.params;
     const content =
-      typeof params["content"] === "string" ? params["content"] : "";
-    if (content) {
-      files.push({
-        path: `.claude/skills/${slugify(skill.skillId)}/SKILL.md`,
-        content,
-      });
+      typeof params["content"] === "string" && params["content"]
+        ? params["content"]
+        : `# ${skill.skillId}\n\nSkill: ${skill.skillId}`;
+    files.push({
+      path: `.claude/skills/${slugify(skill.skillId)}/SKILL.md`,
+      content,
+    });
+  }
+
+  // Documentation files
+  if (config.docs) {
+    for (const [filename, content] of Object.entries(config.docs)) {
+      if (content) {
+        files.push({ path: filename, content });
+      }
     }
   }
 

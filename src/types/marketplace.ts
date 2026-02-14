@@ -50,6 +50,8 @@ export interface Config {
   permissions: Record<string, string>;
   rules: Record<string, unknown>[];
   is_draft: boolean;
+  document_type: string;
+  content: Record<string, unknown> | null;
   created_at: string;
   updated_at: string;
 }
@@ -67,6 +69,7 @@ export interface Skill {
   version: string;
   download_count: number;
   is_official: boolean;
+  source: "builtin" | "anthropic" | "skills.sh" | "custom";
   created_at: string;
   updated_at: string;
 }
@@ -84,6 +87,7 @@ export interface Template {
   permissions: Record<string, string>;
   rules: Record<string, unknown>[];
   is_featured: boolean;
+  document_type: string;
   created_at: string;
   updated_at: string;
 }
@@ -101,6 +105,7 @@ export interface Listing {
   review_count: number;
   download_count: number;
   is_featured: boolean;
+  document_type: string;
   published_at: string;
   updated_at: string;
   author?: Profile;

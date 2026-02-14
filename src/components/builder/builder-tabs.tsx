@@ -6,6 +6,7 @@ import { SkillsTab } from "@/components/builder/tabs/skills-tab";
 import { McpTab } from "@/components/builder/tabs/mcp-tab";
 import { PermissionsTab } from "@/components/builder/tabs/permissions-tab";
 import { RulesTab } from "@/components/builder/tabs/rules-tab";
+import { DocsTab } from "@/components/builder/tabs/docs-tab";
 import type { ConfigState } from "@/hooks/use-config";
 import type { McpServer, Rule, SkillEntry } from "@/types/config";
 import type { Template } from "@/types/marketplace";
@@ -26,6 +27,8 @@ interface BuilderTabsProps {
   updateRule: (index: number, rule: Rule) => void;
   addRulesBatch: (rules: Rule[]) => void;
   onLoadTemplate: (template: Template) => void;
+  setDoc: (filename: string, content: string) => void;
+  removeDoc: (filename: string) => void;
 }
 
 export function BuilderTabs({
@@ -44,7 +47,11 @@ export function BuilderTabs({
   updateRule,
   addRulesBatch,
   onLoadTemplate,
+  setDoc,
+  removeDoc,
 }: BuilderTabsProps) {
+  const docsCount = Object.keys(state.docs).length;
+
   return (
     <Tabs defaultValue="instructions" className="px-6 py-6">
       <TabsList variant="line">
@@ -53,6 +60,9 @@ export function BuilderTabs({
         <TabsTrigger value="mcp">MCP Servers</TabsTrigger>
         <TabsTrigger value="permissions">Permissions</TabsTrigger>
         <TabsTrigger value="rules">Rules</TabsTrigger>
+        <TabsTrigger value="docs">
+          Docs{docsCount > 0 ? ` (${docsCount})` : ""}
+        </TabsTrigger>
       </TabsList>
 
       <TabsContent value="instructions" className="pt-6">
@@ -100,6 +110,14 @@ export function BuilderTabs({
           removeRule={removeRule}
           updateRule={updateRule}
           onApplyPreset={addRulesBatch}
+        />
+      </TabsContent>
+
+      <TabsContent value="docs" className="pt-6">
+        <DocsTab
+          docs={state.docs}
+          setDoc={setDoc}
+          removeDoc={removeDoc}
         />
       </TabsContent>
     </Tabs>

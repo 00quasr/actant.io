@@ -1,8 +1,7 @@
 import { createClient } from "@/lib/supabase/client";
 import type { Config } from "@/types/marketplace";
 import type { AgentConfig } from "@/types/config";
-
-function toDbConfig(config: AgentConfig & { id?: string }) {
+function toDbConfig(config: AgentConfig & { id?: string; documentType?: string; content?: Record<string, unknown> }) {
   return {
     name: config.name,
     description: config.description || null,
@@ -12,10 +11,17 @@ function toDbConfig(config: AgentConfig & { id?: string }) {
     mcp_servers: config.mcpServers,
     permissions: config.permissions,
     rules: config.rules,
+    document_type: config.documentType ?? "agent-config",
+    content: {
+      ...(config.content ?? {}),
+      ...(config.docs && Object.keys(config.docs).length > 0 ? { docs: config.docs } : {}),
+    },
   };
 }
 
-export function fromDbConfig(row: Config): AgentConfig & { id: string } {
+export function fromDbConfig(row: Config): AgentConfig & { id: string; documentType: string; content: Record<string, unknown>; docs: Record<string, string> } {
+  const rawContent = (row.content as Record<string, unknown>) ?? {};
+  const docs = (rawContent.docs as Record<string, string>) ?? {};
   return {
     id: row.id,
     name: row.name,
@@ -26,10 +32,13 @@ export function fromDbConfig(row: Config): AgentConfig & { id: string } {
     mcpServers: row.mcp_servers as unknown as AgentConfig["mcpServers"],
     permissions: row.permissions as AgentConfig["permissions"],
     rules: row.rules as unknown as AgentConfig["rules"],
+    documentType: row.document_type ?? "agent-config",
+    content: rawContent,
+    docs,
   };
 }
 
-export async function createConfig(config: AgentConfig): Promise<Config> {
+export async function createConfig(config: AgentConfig & { documentType?: string; content?: Record<string, unknown> }): Promise<Config> {
   const supabase = createClient();
   const { data, error } = await supabase
     .from("configs")
@@ -55,7 +64,7 @@ export async function getConfig(id: string): Promise<Config> {
 
 export async function updateConfig(
   id: string,
-  config: Partial<AgentConfig>
+  config: Partial<AgentConfig> & { documentType?: string; content?: Record<string, unknown> }
 ): Promise<Config> {
   const supabase = createClient();
 
@@ -68,6 +77,8 @@ export async function updateConfig(
   if (config.mcpServers !== undefined) updates.mcp_servers = config.mcpServers;
   if (config.permissions !== undefined) updates.permissions = config.permissions;
   if (config.rules !== undefined) updates.rules = config.rules;
+  if (config.documentType !== undefined) updates.document_type = config.documentType;
+  if (config.content !== undefined) updates.content = config.content;
 
   const { data, error } = await supabase
     .from("configs")

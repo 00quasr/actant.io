@@ -37,6 +37,13 @@ export const generatedConfigSchema = z.object({
       alwaysApply: z.boolean(),
     })
   ),
+  docs: z.array(
+    z.object({
+      filename: z.string().describe("File name like README.md, CONTRIBUTING.md, ARCHITECTURE.md"),
+      content: z.string().describe("Full markdown content of the documentation file"),
+    })
+  ).describe("Documentation files. Always generate README.md. Optionally CONTRIBUTING.md, ARCHITECTURE.md based on project complexity."),
+  recommendedSkillIds: z.array(z.string()).describe("IDs of skills from the catalog that would benefit this project. Leave empty if no catalog was provided."),
 });
 
 export type GeneratedConfig = z.infer<typeof generatedConfigSchema>;

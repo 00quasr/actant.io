@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
+import { toast } from "sonner";
 import type { AgentConfig, AgentType, McpServer, Rule } from "@/types/config";
 import type { Template } from "@/types/marketplace";
 import { useConfig } from "@/hooks/use-config";
 import { useAutoSave } from "@/hooks/use-auto-save";
+import { createConfig } from "@/services/configs";
 import { BuilderHeader } from "@/components/builder/builder-header";
 import { BuilderTabs } from "@/components/builder/builder-tabs";
 import { LivePreview } from "@/components/builder/live-preview";
@@ -13,7 +15,7 @@ import { AiGenerateDialog } from "@/components/builder/ai-generate-dialog";
 import { RULE_PRESETS, PERMISSION_PRESETS } from "@/lib/presets";
 
 interface BuilderShellProps {
-  initialConfig?: AgentConfig & { id?: string };
+  initialConfig?: AgentConfig & { id?: string; content?: Record<string, unknown>; docs?: Record<string, string> };
   initialTemplate?: Template;
 }
 
@@ -38,11 +40,40 @@ export function BuilderShell({ initialConfig, initialTemplate }: BuilderShellPro
     updateRule,
     addRulesBatch,
     setTechStack,
+    setDoc,
+    removeDoc,
     loadGeneratedConfig,
     loadTemplate,
   } = useConfig(initialConfig);
 
-  const { saveStatus } = useAutoSave(state, state.id, dispatch);
+  const stateRef = useRef(state);
+  useEffect(() => { stateRef.current = state; });
+
+  const handleCreate = useCallback(async () => {
+    const current = stateRef.current;
+    try {
+      const dbConfig = await createConfig({
+        name: current.name,
+        description: current.description,
+        targetAgent: current.targetAgent,
+        instructions: current.instructions,
+        skills: current.skills,
+        mcpServers: current.mcpServers,
+        permissions: current.permissions,
+        rules: current.rules,
+        docs: current.docs,
+      });
+      dispatch({ type: "SET_ID", payload: dbConfig.id });
+      dispatch({ type: "SET_SAVED" });
+      window.history.replaceState(null, "", `/builder/${dbConfig.id}`);
+      return dbConfig.id;
+    } catch {
+      toast.error("Failed to create config");
+      return undefined;
+    }
+  }, [dispatch]);
+
+  const { saveStatus, saveNow } = useAutoSave(state, state.id, dispatch, handleCreate);
   const [showWizard, setShowWizard] = useState(!initialConfig && !initialTemplate);
   const [previewVisible, setPreviewVisible] = useState(true);
   const [templatePickerOpen, setTemplatePickerOpen] = useState(false);
@@ -76,7 +107,7 @@ export function BuilderShell({ initialConfig, initialTemplate }: BuilderShellPro
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialTemplate]);
 
-  const handleWizardComplete = (config: {
+  const handleWizardComplete = async (config: {
     targetAgent: AgentType;
     description?: string;
     techStack?: string[];
@@ -84,6 +115,7 @@ export function BuilderShell({ initialConfig, initialTemplate }: BuilderShellPro
     suggestedRulePresetIds?: string[];
     suggestedPermissionPresetId?: string;
   }) => {
+    // Apply state changes locally
     setTargetAgent(config.targetAgent);
     if (config.description) {
       setDescription(config.description);
@@ -92,19 +124,20 @@ export function BuilderShell({ initialConfig, initialTemplate }: BuilderShellPro
       setTechStack(config.techStack);
     }
 
-    // Apply suggested MCP servers
+    // Build data from suggestions for both local state and DB
+    const mcpServers: McpServer[] = [];
     if (config.suggestedMcpServers) {
       const existingNames = new Set(state.mcpServers.map((s) => s.name));
       for (const server of config.suggestedMcpServers) {
         if (!existingNames.has(server.name)) {
           addMcpServer(server);
+          mcpServers.push(server);
         }
       }
     }
 
-    // Apply suggested rule presets
+    const rules: Rule[] = [];
     if (config.suggestedRulePresetIds) {
-      const rules: Rule[] = [];
       for (const presetId of config.suggestedRulePresetIds) {
         const preset = RULE_PRESETS.find((p) => p.id === presetId);
         if (preset) {
@@ -116,15 +149,38 @@ export function BuilderShell({ initialConfig, initialTemplate }: BuilderShellPro
       }
     }
 
-    // Apply suggested permission preset
+    let permissions: Record<string, "allow" | "ask" | "deny"> = {};
     if (config.suggestedPermissionPresetId) {
       const preset = PERMISSION_PRESETS.find((p) => p.id === config.suggestedPermissionPresetId);
       if (preset) {
+        permissions = preset.permissions;
         setAllPermissions(preset.permissions);
       }
     }
 
     setShowWizard(false);
+
+    // Auto-create config in DB if no ID exists yet
+    if (!state.id) {
+      try {
+        const dbConfig = await createConfig({
+          name: "",
+          description: config.description || "",
+          targetAgent: config.targetAgent,
+          instructions: { content: "" },
+          skills: [],
+          mcpServers,
+          permissions,
+          rules,
+        });
+
+        dispatch({ type: "SET_SAVED" });
+        dispatch({ type: "SET_ID", payload: dbConfig.id });
+        window.history.replaceState(null, "", `/builder/${dbConfig.id}`);
+      } catch {
+        toast.error("Failed to save. Your work won't be auto-saved.");
+      }
+    }
   };
 
   if (showWizard) {
@@ -161,6 +217,7 @@ export function BuilderShell({ initialConfig, initialTemplate }: BuilderShellPro
         onTemplatePickerOpenChange={setTemplatePickerOpen}
         onLoadTemplate={handleLoadTemplate}
         onGenerateClick={() => setGenerateOpen(true)}
+        onSave={saveNow}
       />
       <div className="flex flex-1 min-h-0">
         <div className={`flex-1 min-w-0 min-h-0 overflow-y-auto ${previewVisible ? "lg:w-3/5" : "w-full"}`}>
@@ -180,6 +237,8 @@ export function BuilderShell({ initialConfig, initialTemplate }: BuilderShellPro
             updateRule={updateRule}
             addRulesBatch={addRulesBatch}
             onLoadTemplate={handleLoadTemplate}
+            setDoc={setDoc}
+            removeDoc={removeDoc}
           />
         </div>
         {previewVisible && (

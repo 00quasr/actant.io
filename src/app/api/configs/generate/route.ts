@@ -5,7 +5,7 @@ import { getModel } from "@/lib/ai/provider";
 import { generatedConfigSchema } from "@/lib/ai/schema";
 import { buildSystemPrompt, buildUserPrompt } from "@/lib/ai/prompts";
 import { generationInputSchema } from "@/validations/generation";
-import { listSkillsByIds } from "@/services/skills-server";
+import { listSkillsByIds, listAllSkills } from "@/services/skills-server";
 
 const FREE_TIER_LIMIT = 5;
 
@@ -82,6 +82,19 @@ export async function POST(request: Request) {
     }
   }
 
+  // Fetch skills catalog for AI recommendations
+  let skillsCatalog: { id: string; name: string; description: string }[] = [];
+  try {
+    const allSkills = await listAllSkills();
+    skillsCatalog = allSkills.map((s) => ({
+      id: s.id,
+      name: s.name,
+      description: s.description,
+    }));
+  } catch {
+    // Non-fatal
+  }
+
   // Generate config using AI
   const systemPrompt = buildSystemPrompt(input.targetAgent);
   const userPrompt = buildUserPrompt({
@@ -93,6 +106,7 @@ export async function POST(request: Request) {
     includePermissions: input.includePermissions,
     answers: input.answers,
     selectedSkills: selectedSkills.length > 0 ? selectedSkills : undefined,
+    skillsCatalog: skillsCatalog.length > 0 ? skillsCatalog : undefined,
   });
 
   let generatedConfig;
@@ -134,6 +148,25 @@ export async function POST(request: Request) {
     console.error("Failed to log generation:", logError);
   }
 
+  // Fetch skills for content if we have recommended IDs
+  const recommendedSkillContent: Record<string, string> = {};
+  const allRecommendedIds = [
+    ...(generatedConfig.recommendedSkillIds ?? []),
+    ...selectedSkills.map((s) => s.id),
+  ];
+  if (allRecommendedIds.length > 0) {
+    try {
+      const recSkills = await listSkillsByIds(allRecommendedIds);
+      for (const s of recSkills) {
+        if (s.content) {
+          recommendedSkillContent[s.id] = s.content;
+        }
+      }
+    } catch {
+      // Non-fatal
+    }
+  }
+
   // Convert array-based schema back to record-based AgentConfig format
   const config = {
     name: generatedConfig.name,
@@ -142,12 +175,16 @@ export async function POST(request: Request) {
     skills: [
       ...generatedConfig.skills.map((s) => ({
         ...s,
-        params: {},
+        params: recommendedSkillContent[s.skillId]
+          ? { content: recommendedSkillContent[s.skillId] }
+          : {},
       })),
       ...selectedSkills.map((s) => ({
         skillId: s.id,
         enabled: true,
-        params: {},
+        params: recommendedSkillContent[s.id]
+          ? { content: recommendedSkillContent[s.id] }
+          : {},
       })),
     ],
     mcpServers: generatedConfig.mcpServers.map((s) => ({
@@ -175,6 +212,14 @@ export async function POST(request: Request) {
       glob: r.glob ?? undefined,
     })),
     targetAgent: input.targetAgent,
+    docs: (generatedConfig.docs ?? []).reduce<Record<string, string>>(
+      (acc, { filename, content }) => {
+        acc[filename] = content;
+        return acc;
+      },
+      {}
+    ),
+    recommendedSkillIds: generatedConfig.recommendedSkillIds ?? [],
   };
 
   return NextResponse.json({ config });

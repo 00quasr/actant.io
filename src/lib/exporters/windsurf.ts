@@ -31,5 +31,12 @@ export function exportWindsurf(config: AgentConfig): ExportResult {
     files.push({ path: ".windsurf/rules/rules.md", content: combined });
   }
 
+  // Docs
+  if (config.docs) {
+    for (const [filename, content] of Object.entries(config.docs)) {
+      if (content) files.push({ path: filename, content });
+    }
+  }
+
   return { files, warnings };
 }

@@ -28,7 +28,12 @@ export function SkillsTab({ skills, targetAgent, addSkill, removeSkill }: Skills
 
   const handleToggle = (skillId: string, enabled: boolean) => {
     if (enabled) {
-      addSkill({ skillId, enabled: true, params: {} });
+      const skill = availableSkills.find((s) => s.id === skillId);
+      addSkill({
+        skillId,
+        enabled: true,
+        params: skill?.content ? { content: skill.content } : {},
+      });
     } else {
       removeSkill(skillId);
     }

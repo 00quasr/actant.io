@@ -10,6 +10,7 @@ interface MarketplacePageProps {
     q?: string;
     agent?: string;
     use_case?: string;
+    document_type?: string;
     sort?: string;
     page?: string;
   }>;
@@ -40,6 +41,11 @@ async function MarketplaceContent({ searchParams }: MarketplacePageProps) {
   if (params.use_case) {
     const useCases = params.use_case.split(",").filter(Boolean);
     query = query.in("use_case", useCases);
+  }
+
+  if (params.document_type) {
+    const docTypes = params.document_type.split(",").filter(Boolean);
+    query = query.in("document_type", docTypes);
   }
 
   switch (params.sort) {

@@ -23,7 +23,8 @@ export function useConfigGeneration() {
 
   async function generateQuestions(
     projectDescription: string,
-    techStack: string[]
+    techStack: string[],
+    documentType?: string
   ) {
     setStatus("asking");
     setError(null);
@@ -32,7 +33,7 @@ export function useConfigGeneration() {
       const res = await fetch("/api/configs/generate/questions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ projectDescription, techStack }),
+        body: JSON.stringify({ projectDescription, techStack, documentType }),
       });
 
       if (!res.ok) {
@@ -111,22 +112,23 @@ export function useConfigGeneration() {
         throw new Error(data.message || data.error || "Generation failed");
       }
 
-      const data = (await res.json()) as { config: AgentConfig };
+      const data = (await res.json()) as { config: AgentConfig & { documentType?: string; content?: Record<string, unknown>; docs?: Record<string, string>; recommendedSkillIds?: string[] } };
       // Normalize nulls to undefined for compatibility with AgentConfig types
-      const config = {
+      const config: AgentConfig = {
         ...data.config,
-        mcpServers: data.config.mcpServers.map((s) => ({
+        mcpServers: (data.config.mcpServers ?? []).map((s) => ({
           ...s,
           command: s.command ?? undefined,
           args: s.args ?? undefined,
           url: s.url ?? undefined,
           env: s.env ?? undefined,
         })),
-        rules: data.config.rules.map((r) => ({
+        rules: (data.config.rules ?? []).map((r) => ({
           ...r,
           glob: r.glob ?? undefined,
           alwaysApply: r.alwaysApply ?? undefined,
         })),
+        docs: data.config.docs ?? {},
       };
       setResult(config);
       setStatus("done");

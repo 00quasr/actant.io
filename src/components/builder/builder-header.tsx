@@ -42,6 +42,7 @@ interface BuilderHeaderProps {
   onTemplatePickerOpenChange: (open: boolean) => void;
   onLoadTemplate: (template: Template) => void;
   onGenerateClick: () => void;
+  onSave: () => void;
 }
 
 function SaveIndicator({ status, isDirty }: { status: SaveStatus; isDirty: boolean }) {
@@ -84,6 +85,7 @@ export function BuilderHeader({
   onTemplatePickerOpenChange,
   onLoadTemplate,
   onGenerateClick,
+  onSave,
 }: BuilderHeaderProps) {
   const [exportOpen, setExportOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
@@ -123,6 +125,12 @@ export function BuilderHeader({
         <div className="flex-1" />
 
         <SaveIndicator status={saveStatus} isDirty={state.isDirty} />
+
+        {state.isDirty && saveStatus !== "saving" && (
+          <Button variant="ghost" size="sm" onClick={onSave}>
+            Save
+          </Button>
+        )}
 
         <Button
           variant="ghost"

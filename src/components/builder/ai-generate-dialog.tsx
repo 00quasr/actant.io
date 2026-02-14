@@ -9,6 +9,7 @@ import {
   PlusIcon,
   ArrowRightIcon,
   MagnifyingGlassIcon,
+  FileTextIcon,
 } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -36,6 +37,7 @@ const LOADING_STAGES = [
   "Configuring MCP servers...",
   "Setting permissions...",
   "Creating rules...",
+  "Generating documentation...",
 ];
 
 interface AiGenerateDialogProps {
@@ -70,7 +72,7 @@ export function AiGenerateDialog({
   const [includeMcp, setIncludeMcp] = useState(true);
   const [includePermissions, setIncludePermissions] = useState(true);
   const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [selectedSkillIds, setSelectedSkillIds] = useState<string[]>([]);
+  const [, setSelectedSkillIds] = useState<string[]>([]);
   const [showSkillPicker, setShowSkillPicker] = useState(false);
 
   const resetForm = useCallback(() => {
@@ -128,10 +130,8 @@ export function AiGenerateDialog({
 
   function handleAnswersDone(withAnswers: boolean) {
     if (withAnswers) {
-      // Show skill picker step before generating
       setShowSkillPicker(true);
     } else {
-      // Skip answers → also skip skills → generate directly
       doGenerate(false, []);
     }
   }
@@ -183,7 +183,6 @@ export function AiGenerateDialog({
 
   const isFormValid = projectDescription.length >= 10;
 
-  // Determine current step for indicator
   let currentStep = 0;
   if (status === "asking") currentStep = 1;
   else if (status === "answering") currentStep = 1;
@@ -195,7 +194,6 @@ export function AiGenerateDialog({
 
   return (
     <div className="fixed inset-0 z-50 bg-background overflow-y-auto">
-      {/* Top bar */}
       <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-background/95 backdrop-blur px-6 py-3">
         <div className="flex items-center gap-3">
           <MagicWandIcon className="size-4" />
@@ -209,7 +207,6 @@ export function AiGenerateDialog({
         </div>
       </div>
 
-      {/* Content */}
       <div className="max-w-2xl mx-auto py-16 px-8">
         {(status === "idle" || (status === "error" && questions.length === 0)) && (
           <HeroInput
@@ -346,18 +343,16 @@ function HeroInput({
 
   return (
     <div className="flex flex-col items-center">
-      {/* Hero heading */}
       <div className="text-center mb-12">
         <h2 className="text-4xl font-bold tracking-tight">
           What are you building?
         </h2>
         <p className="mt-4 text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
           Describe your project and we&apos;ll generate a tailored agent config
-          with instructions, rules, MCP servers, and permissions.
+          with instructions, rules, MCP servers, permissions, and documentation.
         </p>
       </div>
 
-      {/* Main textarea */}
       <div className="w-full">
         <div className="relative rounded-2xl border bg-background shadow-sm focus-within:ring-2 focus-within:ring-ring/50">
           <Textarea
@@ -374,7 +369,6 @@ function HeroInput({
           </div>
         </div>
 
-        {/* Generate button — full width */}
         <Button
           onClick={onNext}
           disabled={!isFormValid}
@@ -385,7 +379,6 @@ function HeroInput({
           <ArrowRightIcon className="ml-1.5 size-4" />
         </Button>
 
-        {/* Tech stack pills */}
         <div className="mt-8">
           <p className="text-xs text-muted-foreground mb-3">Select your stack (optional)</p>
           <div className="flex flex-wrap gap-2">
@@ -437,7 +430,6 @@ function HeroInput({
           </div>
         </div>
 
-        {/* Include options — toggle cards */}
         <div className="mt-8">
           <p className="text-xs text-muted-foreground mb-3">Include in generation</p>
           <div className="grid grid-cols-3 gap-2">
@@ -462,7 +454,6 @@ function HeroInput({
           </div>
         </div>
 
-        {/* Error */}
         {error && (
           <div className="mt-6 rounded-md border border-destructive/20 bg-destructive/5 p-3">
             <p className="text-sm text-destructive">{error}</p>
@@ -548,7 +539,6 @@ function AnswerForm({
       </div>
 
       <div className="w-full space-y-6">
-        {/* Auto-answer button */}
         <div className="flex justify-end">
           <Button
             variant="outline"
@@ -654,7 +644,7 @@ function SkillPicker({ onDone, onSkip }: SkillPickerProps) {
         const data = await listSkills();
         if (!cancelled) setSkills(data);
       } catch {
-        // Non-fatal: show empty state
+        // Non-fatal
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -698,7 +688,6 @@ function SkillPicker({ onDone, onSkip }: SkillPickerProps) {
       </div>
 
       <div className="w-full space-y-4">
-        {/* Search */}
         <div className="relative">
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <Input
@@ -709,7 +698,6 @@ function SkillPicker({ onDone, onSkip }: SkillPickerProps) {
           />
         </div>
 
-        {/* Skills list */}
         <div className="max-h-80 overflow-y-auto space-y-2">
           {loading ? (
             <div className="py-8 text-center text-sm text-muted-foreground">
@@ -741,6 +729,11 @@ function SkillPicker({ onDone, onSkip }: SkillPickerProps) {
                       <span className="shrink-0 rounded-full border px-2 py-0.5 text-[10px] text-muted-foreground">
                         {skill.category}
                       </span>
+                      {skill.is_official && (
+                        <span className="shrink-0 rounded-full bg-foreground/10 px-2 py-0.5 text-[10px] font-medium">
+                          Official
+                        </span>
+                      )}
                     </div>
                     {isSelected && (
                       <CheckIcon className="size-4 shrink-0 ml-2" />
@@ -755,14 +748,12 @@ function SkillPicker({ onDone, onSkip }: SkillPickerProps) {
           )}
         </div>
 
-        {/* Selected count */}
         {selected.size > 0 && (
           <p className="text-xs text-muted-foreground">
             {selected.size} skill{selected.size !== 1 ? "s" : ""} selected
           </p>
         )}
 
-        {/* Actions */}
         <div className="flex gap-3 pt-2">
           <Button variant="outline" onClick={onSkip} className="flex-1">
             Skip
@@ -795,12 +786,10 @@ function StagedLoading({ contextLabel }: { contextLabel: string }) {
 
   return (
     <div className="flex flex-col items-center py-16">
-      {/* Pulsing status text */}
       <p className="text-sm font-medium animate-pulse mb-10">
         {contextLabel}
       </p>
 
-      {/* Stage list */}
       <div className="w-full max-w-sm space-y-3">
         {LOADING_STAGES.map((label, i) => {
           const isDone = i < visibleStage;
@@ -856,6 +845,7 @@ interface PreviewStateProps {
 
 function PreviewState({ result, onAccept, onRegenerate }: PreviewStateProps) {
   const [expandedSection, setExpandedSection] = useState<string | null>("instructions");
+  const docsCount = result.docs ? Object.keys(result.docs).length : 0;
 
   return (
     <div className="flex flex-col items-center">
@@ -869,7 +859,6 @@ function PreviewState({ result, onAccept, onRegenerate }: PreviewStateProps) {
       </div>
 
       <div className="w-full space-y-4">
-        {/* Name & description */}
         <div className="space-y-1">
           <p className="text-sm font-medium">{result.name}</p>
           {result.description && (
@@ -877,7 +866,6 @@ function PreviewState({ result, onAccept, onRegenerate }: PreviewStateProps) {
           )}
         </div>
 
-        {/* Summary stats */}
         <div className="flex flex-wrap gap-2">
           <StatBadge label="Instructions" value={`${result.instructions.content.length} chars`} />
           <StatBadge label="Rules" value={String(result.rules.length)} />
@@ -886,9 +874,12 @@ function PreviewState({ result, onAccept, onRegenerate }: PreviewStateProps) {
           {result.skills.length > 0 && (
             <StatBadge label="Skills" value={String(result.skills.length)} />
           )}
+          {docsCount > 0 && (
+            <StatBadge label="Docs" value={String(docsCount)} />
+          )}
         </div>
 
-        {/* Expandable sections */}
+        {/* Instructions */}
         {result.instructions.content && (
           <PreviewSection
             title="Instructions"
@@ -903,6 +894,7 @@ function PreviewState({ result, onAccept, onRegenerate }: PreviewStateProps) {
           </PreviewSection>
         )}
 
+        {/* Rules */}
         {result.rules.length > 0 && (
           <PreviewSection
             title={`Rules (${result.rules.length})`}
@@ -924,6 +916,7 @@ function PreviewState({ result, onAccept, onRegenerate }: PreviewStateProps) {
           </PreviewSection>
         )}
 
+        {/* MCP Servers */}
         {result.mcpServers.length > 0 && (
           <PreviewSection
             title={`MCP Servers (${result.mcpServers.length})`}
@@ -937,6 +930,85 @@ function PreviewState({ result, onAccept, onRegenerate }: PreviewStateProps) {
                   <span className="size-1 rounded-full bg-foreground/30 shrink-0" />
                   <span className="font-medium">{server.name}</span>
                   <span className="text-muted-foreground">({server.type})</span>
+                </div>
+              ))}
+            </div>
+          </PreviewSection>
+        )}
+
+        {/* Permissions */}
+        {Object.keys(result.permissions).length > 0 && (
+          <PreviewSection
+            title={`Permissions (${Object.keys(result.permissions).length})`}
+            sectionId="permissions"
+            expanded={expandedSection}
+            onToggle={setExpandedSection}
+          >
+            <div className="space-y-1">
+              {Object.entries(result.permissions).map(([tool, value]) => (
+                <div key={tool} className="flex items-center justify-between text-xs">
+                  <span className="font-mono text-foreground/80">{tool}</span>
+                  <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
+                    value === "allow"
+                      ? "bg-green-500/10 text-green-700"
+                      : value === "deny"
+                        ? "bg-red-500/10 text-red-700"
+                        : "bg-amber-500/10 text-amber-700"
+                  }`}>
+                    {value}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </PreviewSection>
+        )}
+
+        {/* Skills */}
+        {result.skills.length > 0 && (
+          <PreviewSection
+            title={`Skills (${result.skills.length})`}
+            sectionId="skills"
+            expanded={expandedSection}
+            onToggle={setExpandedSection}
+          >
+            <div className="space-y-1">
+              {result.skills.map((skill, i) => (
+                <div key={i} className="flex items-center gap-2 text-xs text-foreground/80">
+                  <span className="size-1 rounded-full bg-foreground/30 shrink-0" />
+                  <span className="font-medium">{skill.skillId}</span>
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded ${
+                    skill.enabled
+                      ? "bg-green-500/10 text-green-700"
+                      : "bg-muted text-muted-foreground"
+                  }`}>
+                    {skill.enabled ? "enabled" : "disabled"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </PreviewSection>
+        )}
+
+        {/* Docs */}
+        {docsCount > 0 && result.docs && (
+          <PreviewSection
+            title={`Documentation (${docsCount})`}
+            sectionId="docs"
+            expanded={expandedSection}
+            onToggle={setExpandedSection}
+          >
+            <div className="space-y-2">
+              {Object.entries(result.docs).map(([filename, content]) => (
+                <div key={filename} className="space-y-1">
+                  <div className="flex items-center gap-2 text-xs text-foreground/80">
+                    <FileTextIcon className="size-3 shrink-0" />
+                    <span className="font-medium">{filename}</span>
+                    <span className="text-muted-foreground">{content.length} chars</span>
+                  </div>
+                  <pre className="text-[11px] text-muted-foreground whitespace-pre-wrap font-mono pl-5 line-clamp-3">
+                    {content.slice(0, 200)}
+                    {content.length > 200 && "..."}
+                  </pre>
                 </div>
               ))}
             </div>

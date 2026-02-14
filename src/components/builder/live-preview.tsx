@@ -24,6 +24,7 @@ export function LivePreview({ state }: LivePreviewProps) {
         mcpServers: debouncedState.mcpServers,
         permissions: debouncedState.permissions,
         rules: debouncedState.rules,
+        docs: debouncedState.docs,
       });
     } catch {
       return null;

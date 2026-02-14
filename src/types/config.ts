@@ -52,6 +52,7 @@ export interface AgentConfig {
   permissions: Record<string, "allow" | "ask" | "deny">;
   rules: Rule[];
   techStack?: string[];
+  docs?: Record<string, string>;
 }
 
 export type UseCase =

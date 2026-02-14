@@ -6,6 +6,7 @@ import {
   ArrowLeftIcon,
   CheckCircledIcon,
   CheckIcon,
+  MagicWandIcon,
 } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -91,10 +92,11 @@ export function OnboardingWizard({
     suggestions.rulePresetIds.length > 0
   );
 
-  // Total steps: 0=agent, 1=describe, 2=suggestions (conditional), 3=start
-  const totalSteps = hasSuggestions ? 4 : 3;
+  // Steps: 0=agent, 1=describe, 2=suggestions (conditional), 3=start
+  const describeStep = 1;
   const suggestionsStep = hasSuggestions ? 2 : -1;
   const startStep = hasSuggestions ? 3 : 2;
+  const totalSteps = startStep + 1;
 
   const toggleStackItem = (item: string) => {
     setTechStack((prev) =>
@@ -104,8 +106,7 @@ export function OnboardingWizard({
   };
 
   const handleNext = () => {
-    if (step === 1 && hasSuggestions && !suggestionsInitialized) {
-      // Initialize suggestions with defaults pre-checked
+    if (step === describeStep && hasSuggestions && !suggestionsInitialized) {
       if (suggestions) {
         setSelectedMcpSlugs(new Set(suggestions.mcpServers.map((s) => s.name)));
         setSelectedRulePresetIds(new Set(suggestions.rulePresetIds));
@@ -144,7 +145,7 @@ export function OnboardingWizard({
 
   function buildCompleteConfig() {
     const config: Parameters<typeof onComplete>[0] = {
-      targetAgent: selectedAgent!,
+      targetAgent: selectedAgent ?? "claude-code",
       description: description || undefined,
       techStack: techStack.length > 0 ? techStack : undefined,
     };
@@ -161,18 +162,15 @@ export function OnboardingWizard({
   }
 
   const handleStartBlank = () => {
-    if (!selectedAgent) return;
     onComplete(buildCompleteConfig());
   };
 
   const handleUseTemplate = () => {
-    if (!selectedAgent) return;
     onComplete(buildCompleteConfig());
     onOpenTemplate();
   };
 
   const handleUseGenerate = () => {
-    if (!selectedAgent) return;
     onComplete(buildCompleteConfig());
     onOpenGenerate();
   };
@@ -206,7 +204,7 @@ export function OnboardingWizard({
           </button>
         </div>
 
-        {/* Step 1: Pick your agent */}
+        {/* Step 0: Pick your agent */}
         {step === 0 && (
           <div className="space-y-6">
             <div className="text-center space-y-1">
@@ -266,8 +264,8 @@ export function OnboardingWizard({
           </div>
         )}
 
-        {/* Step 2: Describe your project */}
-        {step === 1 && (
+        {/* Describe your project */}
+        {step === describeStep && (
           <div className="space-y-6">
             <div className="text-center space-y-1">
               <h2 className="text-lg font-medium">Describe your project</h2>
@@ -315,7 +313,7 @@ export function OnboardingWizard({
           </div>
         )}
 
-        {/* Step 2.5: Recommended for your stack */}
+        {/* Recommended for your stack */}
         {step === suggestionsStep && suggestions && (
           <div className="space-y-6">
             <div className="text-center space-y-1">
@@ -325,7 +323,6 @@ export function OnboardingWizard({
               </p>
             </div>
 
-            {/* Suggested MCP servers */}
             {suggestions.mcpServers.length > 0 && (
               <div className="space-y-2">
                 <p className="text-xs text-muted-foreground font-medium">MCP Servers</p>
@@ -360,7 +357,6 @@ export function OnboardingWizard({
               </div>
             )}
 
-            {/* Suggested rule presets */}
             {suggestions.rulePresetIds.length > 0 && (
               <div className="space-y-2">
                 <p className="text-xs text-muted-foreground font-medium">Rule Presets</p>
@@ -397,7 +393,6 @@ export function OnboardingWizard({
               </div>
             )}
 
-            {/* Permission preset */}
             <div className="space-y-2">
               <p className="text-xs text-muted-foreground font-medium">Permission Preset</p>
               <div className="flex gap-2">
@@ -431,7 +426,7 @@ export function OnboardingWizard({
           </div>
         )}
 
-        {/* Step 3: How to start */}
+        {/* How to start — AI Generate is primary */}
         {step === startStep && (
           <div className="space-y-6">
             <div className="text-center space-y-1">
@@ -443,22 +438,26 @@ export function OnboardingWizard({
 
             <div className="grid gap-3">
               <button
+                onClick={handleUseGenerate}
+                className="text-left rounded-lg border-2 border-foreground p-4 transition-colors hover:bg-foreground/[0.02]"
+              >
+                <div className="flex items-center gap-2">
+                  <MagicWandIcon className="size-4" />
+                  <span className="text-sm font-medium">Generate with AI</span>
+                  <Badge variant="secondary" className="text-[10px]">Recommended</Badge>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  AI generates a complete config with instructions, rules, MCP servers, permissions, and documentation — all in one shot.
+                </p>
+              </button>
+
+              <button
                 onClick={handleUseTemplate}
                 className="text-left rounded-lg border p-4 hover:border-foreground/30 transition-colors"
               >
                 <span className="text-sm font-medium">Use a Template</span>
                 <p className="text-xs text-muted-foreground mt-1">
                   Start from a pre-built configuration and customize it for your needs.
-                </p>
-              </button>
-
-              <button
-                onClick={handleUseGenerate}
-                className="text-left rounded-lg border p-4 hover:border-foreground/30 transition-colors"
-              >
-                <span className="text-sm font-medium">AI Generate</span>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Let AI generate a configuration based on your project description.
                 </p>
               </button>
 

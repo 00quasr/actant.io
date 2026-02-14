@@ -52,5 +52,12 @@ export function exportCursor(config: AgentConfig): ExportFile[] {
     });
   }
 
+  // Docs
+  if (config.docs) {
+    for (const [filename, content] of Object.entries(config.docs)) {
+      if (content) files.push({ path: filename, content });
+    }
+  }
+
   return files;
 }

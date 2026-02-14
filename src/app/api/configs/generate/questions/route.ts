@@ -43,13 +43,14 @@ export async function POST(request: Request) {
   const { projectDescription, techStack } = parseResult.data;
 
   const prompt = buildQuestionsPrompt(projectDescription, techStack);
+  const systemMessage =
+    "You are an expert developer who helps configure AI coding agents. Generate insightful clarifying questions to better understand a project's needs. Each question should be specific and actionable.";
 
   try {
     const result = await generateObject({
       model: getModel(),
       schema: clarifyingQuestionsSchema,
-      system:
-        "You are an expert developer who helps configure AI coding agents. Generate insightful clarifying questions to better understand a project's needs. Each question should be specific and actionable.",
+      system: systemMessage,
       prompt,
     });
 

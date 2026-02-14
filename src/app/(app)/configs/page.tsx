@@ -7,7 +7,7 @@ import { UserConfigCard } from "@/components/config/user-config-card";
 import type { Config } from "@/types/marketplace";
 
 export const metadata = {
-  title: "My Configs",
+  title: "My Library",
 };
 
 export default async function ConfigsPage() {
@@ -30,9 +30,9 @@ export default async function ConfigsPage() {
     <div className="mx-auto max-w-4xl px-6 py-8">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <h1 className="text-2xl font-semibold tracking-tight">My Configs</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">My Library</h1>
           <p className="text-sm text-muted-foreground">
-            Manage your agent configurations
+            Manage your configurations
           </p>
         </div>
         <Button asChild size="sm">

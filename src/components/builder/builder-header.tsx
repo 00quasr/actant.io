@@ -19,7 +19,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ExportDialog } from "@/components/builder/export-dialog";
-import { AiGenerateDialog } from "@/components/builder/ai-generate-dialog";
 import { RepoImportDialog } from "@/components/builder/repo-import-dialog";
 import { PublishDialog } from "@/components/builder/publish-dialog";
 import { TemplatePicker } from "@/components/builder/tabs/template-picker";
@@ -41,8 +40,7 @@ interface BuilderHeaderProps {
   templatePickerOpen: boolean;
   onTemplatePickerOpenChange: (open: boolean) => void;
   onLoadTemplate: (template: Template) => void;
-  generateOpen: boolean;
-  onGenerateOpenChange: (open: boolean) => void;
+  onGenerateClick: () => void;
 }
 
 function SaveIndicator({ status }: { status: SaveStatus }) {
@@ -70,8 +68,7 @@ export function BuilderHeader({
   templatePickerOpen,
   onTemplatePickerOpenChange,
   onLoadTemplate,
-  generateOpen,
-  onGenerateOpenChange,
+  onGenerateClick,
 }: BuilderHeaderProps) {
   const [exportOpen, setExportOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
@@ -127,7 +124,7 @@ export function BuilderHeader({
           Import from GitHub
         </Button>
 
-        <Button variant="outline" size="sm" onClick={() => onGenerateOpenChange(true)}>
+        <Button variant="outline" size="sm" onClick={onGenerateClick}>
           <MagicWandIcon />
           Generate with AI
         </Button>
@@ -154,13 +151,6 @@ export function BuilderHeader({
       <RepoImportDialog
         open={importOpen}
         onOpenChange={setImportOpen}
-        targetAgent={state.targetAgent}
-        onAccept={onAcceptGenerated}
-      />
-
-      <AiGenerateDialog
-        open={generateOpen}
-        onOpenChange={onGenerateOpenChange}
         targetAgent={state.targetAgent}
         onAccept={onAcceptGenerated}
       />

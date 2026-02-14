@@ -11,6 +11,7 @@ import type {
 
 export interface ConfigState extends AgentConfig {
   id?: string;
+  techStack: string[];
   isDirty: boolean;
   isSaving: boolean;
   lastSaved?: Date;
@@ -38,6 +39,7 @@ type ConfigAction =
   | { type: "LOAD_TEMPLATE"; payload: { instructions: AgentConfig["instructions"]; rules: Rule[]; mcpServers: McpServer[]; permissions: Record<string, "allow" | "ask" | "deny"> } }
   | { type: "SET_ALL_PERMISSIONS"; payload: Record<string, "allow" | "ask" | "deny"> }
   | { type: "ADD_RULES_BATCH"; payload: Rule[] }
+  | { type: "SET_TECH_STACK"; payload: string[] }
   | { type: "RESET" }
   | { type: "SET_SAVING"; payload: boolean }
   | { type: "SET_SAVED" };
@@ -53,6 +55,7 @@ function createInitialState(initial?: Partial<AgentConfig> & { id?: string }): C
     mcpServers: initial?.mcpServers ?? [],
     permissions: initial?.permissions ?? {},
     rules: initial?.rules ?? [],
+    techStack: initial?.techStack ?? [],
     isDirty: false,
     isSaving: false,
     lastSaved: undefined,
@@ -154,6 +157,8 @@ function configReducer(state: ConfigState, action: ConfigAction): ConfigState {
       return { ...state, permissions: action.payload, isDirty: true };
     case "ADD_RULES_BATCH":
       return { ...state, rules: [...state.rules, ...action.payload], isDirty: true };
+    case "SET_TECH_STACK":
+      return { ...state, techStack: action.payload, isDirty: true };
     case "LOAD_CONFIG":
       return createInitialState(action.payload);
     case "LOAD_GENERATED_CONFIG":
@@ -282,6 +287,10 @@ export function useConfig(initial?: Partial<AgentConfig> & { id?: string }) {
     (rules: Rule[]) => dispatch({ type: "ADD_RULES_BATCH", payload: rules }),
     []
   );
+  const setTechStack = useCallback(
+    (techStack: string[]) => dispatch({ type: "SET_TECH_STACK", payload: techStack }),
+    []
+  );
   const reset = useCallback(() => dispatch({ type: "RESET" }), []);
 
   return {
@@ -307,6 +316,7 @@ export function useConfig(initial?: Partial<AgentConfig> & { id?: string }) {
     loadTemplate,
     setAllPermissions,
     addRulesBatch,
+    setTechStack,
     reset,
   };
 }

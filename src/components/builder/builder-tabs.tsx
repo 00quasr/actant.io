@@ -80,6 +80,7 @@ export function BuilderTabs({
           addServer={addMcpServer}
           removeServer={removeMcpServer}
           updateServer={updateMcpServer}
+          techStack={state.techStack}
         />
       </TabsContent>
 

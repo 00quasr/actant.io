@@ -51,6 +51,7 @@ export interface AgentConfig {
   mcpServers: McpServer[];
   permissions: Record<string, "allow" | "ask" | "deny">;
   rules: Rule[];
+  techStack?: string[];
 }
 
 export type UseCase =

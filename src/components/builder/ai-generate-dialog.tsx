@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   MagicWandIcon,
   Cross2Icon,
@@ -9,17 +9,9 @@ import {
   PlusIcon,
   ArrowRightIcon,
 } from "@radix-ui/react-icons";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useConfigGeneration } from "@/hooks/use-config-generation";
 import type { AgentConfig, AgentType } from "@/types/config";
 import type { ClarifyingQuestion } from "@/lib/ai/questions-schema";
@@ -34,6 +26,14 @@ const QUICK_STACK_OPTIONS = [
   "Rust",
   "Go",
 ] as const;
+
+const LOADING_STAGES = [
+  "Analyzing project context...",
+  "Generating instructions...",
+  "Configuring MCP servers...",
+  "Setting permissions...",
+  "Creating rules...",
+];
 
 interface AiGenerateDialogProps {
   open: boolean;
@@ -77,11 +77,9 @@ export function AiGenerateDialog({
     reset();
   }, [reset]);
 
-  function handleOpenChange(nextOpen: boolean) {
-    if (!nextOpen) {
-      resetForm();
-    }
-    onOpenChange(nextOpen);
+  function handleClose() {
+    resetForm();
+    onOpenChange(false);
   }
 
   function toggleStackItem(item: string) {
@@ -134,7 +132,7 @@ export function AiGenerateDialog({
   function handleAccept() {
     if (result) {
       onAccept(result);
-      handleOpenChange(false);
+      handleClose();
     }
   }
 
@@ -145,87 +143,111 @@ export function AiGenerateDialog({
 
   const isFormValid = projectDescription.length >= 10;
 
-  function renderStep() {
-    if (status === "idle" || (status === "error" && questions.length === 0)) {
-      return (
-        <HeroInput
-          projectDescription={projectDescription}
-          setProjectDescription={setProjectDescription}
-          techStack={techStack}
-          toggleStackItem={toggleStackItem}
-          customTech={customTech}
-          setCustomTech={setCustomTech}
-          addCustomTech={addCustomTech}
-          handleCustomKeyDown={handleCustomKeyDown}
-          includeRules={includeRules}
-          setIncludeRules={setIncludeRules}
-          includeMcp={includeMcp}
-          setIncludeMcp={setIncludeMcp}
-          includePermissions={includePermissions}
-          setIncludePermissions={setIncludePermissions}
-          error={error}
-          isFormValid={isFormValid}
-          onNext={handleNext}
-        />
-      );
-    }
+  // Determine current step for indicator
+  let currentStep = 0;
+  if (status === "asking") currentStep = 1;
+  else if (status === "answering") currentStep = 1;
+  else if (status === "generating") currentStep = 2;
+  else if (status === "done") currentStep = 3;
 
-    if (status === "asking") {
-      return (
-        <LoadingState
-          message="Analyzing your project..."
-          subtitle="Generating clarifying questions to build a better config."
-        />
-      );
-    }
-
-    if (status === "answering" || (status === "error" && questions.length > 0)) {
-      return (
-        <AnswerForm
-          questions={questions}
-          answers={answers}
-          setAnswers={setAnswers}
-          error={error}
-          onSkip={() => handleGenerate(false)}
-          onGenerate={() => handleGenerate(true)}
-        />
-      );
-    }
-
-    if (status === "generating") {
-      return (
-        <LoadingState
-          message="Generating your configuration..."
-          subtitle="This may take a few seconds."
-        />
-      );
-    }
-
-    if (status === "done" && result) {
-      return (
-        <PreviewState
-          result={result}
-          onAccept={handleAccept}
-          onRegenerate={handleRegenerate}
-        />
-      );
-    }
-
-    return null;
-  }
+  if (!open) return null;
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-3xl max-h-[90vh] flex flex-col gap-0 p-0 overflow-hidden">
-        <DialogTitle className="sr-only">Generate with AI</DialogTitle>
-        {renderStep()}
-      </DialogContent>
-    </Dialog>
+    <div className="fixed inset-0 z-50 bg-background overflow-y-auto">
+      {/* Top bar */}
+      <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-background/95 backdrop-blur px-6 py-3">
+        <div className="flex items-center gap-3">
+          <MagicWandIcon className="size-4" />
+          <span className="text-sm font-medium">Generate with AI</span>
+        </div>
+        <div className="flex items-center gap-4">
+          <StepIndicator current={currentStep} total={4} />
+          <Button variant="ghost" size="icon" onClick={handleClose}>
+            <Cross2Icon className="size-4" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="max-w-2xl mx-auto py-16 px-8">
+        {(status === "idle" || (status === "error" && questions.length === 0)) && (
+          <HeroInput
+            projectDescription={projectDescription}
+            setProjectDescription={setProjectDescription}
+            techStack={techStack}
+            toggleStackItem={toggleStackItem}
+            customTech={customTech}
+            setCustomTech={setCustomTech}
+            addCustomTech={addCustomTech}
+            handleCustomKeyDown={handleCustomKeyDown}
+            includeRules={includeRules}
+            setIncludeRules={setIncludeRules}
+            includeMcp={includeMcp}
+            setIncludeMcp={setIncludeMcp}
+            includePermissions={includePermissions}
+            setIncludePermissions={setIncludePermissions}
+            error={error}
+            isFormValid={isFormValid}
+            onNext={handleNext}
+          />
+        )}
+
+        {status === "asking" && (
+          <StagedLoading stage={0} />
+        )}
+
+        {(status === "answering" || (status === "error" && questions.length > 0)) && (
+          <AnswerForm
+            questions={questions}
+            answers={answers}
+            setAnswers={setAnswers}
+            error={error}
+            onSkip={() => handleGenerate(false)}
+            onGenerate={() => handleGenerate(true)}
+          />
+        )}
+
+        {status === "generating" && (
+          <StagedLoading stage={1} />
+        )}
+
+        {status === "done" && result && (
+          <PreviewState
+            result={result}
+            onAccept={handleAccept}
+            onRegenerate={handleRegenerate}
+          />
+        )}
+      </div>
+    </div>
   );
 }
 
 /* ------------------------------------------------------------------ */
-/* Hero Input (Step 1) — Chat-style, spacious                         */
+/* Step Indicator                                                      */
+/* ------------------------------------------------------------------ */
+
+function StepIndicator({ current, total }: { current: number; total: number }) {
+  return (
+    <div className="flex items-center gap-1.5">
+      {Array.from({ length: total }).map((_, i) => (
+        <div
+          key={i}
+          className={`h-1.5 rounded-full transition-all ${
+            i === current
+              ? "w-6 bg-foreground"
+              : i < current
+                ? "w-1.5 bg-foreground/40"
+                : "w-1.5 bg-muted-foreground/20"
+          }`}
+        />
+      ))}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Hero Input (Step 1)                                                 */
 /* ------------------------------------------------------------------ */
 
 interface HeroInputProps {
@@ -273,53 +295,56 @@ function HeroInput({
   );
 
   return (
-    <div className="flex flex-col items-center px-10 py-16">
+    <div className="flex flex-col items-center">
       {/* Hero heading */}
-      <div className="text-center mb-10">
-        <h2 className="text-3xl font-bold tracking-tight">
+      <div className="text-center mb-12">
+        <h2 className="text-4xl font-bold tracking-tight">
           What are you building?
         </h2>
-        <p className="mt-3 text-sm text-muted-foreground max-w-md mx-auto">
-          Describe your project and we&apos;ll generate a tailored agent config.
+        <p className="mt-4 text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
+          Describe your project and we&apos;ll generate a tailored agent config
+          with instructions, rules, MCP servers, and permissions.
         </p>
       </div>
 
       {/* Main textarea */}
-      <div className="w-full max-w-2xl">
-        <div className="relative rounded-xl border bg-background shadow-sm focus-within:ring-2 focus-within:ring-ring/50">
+      <div className="w-full">
+        <div className="relative rounded-2xl border bg-background shadow-sm focus-within:ring-2 focus-within:ring-ring/50">
           <Textarea
             placeholder="I'm building a Next.js SaaS app with Supabase auth, Stripe billing, and a dashboard..."
             value={projectDescription}
             onChange={(e) => setProjectDescription(e.target.value)}
-            className="min-h-36 resize-none border-0 shadow-none focus-visible:ring-0 text-sm leading-relaxed p-4"
+            className="min-h-48 resize-none border-0 shadow-none focus-visible:ring-0 text-sm leading-relaxed p-5"
             maxLength={2000}
           />
-          <div className="flex items-center justify-between px-4 pb-4">
+          <div className="flex items-center justify-between px-5 pb-4">
             <span className="text-xs text-muted-foreground">
               {projectDescription.length > 0 && `${projectDescription.length}/2000`}
             </span>
-            <Button
-              onClick={onNext}
-              disabled={!isFormValid}
-              size="default"
-              className="rounded-full px-6"
-            >
-              Generate
-              <ArrowRightIcon className="ml-1.5 size-4" />
-            </Button>
           </div>
         </div>
 
+        {/* Generate button — full width */}
+        <Button
+          onClick={onNext}
+          disabled={!isFormValid}
+          size="lg"
+          className="w-full mt-4 rounded-xl"
+        >
+          Generate Configuration
+          <ArrowRightIcon className="ml-1.5 size-4" />
+        </Button>
+
         {/* Tech stack pills */}
-        <div className="mt-6">
-          <p className="text-xs text-muted-foreground mb-2">Tech stack (optional)</p>
+        <div className="mt-8">
+          <p className="text-xs text-muted-foreground mb-3">Select your stack (optional)</p>
           <div className="flex flex-wrap gap-2">
             {QUICK_STACK_OPTIONS.map((tech) => (
               <button
                 key={tech}
                 type="button"
                 onClick={() => toggleStackItem(tech)}
-                className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                className={`inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
                   techStack.includes(tech)
                     ? "border-foreground bg-foreground text-background"
                     : "border-border bg-background text-muted-foreground hover:border-foreground/30 hover:text-foreground"
@@ -333,7 +358,7 @@ function HeroInput({
                 key={tech}
                 type="button"
                 onClick={() => toggleStackItem(tech)}
-                className="inline-flex items-center gap-1 rounded-full border border-foreground bg-foreground text-background px-3 py-1 text-xs font-medium"
+                className="inline-flex items-center gap-1 rounded-full border border-foreground bg-foreground text-background px-3 py-1.5 text-xs font-medium"
               >
                 {tech}
                 <Cross2Icon className="size-3" />
@@ -345,14 +370,14 @@ function HeroInput({
                 value={customTech}
                 onChange={(e) => setCustomTech(e.target.value)}
                 onKeyDown={handleCustomKeyDown}
-                className="h-7 w-24 text-xs rounded-full border-dashed"
+                className="h-8 w-24 text-xs rounded-full border-dashed"
               />
               {customTech.trim() && (
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="size-7 rounded-full"
+                  className="size-8 rounded-full"
                   onClick={addCustomTech}
                 >
                   <PlusIcon className="size-3.5" />
@@ -362,35 +387,34 @@ function HeroInput({
           </div>
         </div>
 
-        {/* Inline options — always visible, compact */}
-        <div className="mt-5 flex items-center gap-5">
-          <span className="text-xs text-muted-foreground">Include:</span>
-          <label className="flex items-center gap-1.5 cursor-pointer">
-            <Checkbox
-              checked={includeRules}
-              onCheckedChange={(v) => setIncludeRules(v === true)}
+        {/* Include options — toggle cards */}
+        <div className="mt-8">
+          <p className="text-xs text-muted-foreground mb-3">Include in generation</p>
+          <div className="grid grid-cols-3 gap-2">
+            <ToggleCard
+              label="Rules"
+              description="Coding conventions"
+              active={includeRules}
+              onToggle={() => setIncludeRules(!includeRules)}
             />
-            <span className="text-xs text-muted-foreground">Rules</span>
-          </label>
-          <label className="flex items-center gap-1.5 cursor-pointer">
-            <Checkbox
-              checked={includeMcp}
-              onCheckedChange={(v) => setIncludeMcp(v === true)}
+            <ToggleCard
+              label="MCP Servers"
+              description="External tools"
+              active={includeMcp}
+              onToggle={() => setIncludeMcp(!includeMcp)}
             />
-            <span className="text-xs text-muted-foreground">MCP</span>
-          </label>
-          <label className="flex items-center gap-1.5 cursor-pointer">
-            <Checkbox
-              checked={includePermissions}
-              onCheckedChange={(v) => setIncludePermissions(v === true)}
+            <ToggleCard
+              label="Permissions"
+              description="Tool access"
+              active={includePermissions}
+              onToggle={() => setIncludePermissions(!includePermissions)}
             />
-            <span className="text-xs text-muted-foreground">Permissions</span>
-          </label>
+          </div>
         </div>
 
         {/* Error */}
         {error && (
-          <div className="mt-4 rounded-md border border-destructive/20 bg-destructive/5 p-3">
+          <div className="mt-6 rounded-md border border-destructive/20 bg-destructive/5 p-3">
             <p className="text-sm text-destructive">{error}</p>
           </div>
         )}
@@ -400,7 +424,41 @@ function HeroInput({
 }
 
 /* ------------------------------------------------------------------ */
-/* Answer Form (Step 3)                                                */
+/* Toggle Card                                                         */
+/* ------------------------------------------------------------------ */
+
+function ToggleCard({
+  label,
+  description,
+  active,
+  onToggle,
+}: {
+  label: string;
+  description: string;
+  active: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      className={`rounded-lg border p-3 text-left transition-colors ${
+        active
+          ? "border-foreground bg-foreground/[0.03]"
+          : "border-border text-muted-foreground hover:border-foreground/20"
+      }`}
+    >
+      <div className="flex items-center justify-between mb-0.5">
+        <span className="text-xs font-medium">{label}</span>
+        {active && <CheckIcon className="size-3" />}
+      </div>
+      <span className="text-[11px] text-muted-foreground">{description}</span>
+    </button>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Answer Form (Step 2)                                                */
 /* ------------------------------------------------------------------ */
 
 interface AnswerFormProps {
@@ -425,43 +483,48 @@ function AnswerForm({
   }
 
   return (
-    <div className="flex flex-col px-8 py-10">
-      <div className="text-center mb-8">
-        <h2 className="text-xl font-semibold tracking-tight">
+    <div className="flex flex-col items-center">
+      <div className="text-center mb-10">
+        <h2 className="text-2xl font-bold tracking-tight">
           A few quick questions
         </h2>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="mt-2 text-sm text-muted-foreground">
           Help us understand your project better for a more accurate config.
         </p>
       </div>
 
-      <div className="mx-auto w-full max-w-xl space-y-6 flex-1 min-h-0 overflow-y-auto">
+      <div className="w-full space-y-6">
         {questions.map((q, i) => (
-          <div key={q.id} className="space-y-2">
-            <Label className="text-sm">
-              {i + 1}. {q.question}
-            </Label>
+          <div key={q.id} className="rounded-lg border p-5 space-y-3">
+            <div className="flex items-start justify-between">
+              <p className="text-sm font-medium leading-relaxed">
+                {q.question}
+              </p>
+              <span className="text-xs text-muted-foreground shrink-0 ml-3">
+                {i + 1} of {questions.length}
+              </span>
+            </div>
             {q.context && (
               <p className="text-xs text-muted-foreground">{q.context}</p>
             )}
 
             {q.type === "multiple_choice" && q.options ? (
-              <RadioGroup
-                value={answers[q.id] ?? ""}
-                onValueChange={(v) => setAnswer(q.id, v)}
-              >
+              <div className="grid grid-cols-2 gap-2">
                 {q.options.map((option) => (
-                  <div key={option} className="flex items-center gap-2">
-                    <RadioGroupItem value={option} id={`${q.id}-${option}`} />
-                    <Label
-                      htmlFor={`${q.id}-${option}`}
-                      className="text-sm font-normal cursor-pointer"
-                    >
-                      {option}
-                    </Label>
-                  </div>
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() => setAnswer(q.id, option)}
+                    className={`rounded-md border px-3 py-2 text-xs text-left transition-colors ${
+                      answers[q.id] === option
+                        ? "border-foreground bg-foreground/[0.03] font-medium"
+                        : "border-border hover:border-foreground/30"
+                    }`}
+                  >
+                    {option}
+                  </button>
                 ))}
-              </RadioGroup>
+              </div>
             ) : (
               <Textarea
                 placeholder="Your answer..."
@@ -481,11 +544,11 @@ function AnswerForm({
 
         <div className="flex gap-3 pt-2">
           <Button variant="outline" onClick={onSkip} className="flex-1">
-            Skip
+            Skip Questions
           </Button>
           <Button onClick={onGenerate} className="flex-1">
             <MagicWandIcon className="size-4" />
-            Generate
+            Generate Config
           </Button>
         </div>
       </div>
@@ -494,22 +557,63 @@ function AnswerForm({
 }
 
 /* ------------------------------------------------------------------ */
-/* Loading State                                                       */
+/* Staged Loading                                                      */
 /* ------------------------------------------------------------------ */
 
-function LoadingState({
-  message,
-  subtitle,
-}: {
-  message: string;
-  subtitle: string;
-}) {
+function StagedLoading({ stage }: { stage: number }) {
+  const [visibleStage, setVisibleStage] = useState(stage === 0 ? 0 : 1);
+
+  useEffect(() => {
+    if (stage === 0) {
+      // For "asking" — just show first stage
+      setVisibleStage(0);
+      return;
+    }
+
+    // For "generating" — animate through stages
+    setVisibleStage(1);
+    const timers: NodeJS.Timeout[] = [];
+    for (let i = 2; i < LOADING_STAGES.length; i++) {
+      timers.push(setTimeout(() => setVisibleStage(i), (i - 1) * 1500));
+    }
+    return () => timers.forEach(clearTimeout);
+  }, [stage]);
+
   return (
-    <div className="flex flex-col items-center justify-center py-20 gap-4">
-      <div className="size-8 rounded-full border-2 border-muted-foreground/20 border-t-foreground animate-spin" />
-      <div className="text-center space-y-1">
-        <p className="text-sm font-medium">{message}</p>
-        <p className="text-xs text-muted-foreground">{subtitle}</p>
+    <div className="flex flex-col items-center py-12">
+      <div className="size-10 rounded-full border-2 border-muted-foreground/20 border-t-foreground animate-spin mb-8" />
+
+      <div className="w-full max-w-sm space-y-3">
+        {LOADING_STAGES.map((label, i) => {
+          let stageStatus: "done" | "active" | "pending" = "pending";
+          if (i < visibleStage) stageStatus = "done";
+          else if (i === visibleStage) stageStatus = "active";
+
+          return (
+            <div key={i} className="flex items-center gap-3">
+              {stageStatus === "done" ? (
+                <div className="size-5 rounded-full bg-foreground/10 flex items-center justify-center">
+                  <CheckIcon className="size-3 text-foreground" />
+                </div>
+              ) : stageStatus === "active" ? (
+                <div className="size-5 rounded-full border-2 border-muted-foreground/30 border-t-foreground animate-spin" />
+              ) : (
+                <div className="size-5 rounded-full border border-muted-foreground/20" />
+              )}
+              <span
+                className={`text-sm ${
+                  stageStatus === "pending"
+                    ? "text-muted-foreground/50"
+                    : stageStatus === "active"
+                      ? "text-foreground font-medium"
+                      : "text-muted-foreground"
+                }`}
+              >
+                {label}
+              </span>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -526,18 +630,20 @@ interface PreviewStateProps {
 }
 
 function PreviewState({ result, onAccept, onRegenerate }: PreviewStateProps) {
+  const [expandedSection, setExpandedSection] = useState<string | null>("instructions");
+
   return (
-    <div className="flex flex-col px-8 py-10">
-      <div className="text-center mb-6">
-        <h2 className="text-xl font-semibold tracking-tight">
+    <div className="flex flex-col items-center">
+      <div className="text-center mb-10">
+        <h2 className="text-2xl font-bold tracking-tight">
           Your config is ready
         </h2>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="mt-2 text-sm text-muted-foreground">
           Review the generated configuration before applying it.
         </p>
       </div>
 
-      <div className="mx-auto w-full max-w-xl space-y-4 flex-1 min-h-0 overflow-y-auto">
+      <div className="w-full space-y-4">
         {/* Name & description */}
         <div className="space-y-1">
           <p className="text-sm font-medium">{result.name}</p>
@@ -554,25 +660,28 @@ function PreviewState({ result, onAccept, onRegenerate }: PreviewStateProps) {
           <StatBadge label="Permissions" value={String(Object.keys(result.permissions).length)} />
         </div>
 
-        {/* Instructions preview */}
+        {/* Expandable sections */}
         {result.instructions.content && (
-          <div className="space-y-1.5">
-            <p className="text-xs font-medium text-muted-foreground">
-              Instructions
-            </p>
-            <div className="rounded-md border bg-muted/30 p-3 max-h-48 overflow-y-auto">
-              <pre className="text-xs whitespace-pre-wrap font-mono leading-relaxed">
-                {result.instructions.content.slice(0, 1000)}
-                {result.instructions.content.length > 1000 && "..."}
-              </pre>
-            </div>
-          </div>
+          <PreviewSection
+            title="Instructions"
+            sectionId="instructions"
+            expanded={expandedSection}
+            onToggle={setExpandedSection}
+          >
+            <pre className="text-xs whitespace-pre-wrap font-mono leading-relaxed">
+              {result.instructions.content.slice(0, 2000)}
+              {result.instructions.content.length > 2000 && "..."}
+            </pre>
+          </PreviewSection>
         )}
 
-        {/* Rules list */}
         {result.rules.length > 0 && (
-          <div className="space-y-1.5">
-            <p className="text-xs font-medium text-muted-foreground">Rules</p>
+          <PreviewSection
+            title={`Rules (${result.rules.length})`}
+            sectionId="rules"
+            expanded={expandedSection}
+            onToggle={setExpandedSection}
+          >
             <div className="space-y-1">
               {result.rules.map((rule, i) => (
                 <div key={i} className="flex items-center gap-2 text-xs text-foreground/80">
@@ -584,13 +693,16 @@ function PreviewState({ result, onAccept, onRegenerate }: PreviewStateProps) {
                 </div>
               ))}
             </div>
-          </div>
+          </PreviewSection>
         )}
 
-        {/* MCP Servers list */}
         {result.mcpServers.length > 0 && (
-          <div className="space-y-1.5">
-            <p className="text-xs font-medium text-muted-foreground">MCP Servers</p>
+          <PreviewSection
+            title={`MCP Servers (${result.mcpServers.length})`}
+            sectionId="mcp"
+            expanded={expandedSection}
+            onToggle={setExpandedSection}
+          >
             <div className="space-y-1">
               {result.mcpServers.map((server, i) => (
                 <div key={i} className="flex items-center gap-2 text-xs text-foreground/80">
@@ -600,21 +712,60 @@ function PreviewState({ result, onAccept, onRegenerate }: PreviewStateProps) {
                 </div>
               ))}
             </div>
-          </div>
+          </PreviewSection>
         )}
 
         {/* Actions */}
-        <div className="flex gap-3 pt-2">
-          <Button variant="outline" onClick={onRegenerate} className="flex-1">
+        <div className="pt-4 space-y-2">
+          <Button onClick={onAccept} size="lg" className="w-full rounded-xl">
+            <CheckIcon className="size-4" />
+            Accept &amp; Configure
+          </Button>
+          <Button variant="outline" onClick={onRegenerate} className="w-full">
             <ReloadIcon className="size-4" />
             Regenerate
           </Button>
-          <Button onClick={onAccept} className="flex-1">
-            <CheckIcon className="size-4" />
-            Accept
-          </Button>
         </div>
       </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Preview Section                                                     */
+/* ------------------------------------------------------------------ */
+
+function PreviewSection({
+  title,
+  sectionId,
+  expanded,
+  onToggle,
+  children,
+}: {
+  title: string;
+  sectionId: string;
+  expanded: string | null;
+  onToggle: (id: string | null) => void;
+  children: React.ReactNode;
+}) {
+  const isOpen = expanded === sectionId;
+
+  return (
+    <div className="rounded-lg border">
+      <button
+        onClick={() => onToggle(isOpen ? null : sectionId)}
+        className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium hover:bg-muted/30 transition-colors"
+      >
+        {title}
+        <span className="text-xs text-muted-foreground">
+          {isOpen ? "Collapse" : "Expand"}
+        </span>
+      </button>
+      {isOpen && (
+        <div className="border-t px-4 py-3 max-h-64 overflow-y-auto">
+          {children}
+        </div>
+      )}
     </div>
   );
 }

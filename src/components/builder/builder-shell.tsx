@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { AgentConfig, AgentType } from "@/types/config";
+import type { AgentConfig, AgentType, McpServer, Rule } from "@/types/config";
 import type { Template } from "@/types/marketplace";
 import { useConfig } from "@/hooks/use-config";
 import { useAutoSave } from "@/hooks/use-auto-save";
@@ -9,6 +9,8 @@ import { BuilderHeader } from "@/components/builder/builder-header";
 import { BuilderTabs } from "@/components/builder/builder-tabs";
 import { LivePreview } from "@/components/builder/live-preview";
 import { OnboardingWizard } from "@/components/builder/onboarding-wizard";
+import { AiGenerateDialog } from "@/components/builder/ai-generate-dialog";
+import { RULE_PRESETS, PERMISSION_PRESETS } from "@/lib/presets";
 
 interface BuilderShellProps {
   initialConfig?: AgentConfig & { id?: string };
@@ -35,6 +37,7 @@ export function BuilderShell({ initialConfig, initialTemplate }: BuilderShellPro
     removeRule,
     updateRule,
     addRulesBatch,
+    setTechStack,
     loadGeneratedConfig,
     loadTemplate,
   } = useConfig(initialConfig);
@@ -77,11 +80,50 @@ export function BuilderShell({ initialConfig, initialTemplate }: BuilderShellPro
     targetAgent: AgentType;
     description?: string;
     techStack?: string[];
+    suggestedMcpServers?: McpServer[];
+    suggestedRulePresetIds?: string[];
+    suggestedPermissionPresetId?: string;
   }) => {
     setTargetAgent(config.targetAgent);
     if (config.description) {
       setDescription(config.description);
     }
+    if (config.techStack && config.techStack.length > 0) {
+      setTechStack(config.techStack);
+    }
+
+    // Apply suggested MCP servers
+    if (config.suggestedMcpServers) {
+      const existingNames = new Set(state.mcpServers.map((s) => s.name));
+      for (const server of config.suggestedMcpServers) {
+        if (!existingNames.has(server.name)) {
+          addMcpServer(server);
+        }
+      }
+    }
+
+    // Apply suggested rule presets
+    if (config.suggestedRulePresetIds) {
+      const rules: Rule[] = [];
+      for (const presetId of config.suggestedRulePresetIds) {
+        const preset = RULE_PRESETS.find((p) => p.id === presetId);
+        if (preset) {
+          rules.push(...preset.rules);
+        }
+      }
+      if (rules.length > 0) {
+        addRulesBatch(rules);
+      }
+    }
+
+    // Apply suggested permission preset
+    if (config.suggestedPermissionPresetId) {
+      const preset = PERMISSION_PRESETS.find((p) => p.id === config.suggestedPermissionPresetId);
+      if (preset) {
+        setAllPermissions(preset.permissions);
+      }
+    }
+
     setShowWizard(false);
   };
 
@@ -118,8 +160,7 @@ export function BuilderShell({ initialConfig, initialTemplate }: BuilderShellPro
         templatePickerOpen={templatePickerOpen}
         onTemplatePickerOpenChange={setTemplatePickerOpen}
         onLoadTemplate={handleLoadTemplate}
-        generateOpen={generateOpen}
-        onGenerateOpenChange={setGenerateOpen}
+        onGenerateClick={() => setGenerateOpen(true)}
       />
       <div className="flex flex-1 min-h-0">
         <div className={`flex-1 min-w-0 min-h-0 overflow-y-auto ${previewVisible ? "lg:w-3/5" : "w-full"}`}>
@@ -147,6 +188,14 @@ export function BuilderShell({ initialConfig, initialTemplate }: BuilderShellPro
           </div>
         )}
       </div>
+
+      {/* AI Generate — full-page overlay, rendered at root level */}
+      <AiGenerateDialog
+        open={generateOpen}
+        onOpenChange={setGenerateOpen}
+        targetAgent={state.targetAgent}
+        onAccept={loadGeneratedConfig}
+      />
     </div>
   );
 }

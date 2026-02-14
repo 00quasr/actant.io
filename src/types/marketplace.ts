@@ -26,9 +26,15 @@ export interface McpProvider {
   default_args: string[];
   default_url: string | null;
   required_env_keys: string[];
-  category: "database" | "cloud" | "devtools" | "monitoring" | "ai" | "general";
+  category: "database" | "cloud" | "devtools" | "monitoring" | "ai" | "general" | "search" | "communication" | "design";
   documentation_url: string | null;
   is_featured: boolean;
+  tagline: string | null;
+  setup_guide: string | null;
+  env_key_descriptions: Record<string, string> | null;
+  compatible_agents: string[];
+  tags: string[];
+  recommended_for: string[];
   created_at: string;
 }
 

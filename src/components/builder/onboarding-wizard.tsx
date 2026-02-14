@@ -1,15 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   ArrowRightIcon,
   ArrowLeftIcon,
   CheckCircledIcon,
+  CheckIcon,
 } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { AGENT_TYPES, AGENT_LABELS, type AgentType } from "@/types/config";
+import type { McpServer } from "@/types/config";
+import { getSuggestions } from "@/lib/smart-suggestions";
+import { RULE_PRESETS, PERMISSION_PRESETS } from "@/lib/presets";
 
 const QUICK_STACK_OPTIONS = [
   "React",
@@ -19,6 +23,8 @@ const QUICK_STACK_OPTIONS = [
   "Python",
   "Rust",
   "Go",
+  "Supabase",
+  "TailwindCSS",
 ] as const;
 
 const AGENT_DESCRIPTIONS: Record<AgentType, { tagline: string; features: string[] }> = {
@@ -45,7 +51,14 @@ const AGENT_DESCRIPTIONS: Record<AgentType, { tagline: string; features: string[
 };
 
 interface OnboardingWizardProps {
-  onComplete: (config: { targetAgent: AgentType; description?: string; techStack?: string[] }) => void;
+  onComplete: (config: {
+    targetAgent: AgentType;
+    description?: string;
+    techStack?: string[];
+    suggestedMcpServers?: McpServer[];
+    suggestedRulePresetIds?: string[];
+    suggestedPermissionPresetId?: string;
+  }) => void;
   onOpenTemplate: () => void;
   onOpenGenerate: () => void;
   onSkip: () => void;
@@ -62,14 +75,45 @@ export function OnboardingWizard({
   const [description, setDescription] = useState("");
   const [techStack, setTechStack] = useState<string[]>([]);
 
+  // Suggestions state
+  const [selectedMcpSlugs, setSelectedMcpSlugs] = useState<Set<string>>(new Set());
+  const [selectedRulePresetIds, setSelectedRulePresetIds] = useState<Set<string>>(new Set());
+  const [selectedPermissionPresetId, setSelectedPermissionPresetId] = useState("standard");
+  const [suggestionsInitialized, setSuggestionsInitialized] = useState(false);
+
+  const suggestions = useMemo(() => {
+    if (techStack.length === 0 || !selectedAgent) return null;
+    return getSuggestions(techStack, selectedAgent);
+  }, [techStack, selectedAgent]);
+
+  const hasSuggestions = suggestions && (
+    suggestions.mcpServers.length > 0 ||
+    suggestions.rulePresetIds.length > 0
+  );
+
+  // Total steps: 0=agent, 1=describe, 2=suggestions (conditional), 3=start
+  const totalSteps = hasSuggestions ? 4 : 3;
+  const suggestionsStep = hasSuggestions ? 2 : -1;
+  const startStep = hasSuggestions ? 3 : 2;
+
   const toggleStackItem = (item: string) => {
     setTechStack((prev) =>
       prev.includes(item) ? prev.filter((t) => t !== item) : [...prev, item]
     );
+    setSuggestionsInitialized(false);
   };
 
   const handleNext = () => {
-    if (step < 2) {
+    if (step === 1 && hasSuggestions && !suggestionsInitialized) {
+      // Initialize suggestions with defaults pre-checked
+      if (suggestions) {
+        setSelectedMcpSlugs(new Set(suggestions.mcpServers.map((s) => s.name)));
+        setSelectedRulePresetIds(new Set(suggestions.rulePresetIds));
+        setSelectedPermissionPresetId(suggestions.permissionPresetId);
+        setSuggestionsInitialized(true);
+      }
+    }
+    if (step < totalSteps - 1) {
       setStep(step + 1);
     }
   };
@@ -80,32 +124,56 @@ export function OnboardingWizard({
     }
   };
 
-  const handleStartBlank = () => {
-    if (!selectedAgent) return;
-    onComplete({
-      targetAgent: selectedAgent,
+  function toggleMcpSlug(slug: string) {
+    setSelectedMcpSlugs((prev) => {
+      const next = new Set(prev);
+      if (next.has(slug)) next.delete(slug);
+      else next.add(slug);
+      return next;
+    });
+  }
+
+  function toggleRulePreset(id: string) {
+    setSelectedRulePresetIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function buildCompleteConfig() {
+    const config: Parameters<typeof onComplete>[0] = {
+      targetAgent: selectedAgent!,
       description: description || undefined,
       techStack: techStack.length > 0 ? techStack : undefined,
-    });
+    };
+
+    if (hasSuggestions && suggestions && suggestionsInitialized) {
+      config.suggestedMcpServers = suggestions.mcpServers.filter(
+        (s) => selectedMcpSlugs.has(s.name)
+      );
+      config.suggestedRulePresetIds = Array.from(selectedRulePresetIds);
+      config.suggestedPermissionPresetId = selectedPermissionPresetId;
+    }
+
+    return config;
+  }
+
+  const handleStartBlank = () => {
+    if (!selectedAgent) return;
+    onComplete(buildCompleteConfig());
   };
 
   const handleUseTemplate = () => {
     if (!selectedAgent) return;
-    onComplete({
-      targetAgent: selectedAgent,
-      description: description || undefined,
-      techStack: techStack.length > 0 ? techStack : undefined,
-    });
+    onComplete(buildCompleteConfig());
     onOpenTemplate();
   };
 
   const handleUseGenerate = () => {
     if (!selectedAgent) return;
-    onComplete({
-      targetAgent: selectedAgent,
-      description: description || undefined,
-      techStack: techStack.length > 0 ? techStack : undefined,
-    });
+    onComplete(buildCompleteConfig());
     onOpenGenerate();
   };
 
@@ -114,7 +182,7 @@ export function OnboardingWizard({
       <div className="w-full max-w-2xl space-y-8">
         {/* Step indicators */}
         <div className="flex items-center justify-center gap-2">
-          {[0, 1, 2].map((i) => (
+          {Array.from({ length: totalSteps }).map((_, i) => (
             <div
               key={i}
               className={`h-2 w-2 rounded-full transition-colors ${
@@ -247,8 +315,124 @@ export function OnboardingWizard({
           </div>
         )}
 
+        {/* Step 2.5: Recommended for your stack */}
+        {step === suggestionsStep && suggestions && (
+          <div className="space-y-6">
+            <div className="text-center space-y-1">
+              <h2 className="text-lg font-medium">Recommended for your stack</h2>
+              <p className="text-sm text-muted-foreground">
+                Based on your tech stack, we suggest these configurations. Uncheck anything you don&apos;t need.
+              </p>
+            </div>
+
+            {/* Suggested MCP servers */}
+            {suggestions.mcpServers.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-xs text-muted-foreground font-medium">MCP Servers</p>
+                <div className="grid gap-2">
+                  {suggestions.mcpServers.map((server) => {
+                    const isChecked = selectedMcpSlugs.has(server.name);
+                    return (
+                      <button
+                        key={server.name}
+                        onClick={() => toggleMcpSlug(server.name)}
+                        className={`text-left rounded-lg border p-3 flex items-center gap-3 transition-colors ${
+                          isChecked
+                            ? "border-foreground/30 bg-foreground/[0.02]"
+                            : "border-border opacity-60"
+                        }`}
+                      >
+                        <div className={`size-4 rounded border flex items-center justify-center shrink-0 ${
+                          isChecked ? "border-foreground bg-foreground" : "border-muted-foreground/30"
+                        }`}>
+                          {isChecked && <CheckIcon className="size-3 text-background" />}
+                        </div>
+                        <div className="min-w-0">
+                          <span className="text-sm font-medium">{server.name}</span>
+                          <span className="text-xs text-muted-foreground ml-2">
+                            {server.command} {(server.args ?? []).slice(1, 2).join(" ")}
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Suggested rule presets */}
+            {suggestions.rulePresetIds.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-xs text-muted-foreground font-medium">Rule Presets</p>
+                <div className="grid gap-2">
+                  {suggestions.rulePresetIds.map((presetId) => {
+                    const preset = RULE_PRESETS.find((p) => p.id === presetId);
+                    if (!preset) return null;
+                    const isChecked = selectedRulePresetIds.has(presetId);
+                    return (
+                      <button
+                        key={presetId}
+                        onClick={() => toggleRulePreset(presetId)}
+                        className={`text-left rounded-lg border p-3 flex items-center gap-3 transition-colors ${
+                          isChecked
+                            ? "border-foreground/30 bg-foreground/[0.02]"
+                            : "border-border opacity-60"
+                        }`}
+                      >
+                        <div className={`size-4 rounded border flex items-center justify-center shrink-0 ${
+                          isChecked ? "border-foreground bg-foreground" : "border-muted-foreground/30"
+                        }`}>
+                          {isChecked && <CheckIcon className="size-3 text-background" />}
+                        </div>
+                        <div className="min-w-0">
+                          <span className="text-sm font-medium">{preset.label}</span>
+                          <span className="text-xs text-muted-foreground ml-2">
+                            {preset.description}
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Permission preset */}
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground font-medium">Permission Preset</p>
+              <div className="flex gap-2">
+                {PERMISSION_PRESETS.map((preset) => (
+                  <button
+                    key={preset.id}
+                    onClick={() => setSelectedPermissionPresetId(preset.id)}
+                    className={`rounded-lg border px-3 py-2 text-left flex-1 transition-colors ${
+                      selectedPermissionPresetId === preset.id
+                        ? "border-foreground"
+                        : "border-border hover:border-foreground/30"
+                    }`}
+                  >
+                    <span className="text-xs font-medium block">{preset.label}</span>
+                    <span className="text-[11px] text-muted-foreground">{preset.description}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex justify-between">
+              <Button variant="outline" onClick={handleBack}>
+                <ArrowLeftIcon />
+                Back
+              </Button>
+              <Button onClick={handleNext}>
+                Apply &amp; Continue
+                <ArrowRightIcon />
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Step 3: How to start */}
-        {step === 2 && (
+        {step === startStep && (
           <div className="space-y-6">
             <div className="text-center space-y-1">
               <h2 className="text-lg font-medium">How do you want to start?</h2>

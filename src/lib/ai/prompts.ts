@@ -47,9 +47,71 @@ const QUALITY_GUIDELINES = `Quality guidelines for generated configs:
 - Use concrete examples in instructions (e.g., "Use vitest, not jest" instead of "Use a testing framework").
 - Structure instructions with clear markdown sections: ## Project Overview, ## Code Style, ## Architecture, ## Testing, ## Git Conventions, etc.`;
 
+export const KNOWN_MCP_SERVERS: Record<string, { name: string; command: string; args: string[]; env?: Record<string, string>; description: string }> = {
+  supabase: { name: "supabase", command: "npx", args: ["-y", "@supabase/mcp-server-supabase"], env: { SUPABASE_ACCESS_TOKEN: "" }, description: "Supabase database and auth management" },
+  context7: { name: "context7", command: "npx", args: ["-y", "@upstash/context7-mcp@latest"], description: "Up-to-date library documentation" },
+  github: { name: "github", command: "npx", args: ["-y", "@modelcontextprotocol/server-github"], env: { GITHUB_PERSONAL_ACCESS_TOKEN: "" }, description: "GitHub repo, issues, PRs" },
+  filesystem: { name: "filesystem", command: "npx", args: ["-y", "@modelcontextprotocol/server-filesystem", "."], description: "Local filesystem access" },
+  puppeteer: { name: "puppeteer", command: "npx", args: ["-y", "@modelcontextprotocol/server-puppeteer"], description: "Browser automation and testing" },
+  sentry: { name: "sentry", command: "npx", args: ["-y", "@sentry/mcp-server"], env: { SENTRY_AUTH_TOKEN: "" }, description: "Error tracking and monitoring" },
+  vercel: { name: "vercel", command: "npx", args: ["-y", "vercel-mcp-server"], description: "Vercel deployment management" },
+  shadcn: { name: "shadcn", command: "npx", args: ["-y", "@anthropic-ai/shadcn-mcp-server"], description: "shadcn/ui component installation" },
+  prisma: { name: "prisma", command: "npx", args: ["-y", "prisma-mcp-server"], description: "Prisma ORM management" },
+  cloudflare: { name: "cloudflare", command: "npx", args: ["-y", "@cloudflare/mcp-server-cloudflare"], description: "Cloudflare Workers, KV, R2" },
+  playwright: { name: "playwright", command: "npx", args: ["-y", "@anthropic-ai/mcp-server-playwright"], description: "Browser testing with Playwright" },
+  neon: { name: "neon", command: "npx", args: ["-y", "@neondatabase/mcp-server-neon"], env: { NEON_API_KEY: "" }, description: "Neon serverless Postgres" },
+  upstash: { name: "upstash", command: "npx", args: ["-y", "@upstash/mcp-server"], env: { UPSTASH_EMAIL: "", UPSTASH_API_KEY: "" }, description: "Upstash Redis and QStash" },
+  resend: { name: "resend", command: "npx", args: ["-y", "mcp-server-resend"], env: { RESEND_API_KEY: "" }, description: "Email sending via Resend" },
+  fetch: { name: "fetch", command: "npx", args: ["-y", "@modelcontextprotocol/server-fetch"], description: "Fetch and parse web content" },
+  turso: { name: "turso", command: "npx", args: ["-y", "@tursodatabase/mcp-server-turso"], env: { TURSO_AUTH_TOKEN: "" }, description: "Turso edge SQLite" },
+  tavily: { name: "tavily", command: "npx", args: ["-y", "tavily-mcp"], env: { TAVILY_API_KEY: "" }, description: "AI-powered web search" },
+};
+
+const FRAMEWORK_TEMPLATES: Record<string, string> = {
+  "next.js": `For Next.js projects, focus on:
+- App Router conventions (layout.tsx, page.tsx, loading.tsx, error.tsx)
+- Server vs Client Components (default to server, use 'use client' sparingly)
+- Server Actions for mutations
+- Route handlers in app/api/
+- Image optimization with next/image
+- Font optimization with next/font`,
+
+  react: `For React projects, focus on:
+- Component composition patterns
+- Custom hooks for shared logic
+- State management approach (local state, context, or external)
+- Code splitting with React.lazy
+- Error boundaries for resilience`,
+
+  python: `For Python projects, focus on:
+- Type hints throughout
+- Virtual environment management
+- Testing with pytest
+- Linting with ruff or flake8
+- Package management with pip/poetry/uv`,
+
+  "node.js": `For Node.js projects, focus on:
+- ES modules vs CommonJS
+- Error handling patterns
+- Async/await best practices
+- Environment variable management
+- Package manager conventions`,
+
+  vue: `For Vue projects, focus on:
+- Composition API with <script setup>
+- Component organization and naming
+- Pinia for state management
+- Vue Router conventions
+- TypeScript integration`,
+};
+
 export function buildSystemPrompt(targetAgent: string): string {
   const agentKnowledge =
     AGENT_FILE_KNOWLEDGE[targetAgent] ?? AGENT_FILE_KNOWLEDGE["claude-code"];
+
+  const knownServersList = Object.entries(KNOWN_MCP_SERVERS)
+    .map(([key, s]) => `- ${key}: ${s.description} (${s.command} ${s.args.join(" ")})`)
+    .join("\n");
 
   return `You are an expert developer configuration generator for AI coding agents. You create comprehensive, production-ready configurations that help AI agents understand and work effectively within a project.
 
@@ -57,6 +119,11 @@ ${CONFIG_SCHEMA_DESCRIPTION}
 
 Target agent specifics:
 ${agentKnowledge}
+
+When recommending MCP servers, ONLY use servers from this known catalog:
+${knownServersList}
+
+Do NOT invent MCP server packages. Only recommend servers from the list above that are relevant to the project's tech stack.
 
 ${QUALITY_GUIDELINES}
 
@@ -135,18 +202,27 @@ export function buildQuestionsPrompt(
   projectDescription: string,
   techStack: string[]
 ): string {
+  const frameworkHints = techStack
+    .map((t) => FRAMEWORK_TEMPLATES[t.toLowerCase()])
+    .filter(Boolean)
+    .join("\n\n");
+
+  const frameworkSection = frameworkHints
+    ? `\n\nFramework-specific considerations:\n${frameworkHints}`
+    : "";
+
   return `Based on this project description and tech stack, generate 3-5 clarifying questions that would help create a better, more tailored agent configuration.
 
 Project description: ${projectDescription}
 
-Tech stack: ${techStack.join(", ")}
+Tech stack: ${techStack.join(", ")}${frameworkSection}
 
-Generate questions that help understand:
-- Project architecture and folder structure conventions
-- Testing strategy and preferred tools
-- Code style preferences and linting rules
-- Deployment and CI/CD workflow
-- Key patterns or anti-patterns to enforce
+Generate targeted questions about:
+- Project architecture and folder structure conventions specific to ${techStack[0] || "the stack"}
+- Testing strategy and preferred tools (e.g., vitest vs jest, playwright vs cypress)
+- Deployment target and CI/CD workflow
+- Code style preferences beyond defaults (e.g., tabs vs spaces, import ordering)
+- Key patterns or anti-patterns to enforce for this specific stack
 
 For multiple_choice questions, provide 3-5 concise options. For freeform questions, add a short "context" field explaining what kind of answer is helpful.
 
@@ -179,6 +255,15 @@ export function buildUserPrompt(input: UserPromptInput): string {
     sections.push(`Primary framework: ${input.framework}`);
   }
 
+  // Add framework-specific context
+  const frameworkHints = input.techStack
+    .map((t) => FRAMEWORK_TEMPLATES[t.toLowerCase()])
+    .filter(Boolean);
+
+  if (frameworkHints.length > 0) {
+    sections.push(`Framework context:\n${frameworkHints.join("\n\n")}`);
+  }
+
   const inclusions: string[] = [];
   if (input.includeRules) {
     inclusions.push(
@@ -187,7 +272,7 @@ export function buildUserPrompt(input: UserPromptInput): string {
   }
   if (input.includeMcp) {
     inclusions.push(
-      "mcpServers (useful MCP servers for this stack, using npx where possible)"
+      "mcpServers (useful MCP servers for this stack from the known catalog ONLY, using npx where possible)"
     );
   }
   if (input.includePermissions) {

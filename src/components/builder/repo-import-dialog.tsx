@@ -5,6 +5,10 @@ import {
   GitHubLogoIcon,
   CheckIcon,
   ReloadIcon,
+  GlobeIcon,
+  LockClosedIcon,
+  EyeOpenIcon,
+  EyeNoneIcon,
 } from "@radix-ui/react-icons";
 import {
   Dialog,
@@ -22,6 +26,8 @@ import type { AgentConfig, AgentType } from "@/types/config";
 const GITHUB_URL_REGEX =
   /^https?:\/\/(www\.)?github\.com\/[\w.-]+\/[\w.-]+\/?$/;
 
+type RepoVisibility = "public" | "private";
+
 interface RepoImportDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -37,9 +43,15 @@ export function RepoImportDialog({
 }: RepoImportDialogProps) {
   const { status, result, error, importRepo, reset } = useRepoImport();
   const [repoUrl, setRepoUrl] = useState("");
+  const [visibility, setVisibility] = useState<RepoVisibility>("public");
+  const [accessToken, setAccessToken] = useState("");
+  const [tokenVisible, setTokenVisible] = useState(false);
 
   const resetForm = useCallback(() => {
     setRepoUrl("");
+    setVisibility("public");
+    setAccessToken("");
+    setTokenVisible(false);
     reset();
   }, [reset]);
 
@@ -56,6 +68,7 @@ export function RepoImportDialog({
     await importRepo({
       repoUrl: repoUrl.trim(),
       targetAgent,
+      accessToken: visibility === "private" ? accessToken.trim() || undefined : undefined,
     });
   }
 
@@ -80,23 +93,84 @@ export function RepoImportDialog({
             Import from GitHub
           </DialogTitle>
           <DialogDescription>
-            Paste a GitHub repository URL to generate a tailored configuration.
+            Analyze a GitHub repository to generate a tailored configuration.
           </DialogDescription>
         </DialogHeader>
 
         {status === "idle" || status === "error" ? (
           <div className="space-y-5 flex-1 min-h-0 overflow-y-auto">
+            {/* Repository type toggle */}
             <div className="space-y-2">
-              <Label htmlFor="repo-url">Repository URL</Label>
+              <Label>Repository type</Label>
+              <div className="grid grid-cols-2 gap-3">
+                <VisibilityCard
+                  type="public"
+                  selected={visibility === "public"}
+                  onSelect={() => setVisibility("public")}
+                />
+                <VisibilityCard
+                  type="private"
+                  selected={visibility === "private"}
+                  onSelect={() => setVisibility("private")}
+                />
+              </div>
+            </div>
+
+            {/* Access token field (private repos only) */}
+            {visibility === "private" && (
+              <div className="space-y-2">
+                <Label htmlFor="access-token">Personal access token</Label>
+                <div className="relative">
+                  <Input
+                    id="access-token"
+                    type={tokenVisible ? "text" : "password"}
+                    placeholder="ghp_xxxxxxxxxxxx"
+                    value={accessToken}
+                    onChange={(e) => setAccessToken(e.target.value)}
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setTokenVisible(!tokenVisible)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {tokenVisible ? (
+                      <EyeNoneIcon className="size-4" />
+                    ) : (
+                      <EyeOpenIcon className="size-4" />
+                    )}
+                  </button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Required for accessing private repositories.{" "}
+                  <a
+                    href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline underline-offset-2 hover:text-foreground"
+                  >
+                    How to get an access token?
+                  </a>
+                </p>
+              </div>
+            )}
+
+            {/* Repository URL */}
+            <div className="space-y-2">
+              <Label htmlFor="repo-url">Git repository URL</Label>
               <Input
                 id="repo-url"
                 placeholder="https://github.com/owner/repo"
                 value={repoUrl}
                 onChange={(e) => setRepoUrl(e.target.value)}
               />
-              {repoUrl && !isValidUrl && (
+              {repoUrl && !isValidUrl ? (
                 <p className="text-xs text-muted-foreground">
                   Enter a valid GitHub repository URL
+                </p>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  Enter a GitHub repository URL to analyze
                 </p>
               )}
             </div>
@@ -109,10 +183,12 @@ export function RepoImportDialog({
 
             <Button
               onClick={handleImport}
-              disabled={!isValidUrl}
+              disabled={
+                !isValidUrl ||
+                (visibility === "private" && !accessToken.trim())
+              }
               className="w-full"
             >
-              <GitHubLogoIcon className="size-4" />
               Analyze Repository
             </Button>
           </div>
@@ -137,6 +213,50 @@ export function RepoImportDialog({
         ) : null}
       </DialogContent>
     </Dialog>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Visibility Card                                                     */
+/* ------------------------------------------------------------------ */
+
+function VisibilityCard({
+  type,
+  selected,
+  onSelect,
+}: {
+  type: RepoVisibility;
+  selected: boolean;
+  onSelect: () => void;
+}) {
+  const isPublic = type === "public";
+
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      className={`flex flex-col items-center gap-2 rounded-lg border-2 p-4 text-center transition-colors ${
+        selected
+          ? "border-foreground bg-muted/50"
+          : "border-border hover:border-foreground/30"
+      }`}
+    >
+      {isPublic ? (
+        <GlobeIcon className="size-5" />
+      ) : (
+        <LockClosedIcon className="size-5" />
+      )}
+      <div>
+        <p className="text-sm font-medium">
+          {isPublic ? "Public" : "Private"}
+        </p>
+        <p className="text-xs text-muted-foreground">
+          {isPublic
+            ? "No access token required"
+            : "Access token required"}
+        </p>
+      </div>
+    </button>
   );
 }
 

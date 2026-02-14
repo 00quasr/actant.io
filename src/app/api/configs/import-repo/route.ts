@@ -67,18 +67,43 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Get provider token for GitHub API calls
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  const githubToken = session?.provider_token;
+  // Parse and validate input early so we can use accessToken
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      { error: "Invalid request body" },
+      { status: 400 }
+    );
+  }
+
+  const parseResult = repoImportSchema.safeParse(body);
+  if (!parseResult.success) {
+    return NextResponse.json(
+      { error: "Validation failed", details: parseResult.error.flatten() },
+      { status: 400 }
+    );
+  }
+
+  const { repoUrl, targetAgent, accessToken } = parseResult.data;
+
+  // Use provided access token, fall back to OAuth provider token
+  let githubToken = accessToken;
+
+  if (!githubToken) {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    githubToken = session?.provider_token ?? undefined;
+  }
 
   if (!githubToken) {
     return NextResponse.json(
       {
         error: "GitHub not connected",
         message:
-          "Sign in with GitHub to import repositories. Your GitHub connection may have expired — try signing out and back in.",
+          "Provide a personal access token or sign in with GitHub to import repositories.",
       },
       { status: 403 }
     );
@@ -109,27 +134,6 @@ export async function POST(request: Request) {
       { status: 403 }
     );
   }
-
-  // Parse and validate input
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json(
-      { error: "Invalid request body" },
-      { status: 400 }
-    );
-  }
-
-  const parseResult = repoImportSchema.safeParse(body);
-  if (!parseResult.success) {
-    return NextResponse.json(
-      { error: "Validation failed", details: parseResult.error.flatten() },
-      { status: 400 }
-    );
-  }
-
-  const { repoUrl, targetAgent } = parseResult.data;
 
   const parsed = parseGitHubUrl(repoUrl);
   if (!parsed) {

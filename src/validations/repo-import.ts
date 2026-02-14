@@ -15,6 +15,7 @@ export const repoImportSchema = z.object({
     "cline",
     "opencode",
   ]),
+  accessToken: z.string().optional(),
 });
 
 export type RepoImportInput = z.infer<typeof repoImportSchema>;

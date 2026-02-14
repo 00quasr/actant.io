@@ -8,6 +8,7 @@ type ImportStatus = "idle" | "importing" | "done" | "error";
 interface ImportInput {
   repoUrl: string;
   targetAgent: AgentType;
+  accessToken?: string;
 }
 
 export function useRepoImport() {

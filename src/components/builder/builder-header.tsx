@@ -8,6 +8,7 @@ import {
   GitHubLogoIcon,
   EyeOpenIcon,
   EyeClosedIcon,
+  CheckCircledIcon,
 } from "@radix-ui/react-icons";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -43,14 +44,28 @@ interface BuilderHeaderProps {
   onGenerateClick: () => void;
 }
 
-function SaveIndicator({ status }: { status: SaveStatus }) {
+function SaveIndicator({ status, isDirty }: { status: SaveStatus; isDirty: boolean }) {
+  if (isDirty && status !== "saving") {
+    return (
+      <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
+        <span className="size-1.5 rounded-full bg-amber-500" />
+        Unsaved changes
+      </span>
+    );
+  }
+
   switch (status) {
     case "saving":
-      return <span className="text-xs text-muted-foreground">Saving...</span>;
+      return <span className="text-sm text-muted-foreground">Saving...</span>;
     case "saved":
-      return <span className="text-xs text-muted-foreground">Saved</span>;
+      return (
+        <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
+          <CheckCircledIcon className="size-3.5" />
+          Saved
+        </span>
+      );
     case "error":
-      return <span className="text-xs text-destructive">Save failed</span>;
+      return <span className="text-sm text-destructive">Save failed</span>;
     default:
       return null;
   }
@@ -107,7 +122,7 @@ export function BuilderHeader({
 
         <div className="flex-1" />
 
-        <SaveIndicator status={saveStatus} />
+        <SaveIndicator status={saveStatus} isDirty={state.isDirty} />
 
         <Button
           variant="ghost"

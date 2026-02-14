@@ -8,7 +8,7 @@ const questionAnswerSchema = z.object({
 
 export const generationInputSchema = z.object({
   projectDescription: z.string().min(10).max(2000),
-  techStack: z.array(z.string()).min(1),
+  techStack: z.array(z.string()),
   framework: z.string().optional(),
   targetAgent: z.enum([
     "claude-code",
@@ -21,6 +21,7 @@ export const generationInputSchema = z.object({
   includeMcp: z.boolean().default(true),
   includePermissions: z.boolean().default(true),
   answers: z.array(questionAnswerSchema).optional(),
+  selectedSkillIds: z.array(z.string()).optional(),
 });
 
 export type GenerationInput = z.infer<typeof generationInputSchema>;

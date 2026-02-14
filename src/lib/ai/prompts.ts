@@ -29,23 +29,30 @@ const CONFIG_SCHEMA_DESCRIPTION = `You generate AgentConfig JSON objects with th
 {
   "name": string - A short, descriptive name for this configuration (2-5 words).
   "description": string - A one-sentence description of what this configuration does.
-  "instructions": { "content": string } - The main instructions content as comprehensive markdown. This is the most important field. Write detailed, opinionated instructions that cover project conventions, code style, testing approach, architecture decisions, and workflow guidelines. Use markdown headings, lists, and code blocks. Aim for 500-2000 words.
+  "instructions": { "content": string } - The main instructions content as comprehensive markdown. This is the MOST IMPORTANT field. Write comprehensive, detailed instructions of **1500-3000 words**. Structure with markdown headings: ## Project Overview, ## Architecture, ## Code Style & Conventions, ## File Structure, ## Component Patterns, ## Data Fetching, ## State Management, ## Testing Strategy, ## Error Handling, ## Git Workflow, ## Deployment, ## Security. Each section should have specific, actionable guidelines with code examples where helpful. This should read like a complete developer onboarding handbook.
   "skills": [] - Leave as empty array (skills are added separately by the user).
-  "mcpServers": [ { "name": string, "type": "stdio"|"sse"|"streamable-http", "command"?: string, "args"?: string[], "url"?: string, "env"?: Record<string, string>, "enabled": boolean } ] - Useful MCP servers for the tech stack. Only include well-known, widely-used MCP servers. Use "stdio" type with npx commands for npm-based servers.
-  "permissions": Record<string, "allow"|"ask"|"deny"> - Tool permissions. Common keys: "bash", "file_edit", "file_read", "web_search", "mcp". Use "allow" for safe operations, "ask" for destructive ones, "deny" for dangerous ones.
-  "rules": [ { "title": string, "content": string, "glob"?: string, "alwaysApply"?: boolean } ] - Specific, actionable rules. Each rule should have a clear title and detailed content. Use "glob" to scope rules to specific file patterns (e.g., "*.test.ts" for testing rules). Set "alwaysApply" to true for universal rules.
-}`;
+  "mcpServers": [ { "name": string, "type": "stdio"|"sse"|"streamable-http", "command": string|null, "args": string[]|null, "url": string|null, "envKeys": [{key: string, value: string}]|null, "enabled": boolean } ] - Include **all relevant** servers from the known catalog for the given tech stack. Use "stdio" type with npx commands for npm-based servers. Use envKeys array for environment variables (e.g. [{"key": "SUPABASE_ACCESS_TOKEN", "value": ""}]).
+  "permissionEntries": [ { "tool": string, "value": "allow"|"ask"|"deny" } ] - Generate **8-12 permission entries** covering all common tool categories. Common tools: "Bash(npm run *)", "Bash(npx *)", "Bash(git *)", "Bash(rm *)", "file_edit", "file_read", "file_write", "web_search", "mcp", "Bash(docker *)", "notebook_edit". Use "allow" for safe operations, "ask" for destructive ones, "deny" for dangerous ones.
+  "rules": [ { "title": string, "content": string, "glob": string|null, "alwaysApply": boolean } ] - Generate **8-15 rules** minimum. Each rule content should be **3-5 sentences** with specific guidance, not one-liners. Include glob patterns to scope rules to relevant files. Use "glob" to scope rules to specific file patterns (e.g., "*.test.ts" for testing rules). Set "alwaysApply" to true for universal rules.
+}
+
+IMPORTANT: Do NOT generate short, vague, or generic content. Every field should be thorough and specific to the described project. A good config should feel like a comprehensive team onboarding document.`;
 
 const QUALITY_GUIDELINES = `Quality guidelines for generated configs:
 - Be specific and opinionated. Generic advice like "write clean code" is not useful.
 - Include real commands, real file paths, real tool names.
 - Reference specific versions and libraries from the tech stack.
 - Instructions should read like a senior developer's project handbook.
+- Instructions must be at minimum 1500 words. Anything shorter is insufficient.
+- Each rule content must be 3-5 detailed sentences, not single-line platitudes.
+- Include code snippet examples in instructions where they add clarity (e.g., import patterns, file naming, component structure).
 - Rules should be actionable: each rule should change how the agent behaves.
 - For MCP servers, only include servers that genuinely help the described project.
 - Permissions should follow the principle of least privilege.
 - Use concrete examples in instructions (e.g., "Use vitest, not jest" instead of "Use a testing framework").
-- Structure instructions with clear markdown sections: ## Project Overview, ## Code Style, ## Architecture, ## Testing, ## Git Conventions, etc.`;
+- Structure instructions with clear markdown sections: ## Project Overview, ## Architecture, ## Code Style & Conventions, ## File Structure, ## Component Patterns, ## Data Fetching, ## State Management, ## Testing Strategy, ## Error Handling, ## Git Workflow, ## Deployment, ## Security.
+- Include at least 8 specific rules with detailed multi-sentence content.
+- Generate at least 8 permission entries covering all relevant tool categories.`;
 
 export const KNOWN_MCP_SERVERS: Record<string, { name: string; command: string; args: string[]; env?: Record<string, string>; description: string }> = {
   supabase: { name: "supabase", command: "npx", args: ["-y", "@supabase/mcp-server-supabase"], env: { SUPABASE_ACCESS_TOKEN: "" }, description: "Supabase database and auth management" },
@@ -211,18 +218,26 @@ export function buildQuestionsPrompt(
     ? `\n\nFramework-specific considerations:\n${frameworkHints}`
     : "";
 
-  return `Based on this project description and tech stack, generate 3-5 clarifying questions that would help create a better, more tailored agent configuration.
+  const stackLabel = techStack.length > 0 ? techStack[0] : "the project";
+  const techStackDisplay = techStack.length > 0 ? techStack.join(", ") : "Not specified";
+
+  return `Based on this project description and tech stack, generate 6-8 clarifying questions that would help create a better, more tailored agent configuration.
 
 Project description: ${projectDescription}
 
-Tech stack: ${techStack.join(", ")}${frameworkSection}
+Tech stack: ${techStackDisplay}${frameworkSection}
 
 Generate targeted questions about:
-- Project architecture and folder structure conventions specific to ${techStack[0] || "the stack"}
+- Project architecture and folder structure conventions specific to ${stackLabel}
 - Testing strategy and preferred tools (e.g., vitest vs jest, playwright vs cypress)
 - Deployment target and CI/CD workflow
 - Code style preferences beyond defaults (e.g., tabs vs spaces, import ordering)
 - Key patterns or anti-patterns to enforce for this specific stack
+- Error handling and logging approach
+- Authentication/authorization strategy (if applicable)
+- Third-party integrations and APIs used
+- Performance requirements or constraints
+- Team size and collaboration patterns
 
 For multiple_choice questions, provide 3-5 concise options. For freeform questions, add a short "context" field explaining what kind of answer is helpful.
 
@@ -235,6 +250,12 @@ export interface QuestionAnswer {
   answer: string;
 }
 
+export interface SelectedSkill {
+  id: string;
+  name: string;
+  description: string;
+}
+
 interface UserPromptInput {
   projectDescription: string;
   techStack: string[];
@@ -243,13 +264,16 @@ interface UserPromptInput {
   includeMcp: boolean;
   includePermissions: boolean;
   answers?: QuestionAnswer[];
+  selectedSkills?: SelectedSkill[];
 }
 
 export function buildUserPrompt(input: UserPromptInput): string {
   const sections: string[] = [];
 
   sections.push(`Project description: ${input.projectDescription}`);
-  sections.push(`Tech stack: ${input.techStack.join(", ")}`);
+
+  const techStackDisplay = input.techStack.length > 0 ? input.techStack.join(", ") : "Not specified";
+  sections.push(`Tech stack: ${techStackDisplay}`);
 
   if (input.framework) {
     sections.push(`Primary framework: ${input.framework}`);
@@ -267,17 +291,17 @@ export function buildUserPrompt(input: UserPromptInput): string {
   const inclusions: string[] = [];
   if (input.includeRules) {
     inclusions.push(
-      "rules (specific, actionable coding rules scoped to relevant file patterns)"
+      "rules (at least 8 specific, actionable coding rules scoped to relevant file patterns, each with 3-5 sentences of content)"
     );
   }
   if (input.includeMcp) {
     inclusions.push(
-      "mcpServers (useful MCP servers for this stack from the known catalog ONLY, using npx where possible)"
+      "mcpServers (all relevant MCP servers for this stack from the known catalog ONLY, using npx where possible)"
     );
   }
   if (input.includePermissions) {
     inclusions.push(
-      "permissions (sensible tool permissions following least privilege)"
+      "permissions (8-12 sensible tool permissions following least privilege)"
     );
   }
 
@@ -290,14 +314,21 @@ export function buildUserPrompt(input: UserPromptInput): string {
   }
 
   if (input.answers && input.answers.length > 0) {
-    const qa = input.answers
-      .map((a) => `Q: ${a.question}\nA: ${a.answer}`)
-      .join("\n\n");
-    sections.push(`Additional context from user:\n${qa}`);
+    sections.push("User's answers to clarifying questions (use these to inform every relevant section of the config):");
+    for (const a of input.answers) {
+      sections.push(`Q: ${a.question}\nA: ${a.answer}`);
+    }
+  }
+
+  if (input.selectedSkills && input.selectedSkills.length > 0) {
+    const skillsList = input.selectedSkills
+      .map((s) => `- ${s.name}: ${s.description}`)
+      .join("\n");
+    sections.push(`The user has selected these skills to include:\n${skillsList}\n\nReference these skills in the instructions and mention how the agent should leverage them.`);
   }
 
   sections.push(
-    "Generate a comprehensive agent configuration for this project. The instructions content should be thorough and opinionated."
+    `Generate a comprehensive agent configuration for this project. The instructions should be a complete developer handbook of 1500-3000 words with multiple structured sections, code examples, and specific guidance. Include at least 8 detailed rules. The output should feel like a thorough team onboarding document, not a brief summary.`
   );
 
   return sections.join("\n\n");

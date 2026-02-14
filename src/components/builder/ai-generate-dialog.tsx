@@ -8,12 +8,15 @@ import {
   ReloadIcon,
   PlusIcon,
   ArrowRightIcon,
+  MagnifyingGlassIcon,
 } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { useConfigGeneration } from "@/hooks/use-config-generation";
+import { listSkills } from "@/services/skills";
 import type { AgentConfig, AgentType } from "@/types/config";
+import type { Skill } from "@/types/marketplace";
 import type { ClarifyingQuestion } from "@/lib/ai/questions-schema";
 import type { QuestionAnswer } from "@/lib/ai/prompts";
 
@@ -53,8 +56,10 @@ export function AiGenerateDialog({
     result,
     error,
     questions,
+    autoAnswering,
     generate,
     generateQuestions,
+    autoAnswer,
     reset,
   } = useConfigGeneration();
 
@@ -65,6 +70,8 @@ export function AiGenerateDialog({
   const [includeMcp, setIncludeMcp] = useState(true);
   const [includePermissions, setIncludePermissions] = useState(true);
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [selectedSkillIds, setSelectedSkillIds] = useState<string[]>([]);
+  const [showSkillPicker, setShowSkillPicker] = useState(false);
 
   const resetForm = useCallback(() => {
     setProjectDescription("");
@@ -74,6 +81,8 @@ export function AiGenerateDialog({
     setIncludeMcp(true);
     setIncludePermissions(true);
     setAnswers({});
+    setSelectedSkillIds([]);
+    setShowSkillPicker(false);
     reset();
   }, [reset]);
 
@@ -117,7 +126,28 @@ export function AiGenerateDialog({
       }));
   }
 
-  async function handleGenerate(withAnswers: boolean) {
+  function handleAnswersDone(withAnswers: boolean) {
+    if (withAnswers) {
+      // Show skill picker step before generating
+      setShowSkillPicker(true);
+    } else {
+      // Skip answers → also skip skills → generate directly
+      doGenerate(false, []);
+    }
+  }
+
+  async function handleSkillsDone(skillIds: string[]) {
+    setSelectedSkillIds(skillIds);
+    setShowSkillPicker(false);
+    await doGenerate(true, skillIds);
+  }
+
+  function handleSkipSkills() {
+    setShowSkillPicker(false);
+    doGenerate(true, []);
+  }
+
+  async function doGenerate(withAnswers: boolean, skillIds: string[]) {
     await generate({
       projectDescription,
       techStack,
@@ -126,7 +156,15 @@ export function AiGenerateDialog({
       includeMcp,
       includePermissions,
       answers: withAnswers ? buildAnswersPayload() : undefined,
+      selectedSkillIds: skillIds.length > 0 ? skillIds : undefined,
     });
+  }
+
+  async function handleAutoAnswer() {
+    const result = await autoAnswer(projectDescription, techStack, questions);
+    if (result) {
+      setAnswers((prev) => ({ ...prev, ...result }));
+    }
   }
 
   function handleAccept() {
@@ -139,6 +177,8 @@ export function AiGenerateDialog({
   function handleRegenerate() {
     reset();
     setAnswers({});
+    setSelectedSkillIds([]);
+    setShowSkillPicker(false);
   }
 
   const isFormValid = projectDescription.length >= 10;
@@ -147,8 +187,9 @@ export function AiGenerateDialog({
   let currentStep = 0;
   if (status === "asking") currentStep = 1;
   else if (status === "answering") currentStep = 1;
-  else if (status === "generating") currentStep = 2;
-  else if (status === "done") currentStep = 3;
+  else if (showSkillPicker) currentStep = 2;
+  else if (status === "generating") currentStep = 3;
+  else if (status === "done") currentStep = 4;
 
   if (!open) return null;
 
@@ -161,7 +202,7 @@ export function AiGenerateDialog({
           <span className="text-sm font-medium">Generate with AI</span>
         </div>
         <div className="flex items-center gap-4">
-          <StepIndicator current={currentStep} total={4} />
+          <StepIndicator current={currentStep} total={5} />
           <Button variant="ghost" size="icon" onClick={handleClose}>
             <Cross2Icon className="size-4" />
           </Button>
@@ -193,22 +234,31 @@ export function AiGenerateDialog({
         )}
 
         {status === "asking" && (
-          <StagedLoading stage={0} />
+          <StagedLoading contextLabel="Generating questions..." />
         )}
 
-        {(status === "answering" || (status === "error" && questions.length > 0)) && (
+        {(status === "answering" || (status === "error" && questions.length > 0)) && !showSkillPicker && (
           <AnswerForm
             questions={questions}
             answers={answers}
             setAnswers={setAnswers}
             error={error}
-            onSkip={() => handleGenerate(false)}
-            onGenerate={() => handleGenerate(true)}
+            autoAnswering={autoAnswering}
+            onAutoAnswer={handleAutoAnswer}
+            onSkip={() => handleAnswersDone(false)}
+            onGenerate={() => handleAnswersDone(true)}
+          />
+        )}
+
+        {showSkillPicker && status !== "generating" && (
+          <SkillPicker
+            onDone={handleSkillsDone}
+            onSkip={handleSkipSkills}
           />
         )}
 
         {status === "generating" && (
-          <StagedLoading stage={1} />
+          <StagedLoading contextLabel="Generating configuration..." />
         )}
 
         {status === "done" && result && (
@@ -466,6 +516,8 @@ interface AnswerFormProps {
   answers: Record<string, string>;
   setAnswers: React.Dispatch<React.SetStateAction<Record<string, string>>>;
   error: string | null;
+  autoAnswering: boolean;
+  onAutoAnswer: () => void;
   onSkip: () => void;
   onGenerate: () => void;
 }
@@ -475,6 +527,8 @@ function AnswerForm({
   answers,
   setAnswers,
   error,
+  autoAnswering,
+  onAutoAnswer,
   onSkip,
   onGenerate,
 }: AnswerFormProps) {
@@ -494,6 +548,28 @@ function AnswerForm({
       </div>
 
       <div className="w-full space-y-6">
+        {/* Auto-answer button */}
+        <div className="flex justify-end">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onAutoAnswer}
+            disabled={autoAnswering}
+          >
+            {autoAnswering ? (
+              <>
+                <span className="size-3 rounded-full border-2 border-muted-foreground/30 border-t-foreground animate-spin mr-2" />
+                Auto-filling...
+              </>
+            ) : (
+              <>
+                <MagicWandIcon className="size-3.5 mr-1.5" />
+                Auto-answer with AI
+              </>
+            )}
+          </Button>
+        </div>
+
         {questions.map((q, i) => (
           <div key={q.id} className="rounded-lg border p-5 space-y-3">
             <div className="flex items-start justify-between">
@@ -547,6 +623,151 @@ function AnswerForm({
             Skip Questions
           </Button>
           <Button onClick={onGenerate} className="flex-1">
+            <ArrowRightIcon className="size-4" />
+            Continue
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Skill Picker (Step 3)                                               */
+/* ------------------------------------------------------------------ */
+
+interface SkillPickerProps {
+  onDone: (skillIds: string[]) => void;
+  onSkip: () => void;
+}
+
+function SkillPicker({ onDone, onSkip }: SkillPickerProps) {
+  const [skills, setSkills] = useState<Skill[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        const data = await listSkills();
+        if (!cancelled) setSkills(data);
+      } catch {
+        // Non-fatal: show empty state
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    load();
+    return () => { cancelled = true; };
+  }, []);
+
+  function toggleSkill(id: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }
+
+  const filtered = skills.filter((s) => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      s.name.toLowerCase().includes(q) ||
+      s.description.toLowerCase().includes(q) ||
+      s.tags.some((t) => t.toLowerCase().includes(q)) ||
+      s.category.toLowerCase().includes(q)
+    );
+  });
+
+  return (
+    <div className="flex flex-col items-center">
+      <div className="text-center mb-10">
+        <h2 className="text-2xl font-bold tracking-tight">
+          Add skills
+        </h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Optionally include skills to enhance your agent&apos;s capabilities.
+        </p>
+      </div>
+
+      <div className="w-full space-y-4">
+        {/* Search */}
+        <div className="relative">
+          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+          <Input
+            placeholder="Search skills..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+
+        {/* Skills list */}
+        <div className="max-h-80 overflow-y-auto space-y-2">
+          {loading ? (
+            <div className="py-8 text-center text-sm text-muted-foreground">
+              Loading skills...
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="py-8 text-center text-sm text-muted-foreground">
+              {searchQuery ? "No skills match your search." : "No skills available."}
+            </div>
+          ) : (
+            filtered.map((skill) => {
+              const isSelected = selected.has(skill.id);
+              return (
+                <button
+                  key={skill.id}
+                  type="button"
+                  onClick={() => toggleSkill(skill.id)}
+                  className={`w-full text-left rounded-lg border p-3 transition-colors ${
+                    isSelected
+                      ? "border-foreground bg-foreground/[0.03]"
+                      : "border-border hover:border-foreground/20"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-sm font-medium truncate">
+                        {skill.name}
+                      </span>
+                      <span className="shrink-0 rounded-full border px-2 py-0.5 text-[10px] text-muted-foreground">
+                        {skill.category}
+                      </span>
+                    </div>
+                    {isSelected && (
+                      <CheckIcon className="size-4 shrink-0 ml-2" />
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                    {skill.description}
+                  </p>
+                </button>
+              );
+            })
+          )}
+        </div>
+
+        {/* Selected count */}
+        {selected.size > 0 && (
+          <p className="text-xs text-muted-foreground">
+            {selected.size} skill{selected.size !== 1 ? "s" : ""} selected
+          </p>
+        )}
+
+        {/* Actions */}
+        <div className="flex gap-3 pt-2">
+          <Button variant="outline" onClick={onSkip} className="flex-1">
+            Skip
+          </Button>
+          <Button onClick={() => onDone(Array.from(selected))} className="flex-1">
             <MagicWandIcon className="size-4" />
             Generate Config
           </Button>
@@ -560,53 +781,57 @@ function AnswerForm({
 /* Staged Loading                                                      */
 /* ------------------------------------------------------------------ */
 
-function StagedLoading({ stage }: { stage: number }) {
-  const [visibleStage, setVisibleStage] = useState(stage === 0 ? 0 : 1);
+function StagedLoading({ contextLabel }: { contextLabel: string }) {
+  const [visibleStage, setVisibleStage] = useState(0);
 
   useEffect(() => {
-    if (stage === 0) {
-      // For "asking" — just show first stage
-      setVisibleStage(0);
-      return;
-    }
-
-    // For "generating" — animate through stages
-    setVisibleStage(1);
+    setVisibleStage(0);
     const timers: NodeJS.Timeout[] = [];
-    for (let i = 2; i < LOADING_STAGES.length; i++) {
-      timers.push(setTimeout(() => setVisibleStage(i), (i - 1) * 1500));
+    for (let i = 1; i < LOADING_STAGES.length; i++) {
+      timers.push(setTimeout(() => setVisibleStage(i), i * 1500));
     }
     return () => timers.forEach(clearTimeout);
-  }, [stage]);
+  }, [contextLabel]);
 
   return (
-    <div className="flex flex-col items-center py-12">
-      <div className="size-10 rounded-full border-2 border-muted-foreground/20 border-t-foreground animate-spin mb-8" />
+    <div className="flex flex-col items-center py-16">
+      {/* Pulsing status text */}
+      <p className="text-sm font-medium animate-pulse mb-10">
+        {contextLabel}
+      </p>
 
+      {/* Stage list */}
       <div className="w-full max-w-sm space-y-3">
         {LOADING_STAGES.map((label, i) => {
-          let stageStatus: "done" | "active" | "pending" = "pending";
-          if (i < visibleStage) stageStatus = "done";
-          else if (i === visibleStage) stageStatus = "active";
+          const isDone = i < visibleStage;
+          const isActive = i === visibleStage;
+          const isPending = i > visibleStage;
 
           return (
-            <div key={i} className="flex items-center gap-3">
-              {stageStatus === "done" ? (
+            <div
+              key={i}
+              className={`flex items-center gap-3 transition-opacity duration-500 ${
+                isPending ? "opacity-0" : "opacity-100"
+              }`}
+            >
+              {isDone ? (
                 <div className="size-5 rounded-full bg-foreground/10 flex items-center justify-center">
                   <CheckIcon className="size-3 text-foreground" />
                 </div>
-              ) : stageStatus === "active" ? (
-                <div className="size-5 rounded-full border-2 border-muted-foreground/30 border-t-foreground animate-spin" />
+              ) : isActive ? (
+                <div className="size-5 rounded-full bg-foreground/5 flex items-center justify-center">
+                  <div className="size-2 rounded-full bg-foreground animate-pulse" />
+                </div>
               ) : (
                 <div className="size-5 rounded-full border border-muted-foreground/20" />
               )}
               <span
                 className={`text-sm ${
-                  stageStatus === "pending"
-                    ? "text-muted-foreground/50"
-                    : stageStatus === "active"
+                  isDone
+                    ? "text-muted-foreground"
+                    : isActive
                       ? "text-foreground font-medium"
-                      : "text-muted-foreground"
+                      : "text-muted-foreground/50"
                 }`}
               >
                 {label}
@@ -658,6 +883,9 @@ function PreviewState({ result, onAccept, onRegenerate }: PreviewStateProps) {
           <StatBadge label="Rules" value={String(result.rules.length)} />
           <StatBadge label="MCP Servers" value={String(result.mcpServers.length)} />
           <StatBadge label="Permissions" value={String(Object.keys(result.permissions).length)} />
+          {result.skills.length > 0 && (
+            <StatBadge label="Skills" value={String(result.skills.length)} />
+          )}
         </div>
 
         {/* Expandable sections */}

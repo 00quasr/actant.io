@@ -5,6 +5,7 @@ import { getModel } from "@/lib/ai/provider";
 import { generatedConfigSchema } from "@/lib/ai/schema";
 import { buildSystemPrompt, buildUserPrompt } from "@/lib/ai/prompts";
 import { generationInputSchema } from "@/validations/generation";
+import { listSkillsByIds } from "@/services/skills-server";
 
 const FREE_TIER_LIMIT = 5;
 
@@ -66,6 +67,21 @@ export async function POST(request: Request) {
 
   const input = parseResult.data;
 
+  // Fetch selected skills if provided
+  let selectedSkills: { id: string; name: string; description: string }[] = [];
+  if (input.selectedSkillIds && input.selectedSkillIds.length > 0) {
+    try {
+      const skills = await listSkillsByIds(input.selectedSkillIds);
+      selectedSkills = skills.map((s) => ({
+        id: s.id,
+        name: s.name,
+        description: s.description,
+      }));
+    } catch {
+      // Non-fatal: continue without skills context
+    }
+  }
+
   // Generate config using AI
   const systemPrompt = buildSystemPrompt(input.targetAgent);
   const userPrompt = buildUserPrompt({
@@ -76,6 +92,7 @@ export async function POST(request: Request) {
     includeMcp: input.includeMcp,
     includePermissions: input.includePermissions,
     answers: input.answers,
+    selectedSkills: selectedSkills.length > 0 ? selectedSkills : undefined,
   });
 
   let generatedConfig;
@@ -117,10 +134,48 @@ export async function POST(request: Request) {
     console.error("Failed to log generation:", logError);
   }
 
-  return NextResponse.json({
-    config: {
-      ...generatedConfig,
-      targetAgent: input.targetAgent,
-    },
-  });
+  // Convert array-based schema back to record-based AgentConfig format
+  const config = {
+    name: generatedConfig.name,
+    description: generatedConfig.description,
+    instructions: generatedConfig.instructions,
+    skills: [
+      ...generatedConfig.skills.map((s) => ({
+        ...s,
+        params: {},
+      })),
+      ...selectedSkills.map((s) => ({
+        skillId: s.id,
+        enabled: true,
+        params: {},
+      })),
+    ],
+    mcpServers: generatedConfig.mcpServers.map((s) => ({
+      name: s.name,
+      type: s.type,
+      command: s.command ?? undefined,
+      args: s.args ?? undefined,
+      url: s.url ?? undefined,
+      env: s.envKeys
+        ? s.envKeys.reduce<Record<string, string>>((acc, { key, value }) => {
+            acc[key] = value;
+            return acc;
+          }, {})
+        : undefined,
+      enabled: s.enabled,
+    })),
+    permissions: generatedConfig.permissionEntries.reduce<
+      Record<string, "allow" | "ask" | "deny">
+    >((acc, { tool, value }) => {
+      acc[tool] = value;
+      return acc;
+    }, {}),
+    rules: generatedConfig.rules.map((r) => ({
+      ...r,
+      glob: r.glob ?? undefined,
+    })),
+    targetAgent: input.targetAgent,
+  };
+
+  return NextResponse.json({ config });
 }

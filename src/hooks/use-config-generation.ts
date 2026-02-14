@@ -19,6 +19,7 @@ export function useConfigGeneration() {
   const [result, setResult] = useState<AgentConfig | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [questions, setQuestions] = useState<ClarifyingQuestion[]>([]);
+  const [autoAnswering, setAutoAnswering] = useState(false);
 
   async function generateQuestions(
     projectDescription: string,
@@ -51,6 +52,46 @@ export function useConfigGeneration() {
     }
   }
 
+  async function autoAnswer(
+    projectDescription: string,
+    techStack: string[],
+    currentQuestions: ClarifyingQuestion[]
+  ): Promise<Record<string, string> | null> {
+    setAutoAnswering(true);
+    try {
+      const res = await fetch("/api/configs/generate/auto-answer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          projectDescription,
+          techStack,
+          questions: currentQuestions.map((q) => ({
+            id: q.id,
+            question: q.question,
+            type: q.type,
+            options: q.options,
+          })),
+        }),
+      });
+
+      if (!res.ok) {
+        const data = (await res.json()) as {
+          error?: string;
+          message?: string;
+        };
+        throw new Error(data.message || data.error || "Auto-answer failed");
+      }
+
+      const data = (await res.json()) as { answers: Record<string, string> };
+      return data.answers;
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Auto-answer failed");
+      return null;
+    } finally {
+      setAutoAnswering(false);
+    }
+  }
+
   async function generate(input: GenerationInput & { answers?: QuestionAnswer[] }) {
     setStatus("generating");
     setError(null);
@@ -71,7 +112,23 @@ export function useConfigGeneration() {
       }
 
       const data = (await res.json()) as { config: AgentConfig };
-      setResult(data.config);
+      // Normalize nulls to undefined for compatibility with AgentConfig types
+      const config = {
+        ...data.config,
+        mcpServers: data.config.mcpServers.map((s) => ({
+          ...s,
+          command: s.command ?? undefined,
+          args: s.args ?? undefined,
+          url: s.url ?? undefined,
+          env: s.env ?? undefined,
+        })),
+        rules: data.config.rules.map((r) => ({
+          ...r,
+          glob: r.glob ?? undefined,
+          alwaysApply: r.alwaysApply ?? undefined,
+        })),
+      };
+      setResult(config);
       setStatus("done");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Generation failed");
@@ -91,8 +148,10 @@ export function useConfigGeneration() {
     result,
     error,
     questions,
+    autoAnswering,
     generate,
     generateQuestions,
+    autoAnswer,
     reset,
   };
 }

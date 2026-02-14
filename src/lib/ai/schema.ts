@@ -8,27 +8,33 @@ export const generatedConfigSchema = z.object({
     z.object({
       skillId: z.string(),
       enabled: z.boolean(),
-      params: z.record(z.string(), z.unknown()),
     })
   ),
   mcpServers: z.array(
     z.object({
       name: z.string(),
       type: z.enum(["stdio", "sse", "streamable-http"]),
-      command: z.string().optional(),
-      args: z.array(z.string()).optional(),
-      url: z.string().optional(),
-      env: z.record(z.string(), z.string()).optional(),
+      command: z.string().nullable(),
+      args: z.array(z.string()).nullable(),
+      url: z.string().nullable(),
+      envKeys: z.array(
+        z.object({ key: z.string(), value: z.string() })
+      ).nullable(),
       enabled: z.boolean(),
     })
   ),
-  permissions: z.record(z.string(), z.enum(["allow", "ask", "deny"])),
+  permissionEntries: z.array(
+    z.object({
+      tool: z.string(),
+      value: z.enum(["allow", "ask", "deny"]),
+    })
+  ),
   rules: z.array(
     z.object({
       title: z.string(),
       content: z.string(),
-      glob: z.string().optional(),
-      alwaysApply: z.boolean().optional(),
+      glob: z.string().nullable(),
+      alwaysApply: z.boolean(),
     })
   ),
 });

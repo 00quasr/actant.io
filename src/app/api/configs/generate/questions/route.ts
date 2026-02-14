@@ -8,7 +8,7 @@ import { z } from "zod";
 
 const questionsInputSchema = z.object({
   projectDescription: z.string().min(10).max(2000),
-  techStack: z.array(z.string()).min(1),
+  techStack: z.array(z.string()),
 });
 
 export async function POST(request: Request) {

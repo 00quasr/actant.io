@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { useConfigGeneration } from "@/hooks/use-config-generation";
+import { UpgradeDialog } from "@/components/billing/upgrade-dialog";
 import { listSkills } from "@/services/skills";
 import type { AgentConfig, AgentType } from "@/types/config";
 import type { Skill } from "@/types/marketplace";
@@ -59,12 +60,14 @@ export function AiGenerateDialog({
     error,
     questions,
     autoAnswering,
+    limitReached,
     generate,
     generateQuestions,
     autoAnswer,
     reset,
   } = useConfigGeneration();
 
+  const [showUpgrade, setShowUpgrade] = useState(false);
   const [projectDescription, setProjectDescription] = useState("");
   const [techStack, setTechStack] = useState<string[]>([]);
   const [customTech, setCustomTech] = useState("");
@@ -85,8 +88,15 @@ export function AiGenerateDialog({
     setAnswers({});
     setSelectedSkillIds([]);
     setShowSkillPicker(false);
+    setShowUpgrade(false);
     reset();
   }, [reset]);
+
+  useEffect(() => {
+    if (limitReached) {
+      setShowUpgrade(true);
+    }
+  }, [limitReached]);
 
   function handleClose() {
     resetForm();
@@ -266,6 +276,8 @@ export function AiGenerateDialog({
           />
         )}
       </div>
+
+      <UpgradeDialog open={showUpgrade} onOpenChange={setShowUpgrade} />
     </div>
   );
 }

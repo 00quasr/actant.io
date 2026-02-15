@@ -20,6 +20,7 @@ export function useConfigGeneration() {
   const [error, setError] = useState<string | null>(null);
   const [questions, setQuestions] = useState<ClarifyingQuestion[]>([]);
   const [autoAnswering, setAutoAnswering] = useState(false);
+  const [limitReached, setLimitReached] = useState(false);
 
   async function generateQuestions(
     projectDescription: string,
@@ -109,6 +110,12 @@ export function useConfigGeneration() {
           error?: string;
           message?: string;
         };
+        if (res.status === 403 && data.error?.toLowerCase().includes("limit")) {
+          setLimitReached(true);
+          setError(data.message || "Generation limit reached");
+          setStatus("error");
+          return;
+        }
         throw new Error(data.message || data.error || "Generation failed");
       }
 
@@ -143,6 +150,7 @@ export function useConfigGeneration() {
     setResult(null);
     setError(null);
     setQuestions([]);
+    setLimitReached(false);
   }
 
   return {
@@ -151,6 +159,7 @@ export function useConfigGeneration() {
     error,
     questions,
     autoAnswering,
+    limitReached,
     generate,
     generateQuestions,
     autoAnswer,

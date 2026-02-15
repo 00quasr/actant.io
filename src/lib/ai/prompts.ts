@@ -34,7 +34,16 @@ const CONFIG_SCHEMA_DESCRIPTION = `You generate AgentConfig JSON objects with th
   "mcpServers": [ { "name": string, "type": "stdio"|"sse"|"streamable-http", "command": string|null, "args": string[]|null, "url": string|null, "envKeys": [{key: string, value: string}]|null, "enabled": boolean } ] - Include **all relevant** servers from the known catalog for the given tech stack. Use "stdio" type with npx commands for npm-based servers. Use envKeys array for environment variables (e.g. [{"key": "SUPABASE_ACCESS_TOKEN", "value": ""}]).
   "permissionEntries": [ { "tool": string, "value": "allow"|"ask"|"deny" } ] - Generate **8-12 permission entries** covering all common tool categories. Common tools: "Bash(npm run *)", "Bash(npx *)", "Bash(git *)", "Bash(rm *)", "file_edit", "file_read", "file_write", "web_search", "mcp", "Bash(docker *)", "notebook_edit". Use "allow" for safe operations, "ask" for destructive ones, "deny" for dangerous ones.
   "rules": [ { "title": string, "content": string, "glob": string|null, "alwaysApply": boolean } ] - Generate **8-15 rules** minimum. Each rule content should be **3-5 sentences** with specific guidance, not one-liners. Include glob patterns to scope rules to relevant files. Use "glob" to scope rules to specific file patterns (e.g., "*.test.ts" for testing rules). Set "alwaysApply" to true for universal rules.
-  "docs": [ { "filename": string, "content": string } ] - Generate documentation files. **Always** generate a README.md with: project name, description, features, tech stack, setup instructions, development workflow, project structure, and usage examples. For complex projects, also generate CONTRIBUTING.md (code style, PR process, development setup) and ARCHITECTURE.md (system design, data flow, key decisions). Each doc should be thorough (500-2000 words).
+  "docs": [ { "filename": string, "content": string } ] - Generate documentation files. Generate at minimum 5 docs for any non-trivial project, each 500-2000 words with real file paths and commands. Doc types:
+    - README.md (ALWAYS): project overview, features, tech stack, prerequisites, setup, dev workflow, structure, env vars, deployment.
+    - DEVELOPMENT.md (ALWAYS): local dev setup, debugging tips, hot reload config, database seeding, dev tools, common issues.
+    - CONTRIBUTING.md (team/open-source): code style, branching strategy, PR process, commit conventions, testing requirements.
+    - ARCHITECTURE.md (complex projects): system overview, component diagram, data flow, key technical decisions, scaling.
+    - TESTING.md (when tests relevant): testing strategy, frameworks, running tests, writing tests, coverage targets, CI integration.
+    - DEPLOYMENT.md (when deployment relevant): pipeline, environments, rollback procedures, monitoring, health checks.
+    - API_REFERENCE.md (when project has API): endpoints, request/response schemas, authentication, rate limits, error codes.
+    - SECURITY.md (when security relevant): security policies, auth flows, input validation, secrets management, vulnerability reporting.
+    Docs should cross-reference each other (e.g., README links to DEVELOPMENT.md for setup details).
   "recommendedSkillIds": string[] - IDs of skills from the provided catalog that would benefit this project. Leave empty if no catalog provided.
 }
 
@@ -57,11 +66,17 @@ const QUALITY_GUIDELINES = `Quality guidelines for generated configs:
 - Generate at least 8 permission entries covering all relevant tool categories.
 
 Documentation quality:
-- README.md must include: project name as h1, one-paragraph description, features list, tech stack section, prerequisites, step-by-step setup, environment variables table, project structure tree, available scripts/commands, and deployment notes.
-- CONTRIBUTING.md (when included): code style expectations, branching strategy, commit message format, PR template/checklist, testing requirements, and review process.
-- ARCHITECTURE.md (when included): system overview diagram (text-based), component relationships, data flow description, key technical decisions with rationale, and scaling considerations.
+- README.md (ALWAYS): project name as h1, one-paragraph description, features list, tech stack section, prerequisites, step-by-step setup, environment variables table, project structure tree, available scripts/commands, and deployment notes.
+- DEVELOPMENT.md (ALWAYS): local environment setup, IDE/editor config, debugging techniques and tools, hot reload configuration, database seeding/migration commands, dev tools and their usage, common issues and troubleshooting.
+- CONTRIBUTING.md (team/open-source): code style expectations, branching strategy, commit message format, PR template/checklist, testing requirements, review process, and getting help.
+- ARCHITECTURE.md (complex projects): system overview diagram (text-based), component relationships, data flow description, key technical decisions with rationale, dependency graph, and scaling considerations.
+- TESTING.md (when tests relevant): testing strategy and philosophy, testing frameworks and tools, how to run tests, how to write new tests, coverage targets and enforcement, CI test pipeline, mocking and fixtures approach.
+- DEPLOYMENT.md (when deployment relevant): deployment pipeline overview, environment descriptions (dev/staging/prod), rollback procedures, monitoring and alerting setup, health check endpoints, infrastructure requirements.
+- API_REFERENCE.md (when project has API): endpoint listing with methods/paths, request/response schemas with examples, authentication and authorization, rate limiting, error codes and handling, versioning strategy.
+- SECURITY.md (when security relevant): security policies, authentication and authorization flows, input validation strategy, secrets management, dependency vulnerability scanning, vulnerability reporting process.
+- Quality bar: each doc should be 500-2000 words, project-specific with real file paths and actual commands (not placeholders).
 - Each doc should feel self-contained and useful to a developer seeing the project for the first time.
-- Cross-reference: instructions should mention the generated docs (e.g., "See README.md for setup" or "Follow CONTRIBUTING.md for PR guidelines").`;
+- Cross-reference: docs should reference each other (e.g., README links to DEVELOPMENT.md for setup, CONTRIBUTING.md references TESTING.md for test requirements). Instructions should also mention the generated docs.`;
 
 export const KNOWN_MCP_SERVERS: Record<string, { name: string; command: string; args: string[]; env?: Record<string, string>; description: string }> = {
   supabase: { name: "supabase", command: "npx", args: ["-y", "@supabase/mcp-server-supabase"], env: { SUPABASE_ACCESS_TOKEN: "" }, description: "Supabase database and auth management" },
@@ -348,11 +363,16 @@ export function buildUserPrompt(input: UserPromptInput): string {
     `Generate a comprehensive agent configuration for this project. The instructions should be a complete developer handbook of 1500-3000 words with multiple structured sections, code examples, and specific guidance. Include at least 8 detailed rules. The output should feel like a thorough team onboarding document, not a brief summary.
 
 Also generate documentation files:
-- README.md (ALWAYS): Include project name, description, key features, tech stack, prerequisites, installation/setup steps, development workflow, project structure overview, environment variables, and deployment notes.
-- CONTRIBUTING.md (for team/open-source projects): Code style guide, branching strategy, PR process, commit conventions, testing requirements, review process.
-- ARCHITECTURE.md (for complex projects): System overview, component diagram (text), data flow, key technical decisions, dependencies, and scaling considerations.
+- README.md (ALWAYS): project overview, features, tech stack, prerequisites, setup, dev workflow, structure, env vars, deployment
+- DEVELOPMENT.md (ALWAYS): local setup, debugging tips, hot reload config, database seeding, dev tools, common issues
+- CONTRIBUTING.md (for team/open-source): code style, branching, PR process, commit conventions, testing requirements
+- ARCHITECTURE.md (for complex projects): system overview, component diagram, data flow, key decisions, scaling
+- TESTING.md (when tests relevant): testing strategy, frameworks, running tests, writing tests, coverage, CI
+- DEPLOYMENT.md (when deployment relevant): pipeline, environments, rollback, monitoring, health checks
+- API_REFERENCE.md (when project has API): endpoints, schemas, auth, rate limits, error codes
+- SECURITY.md (when security relevant): policies, auth flows, validation, secrets, vulnerability reporting
 
-Each documentation file should be thorough (500-2000 words) and specific to the described project.`
+Generate at minimum 5 documentation files for any non-trivial project. Each doc should be 500-2000 words, project-specific with real file paths and commands. Docs should cross-reference each other.`
   );
 
   return sections.join("\n\n");

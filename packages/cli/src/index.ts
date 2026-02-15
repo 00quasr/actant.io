@@ -4,6 +4,7 @@ import { initCommand } from "./commands/init.js";
 import { loginCommand } from "./commands/login.js";
 import { logoutCommand } from "./commands/logout.js";
 import { listCommand } from "./commands/list.js";
+import { pushCommand } from "./commands/push.js";
 
 const program = new Command();
 program
@@ -15,5 +16,6 @@ program.addCommand(initCommand);
 program.addCommand(loginCommand);
 program.addCommand(logoutCommand);
 program.addCommand(listCommand);
+program.addCommand(pushCommand);
 
 program.parse();

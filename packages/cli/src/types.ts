@@ -28,3 +28,15 @@ export interface StoredAuth {
   access_token: string;
   refresh_token: string;
 }
+
+export interface PushConfigInput {
+  targetAgent: AgentType;
+  name: string;
+  description: string;
+  files: Array<{ path: string; content: string }>;
+}
+
+export interface PushConfigResult {
+  id: string;
+  url: string;
+}

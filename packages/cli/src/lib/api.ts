@@ -1,5 +1,5 @@
 import { getStoredAuth, refreshTokens } from "./auth.js";
-import type { ConfigListItem, ExportResult, AgentType } from "../types.js";
+import type { ConfigListItem, ExportResult, AgentType, PushConfigInput, PushConfigResult } from "../types.js";
 
 const BASE_URL = process.env.ACTANT_API_URL ?? "https://actant.io";
 
@@ -67,4 +67,21 @@ export async function exportConfig(
   }
 
   return (await response.json()) as ExportResult;
+}
+
+export async function pushConfig(data: PushConfigInput, configId?: string): Promise<PushConfigResult> {
+  const apiPath = configId ? `/api/configs/${configId}` : "/api/configs/push";
+  const method = configId ? "PUT" : "POST";
+
+  const response = await fetchWithAuth(apiPath, {
+    method,
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const body = (await response.json().catch(() => ({}))) as { error?: string };
+    throw new Error(body.error ?? `Failed to push config (${response.status})`);
+  }
+
+  return (await response.json()) as PushConfigResult;
 }

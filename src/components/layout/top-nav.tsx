@@ -12,9 +12,22 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { useAuth } from "@/hooks/use-auth";
+
+function UserAvatar({ name }: { name: string }) {
+  const initial = name.charAt(0).toUpperCase();
+  return (
+    <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-medium text-foreground">
+      {initial}
+    </div>
+  );
+}
 
 export function TopNav() {
   const [open, setOpen] = React.useState(false);
+  const { user, profile, loading } = useAuth();
+  const isAuthed = !loading && !!user;
+  const displayName = profile?.display_name || profile?.username || user?.email || "U";
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -36,15 +49,26 @@ export function TopNav() {
         </nav>
 
         <div className="hidden items-center gap-4 md:flex">
-          <Link
-            href="/login"
-            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-          >
-            Log in
-          </Link>
-          <Button size="sm" asChild>
-            <Link href="/signup">Get Started</Link>
-          </Button>
+          {isAuthed ? (
+            <>
+              <Button size="sm" asChild>
+                <Link href="/builder">Dashboard</Link>
+              </Button>
+              <UserAvatar name={displayName} />
+            </>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+              >
+                Log in
+              </Link>
+              <Button size="sm" asChild>
+                <Link href="/signup">Get Started</Link>
+              </Button>
+            </>
+          )}
         </div>
 
         <Sheet open={open} onOpenChange={setOpen}>
@@ -72,18 +96,28 @@ export function TopNav() {
                 </Link>
               ))}
               <div className="my-2 h-px bg-border" />
-              <Link
-                href="/login"
-                onClick={() => setOpen(false)}
-                className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-              >
-                Log in
-              </Link>
-              <Button size="sm" asChild>
-                <Link href="/signup" onClick={() => setOpen(false)}>
-                  Get Started
-                </Link>
-              </Button>
+              {isAuthed ? (
+                <Button size="sm" asChild>
+                  <Link href="/builder" onClick={() => setOpen(false)}>
+                    Dashboard
+                  </Link>
+                </Button>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    onClick={() => setOpen(false)}
+                    className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    Log in
+                  </Link>
+                  <Button size="sm" asChild>
+                    <Link href="/signup" onClick={() => setOpen(false)}>
+                      Get Started
+                    </Link>
+                  </Button>
+                </>
+              )}
             </nav>
           </SheetContent>
         </Sheet>

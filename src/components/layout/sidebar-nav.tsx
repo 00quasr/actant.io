@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Pencil2Icon,
   MagnifyingGlassIcon,
@@ -11,6 +11,7 @@ import {
   LayoutIcon,
   HeartIcon,
   GearIcon,
+  ExitIcon,
 } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
 import {
@@ -78,7 +79,14 @@ function NavItems({ onNavigate }: { onNavigate?: () => void }) {
 }
 
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
-  const { profile } = useAuth();
+  const { profile, signOut } = useAuth();
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    await signOut();
+    onNavigate?.();
+    router.push("/");
+  };
 
   return (
     <div className="flex h-full flex-col">
@@ -96,16 +104,32 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       </div>
       {profile && (
         <div className="border-t px-4 py-3">
-          <div className="flex items-center gap-2">
-            <Link
-              href="/profile"
-              onClick={onNavigate}
-              className="text-sm text-muted-foreground truncate hover:text-foreground transition-colors"
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 min-w-0">
+              <Link
+                href="/profile"
+                onClick={onNavigate}
+                className="text-sm text-muted-foreground truncate hover:text-foreground transition-colors"
+              >
+                {profile.display_name || profile.username || "User"}
+              </Link>
+              <PlanBadge plan={profile.plan ?? "free"} />
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-7 shrink-0"
+              onClick={handleSignOut}
+              aria-label="Sign out"
             >
-              {profile.display_name || profile.username || "User"}
-            </Link>
-            <PlanBadge plan={profile.plan ?? "free"} />
+              <ExitIcon className="size-3.5" />
+            </Button>
           </div>
+          {(profile.plan ?? "free") === "free" && (
+            <p className="text-xs text-muted-foreground mt-1">
+              {profile.generation_credits_used ?? 0}/5 generations
+            </p>
+          )}
         </div>
       )}
     </div>
@@ -118,7 +142,7 @@ export function SidebarNav() {
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="hidden h-screen w-60 shrink-0 border-r md:block" aria-label="Main navigation">
+      <aside className="hidden h-screen w-60 shrink-0 border-r md:block sticky top-0" aria-label="Main navigation">
         <SidebarContent />
       </aside>
 

@@ -14,11 +14,26 @@ import { Textarea } from "@/components/ui/textarea";
 
 const COMMON_DOC_FILES = [
   "README.md",
+  "DEVELOPMENT.md",
   "CONTRIBUTING.md",
   "ARCHITECTURE.md",
+  "TESTING.md",
+  "DEPLOYMENT.md",
+  "API_REFERENCE.md",
+  "SECURITY.md",
   "CHANGELOG.md",
-  "CODE_OF_CONDUCT.md",
 ] as const;
+
+const DOC_TYPE_BADGES: Record<string, { label: string; className: string }> = {
+  "README.md": { label: "Overview", className: "bg-blue-500/10 text-blue-700" },
+  "DEVELOPMENT.md": { label: "Setup", className: "bg-green-500/10 text-green-700" },
+  "CONTRIBUTING.md": { label: "Contributing", className: "bg-purple-500/10 text-purple-700" },
+  "ARCHITECTURE.md": { label: "Architecture", className: "bg-orange-500/10 text-orange-700" },
+  "TESTING.md": { label: "Testing", className: "bg-cyan-500/10 text-cyan-700" },
+  "DEPLOYMENT.md": { label: "Deploy", className: "bg-rose-500/10 text-rose-700" },
+  "API_REFERENCE.md": { label: "API", className: "bg-amber-500/10 text-amber-700" },
+  "SECURITY.md": { label: "Security", className: "bg-red-500/10 text-red-700" },
+};
 
 interface DocsTabProps {
   docs: Record<string, string>;
@@ -104,11 +119,16 @@ export function DocsTab({ docs, setDoc, removeDoc }: DocsTabProps) {
                 )}
                 <FileTextIcon className="size-3.5 text-muted-foreground" />
                 <span>{filename}</span>
+                {DOC_TYPE_BADGES[filename] && (
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${DOC_TYPE_BADGES[filename].className}`}>
+                    {DOC_TYPE_BADGES[filename].label}
+                  </span>
+                )}
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-xs text-muted-foreground">
                   {content.length > 0
-                    ? `${content.length} chars`
+                    ? `${content.split(/\s+/).filter(Boolean).length} words`
                     : "Empty"}
                 </span>
                 <Button

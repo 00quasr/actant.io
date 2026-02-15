@@ -36,7 +36,7 @@ export function ExportPreview({ files }: ExportPreviewProps) {
           </button>
         ))}
       </div>
-      <FilePreview content={files[selectedIndex].content} />
+      <FilePreview content={files[selectedIndex].content} filename={files[selectedIndex].path} />
     </div>
   );
 }

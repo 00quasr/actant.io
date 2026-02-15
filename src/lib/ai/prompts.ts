@@ -171,6 +171,12 @@ export interface RepoContext {
   packageDeps: Record<string, string> | null;
   devDeps: Record<string, string> | null;
   tsconfigOptions: Record<string, unknown> | null;
+  packageScripts: Record<string, string> | null;
+  ciWorkflows: string | null;
+  dockerConfig: string | null;
+  testConfig: string | null;
+  envExample: string | null;
+  existingAgentConfig: string | null;
 }
 
 export function buildRepoPrompt(ctx: RepoContext): string {
@@ -219,6 +225,48 @@ export function buildRepoPrompt(ctx: RepoContext): string {
   if (ctx.tsconfigOptions) {
     sections.push(
       `tsconfig.json compilerOptions:\n${JSON.stringify(ctx.tsconfigOptions, null, 2)}`
+    );
+  }
+
+  if (ctx.packageScripts) {
+    const scripts = Object.entries(ctx.packageScripts)
+      .map(([k, v]) => `  ${k}: ${v}`)
+      .join("\n");
+    sections.push(`Package scripts (npm run):\n${scripts}`);
+  }
+
+  if (ctx.ciWorkflows) {
+    const truncated = ctx.ciWorkflows.slice(0, 3000);
+    sections.push(
+      `CI/CD workflows:\n\`\`\`yaml\n${truncated}${ctx.ciWorkflows.length > 3000 ? "\n[truncated]" : ""}\n\`\`\``
+    );
+  }
+
+  if (ctx.dockerConfig) {
+    const truncated = ctx.dockerConfig.slice(0, 2000);
+    sections.push(
+      `Docker configuration:\n\`\`\`dockerfile\n${truncated}${ctx.dockerConfig.length > 2000 ? "\n[truncated]" : ""}\n\`\`\``
+    );
+  }
+
+  if (ctx.testConfig) {
+    const truncated = ctx.testConfig.slice(0, 2000);
+    sections.push(
+      `Test configuration:\n\`\`\`\n${truncated}${ctx.testConfig.length > 2000 ? "\n[truncated]" : ""}\n\`\`\``
+    );
+  }
+
+  if (ctx.envExample) {
+    const truncated = ctx.envExample.slice(0, 2000);
+    sections.push(
+      `Environment variables (.env.example):\n\`\`\`\n${truncated}${ctx.envExample.length > 2000 ? "\n[truncated]" : ""}\n\`\`\``
+    );
+  }
+
+  if (ctx.existingAgentConfig) {
+    const truncated = ctx.existingAgentConfig.slice(0, 3000);
+    sections.push(
+      `Existing agent config:\n\`\`\`\n${truncated}${ctx.existingAgentConfig.length > 3000 ? "\n[truncated]" : ""}\n\`\`\``
     );
   }
 
@@ -374,6 +422,70 @@ Also generate documentation files:
 
 Generate at minimum 5 documentation files for any non-trivial project. Each doc should be 500-2000 words, project-specific with real file paths and commands. Docs should cross-reference each other.`
   );
+
+  return sections.join("\n\n");
+}
+
+export function buildDocsSystemPrompt(): string {
+  return `You are an expert technical writer specializing in developer documentation. Your job is to generate high-quality, project-specific documentation files.
+
+Key principles:
+- Reference actual file paths from the project, not generic placeholders.
+- Include real commands from the project's package scripts (e.g., the actual "npm run dev" or "npm run test" commands).
+- Use real environment variable names from .env.example when available.
+- Cross-reference documentation files (e.g., README links to DEVELOPMENT.md for setup details, CONTRIBUTING.md references TESTING.md for test requirements).
+- Each documentation file should be 500-2000 words with substantive, actionable content.
+- No placeholder content like "TODO" or "Add description here". Every section must be complete.
+- Write in a clear, direct style. Use imperative mood for instructions.
+- Include code snippets and command examples where they add clarity.
+- Structure content with clear markdown headings and logical flow.
+
+Documentation types to generate as appropriate:
+- README.md (ALWAYS): project overview, features, tech stack, prerequisites, step-by-step setup, environment variables, project structure, available commands, deployment.
+- DEVELOPMENT.md (ALWAYS): local dev setup, IDE config, debugging, hot reload, database setup, dev tools, common issues/troubleshooting.
+- CONTRIBUTING.md (team/open-source): code style, branching strategy, commit conventions, PR process, testing requirements, review process.
+- ARCHITECTURE.md (complex projects): system overview, component relationships, data flow, key technical decisions, scaling considerations.
+- TESTING.md (when tests relevant): testing strategy, frameworks, running tests, writing tests, coverage targets, CI integration.
+- DEPLOYMENT.md (when deployment relevant): pipeline overview, environments, rollback procedures, monitoring, health checks.
+- API_REFERENCE.md (when project has API): endpoints, request/response schemas, authentication, rate limits, error codes.
+- SECURITY.md (when security relevant): security policies, auth flows, input validation, secrets management, vulnerability reporting.
+
+Generate at minimum 5 documentation files for any non-trivial project. Quality bar: each doc should feel useful to a developer seeing the project for the first time.
+
+Respond with a JSON object containing a "docs" array of { "filename": string, "content": string } objects.`;
+}
+
+export interface DocsPromptInput {
+  repoContext?: RepoContext;
+  projectDescription?: string;
+  techStack?: string[];
+  existingDocs?: Record<string, string>;
+}
+
+export function buildDocsUserPrompt(input: DocsPromptInput): string {
+  const sections: string[] = [];
+
+  if (input.repoContext) {
+    sections.push(buildRepoPrompt(input.repoContext));
+  } else if (input.projectDescription) {
+    sections.push(`Project description: ${input.projectDescription}`);
+    if (input.techStack && input.techStack.length > 0) {
+      sections.push(`Tech stack: ${input.techStack.join(", ")}`);
+    }
+  }
+
+  if (input.existingDocs && Object.keys(input.existingDocs).length > 0) {
+    sections.push("The project already has these documentation files. Improve and update them rather than generating from scratch:");
+    for (const [filename, content] of Object.entries(input.existingDocs)) {
+      const truncated = content.slice(0, 3000);
+      sections.push(
+        `### ${filename}\n\`\`\`markdown\n${truncated}${content.length > 3000 ? "\n[truncated]" : ""}\n\`\`\``
+      );
+    }
+    sections.push("Update and improve the existing docs. Fix any outdated information, fill in missing sections, and ensure consistency across all docs.");
+  } else {
+    sections.push("Generate comprehensive documentation for this project from scratch. Include at minimum README.md and DEVELOPMENT.md, plus any other relevant docs based on the project type.");
+  }
 
   return sections.join("\n\n");
 }

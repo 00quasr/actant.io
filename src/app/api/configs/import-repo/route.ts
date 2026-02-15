@@ -56,6 +56,16 @@ interface GitHubFileContent {
   encoding?: string;
 }
 
+interface GitHubTreeItem {
+  path: string;
+  type: string;
+}
+
+interface GitHubTreeResponse {
+  tree: GitHubTreeItem[];
+  truncated: boolean;
+}
+
 export async function POST(request: Request) {
   const supabase = await createClient();
   const {
@@ -147,22 +157,69 @@ export async function POST(request: Request) {
   const basePath = `/repos/${owner}/${repo}`;
 
   // Fetch all GitHub data in parallel
-  const [repoMeta, readme, contents, packageJson, tsconfigJson] =
-    await Promise.all([
-      fetchJsonSafe<GitHubRepoMeta>(basePath, githubToken),
-      fetchGitHub(`${basePath}/readme`, githubToken, "application/vnd.github.raw").then(
-        (res) => (res.ok ? res.text() : null)
-      ),
-      fetchJsonSafe<GitHubContentItem[]>(`${basePath}/contents`, githubToken),
-      fetchJsonSafe<GitHubFileContent>(
-        `${basePath}/contents/package.json`,
-        githubToken
-      ),
-      fetchJsonSafe<GitHubFileContent>(
-        `${basePath}/contents/tsconfig.json`,
-        githubToken
-      ),
-    ]);
+  const [
+    repoMeta, readme, contents, packageJson, tsconfigJson,
+    treeData, workflowsDir,
+    dockerfileContent, dockerComposeContent,
+    envExampleContent, envSampleContent,
+    vitestConfig, jestConfig, playwrightConfig,
+    claudeMd, cursorRules,
+  ] = await Promise.all([
+    fetchJsonSafe<GitHubRepoMeta>(basePath, githubToken),
+    fetchGitHub(`${basePath}/readme`, githubToken, "application/vnd.github.raw").then(
+      (res) => (res.ok ? res.text() : null)
+    ),
+    fetchJsonSafe<GitHubContentItem[]>(`${basePath}/contents`, githubToken),
+    fetchJsonSafe<GitHubFileContent>(
+      `${basePath}/contents/package.json`,
+      githubToken
+    ),
+    fetchJsonSafe<GitHubFileContent>(
+      `${basePath}/contents/tsconfig.json`,
+      githubToken
+    ),
+    // Deep file tree via Trees API
+    fetchJsonSafe<GitHubTreeResponse>(
+      `${basePath}/git/trees/HEAD?recursive=1`,
+      githubToken
+    ),
+    // CI workflows directory listing
+    fetchJsonSafe<GitHubContentItem[]>(
+      `${basePath}/contents/.github/workflows`,
+      githubToken
+    ),
+    // Docker config
+    fetchGitHub(`${basePath}/contents/Dockerfile`, githubToken, "application/vnd.github.raw").then(
+      (res) => (res.ok ? res.text() : null)
+    ),
+    fetchGitHub(`${basePath}/contents/docker-compose.yml`, githubToken, "application/vnd.github.raw").then(
+      (res) => (res.ok ? res.text() : null)
+    ),
+    // Env examples
+    fetchGitHub(`${basePath}/contents/.env.example`, githubToken, "application/vnd.github.raw").then(
+      (res) => (res.ok ? res.text() : null)
+    ),
+    fetchGitHub(`${basePath}/contents/.env.sample`, githubToken, "application/vnd.github.raw").then(
+      (res) => (res.ok ? res.text() : null)
+    ),
+    // Test configs
+    fetchGitHub(`${basePath}/contents/vitest.config.ts`, githubToken, "application/vnd.github.raw").then(
+      (res) => (res.ok ? res.text() : null)
+    ),
+    fetchGitHub(`${basePath}/contents/jest.config.ts`, githubToken, "application/vnd.github.raw").then(
+      (res) => (res.ok ? res.text() : null)
+    ),
+    fetchGitHub(`${basePath}/contents/playwright.config.ts`, githubToken, "application/vnd.github.raw").then(
+      (res) => (res.ok ? res.text() : null)
+    ),
+    // Existing agent configs
+    fetchGitHub(`${basePath}/contents/CLAUDE.md`, githubToken, "application/vnd.github.raw").then(
+      (res) => (res.ok ? res.text() : null)
+    ),
+    fetchGitHub(`${basePath}/contents/.cursorrules`, githubToken, "application/vnd.github.raw").then(
+      (res) => (res.ok ? res.text() : null)
+    ),
+  ]);
 
   if (!repoMeta) {
     return NextResponse.json(
@@ -177,6 +234,7 @@ export async function POST(request: Request) {
 
   // Decode base64 file contents
   interface PackageData {
+    scripts?: Record<string, string>;
     dependencies?: Record<string, string>;
     devDependencies?: Record<string, string>;
   }
@@ -209,9 +267,40 @@ export async function POST(request: Request) {
     }
   }
 
-  const fileTree = (contents ?? []).map(
-    (item) => `${item.type === "dir" ? "📁" : "📄"} ${item.name}`
-  );
+  // Use deep tree if available, fall back to root contents listing
+  const fileTree = treeData
+    ? treeData.tree.slice(0, 300).map(
+        (item) => `${item.type === "tree" ? "📁" : "📄"} ${item.path}`
+      )
+    : (contents ?? []).map(
+        (item) => `${item.type === "dir" ? "📁" : "📄"} ${item.name}`
+      );
+
+  // Fetch first 2 workflow files if workflows directory exists
+  let ciWorkflows: string | null = null;
+  if (workflowsDir && workflowsDir.length > 0) {
+    const workflowFiles = workflowsDir
+      .filter((f) => f.name.endsWith(".yml") || f.name.endsWith(".yaml"))
+      .slice(0, 2);
+    const workflowContents = await Promise.all(
+      workflowFiles.map((f) =>
+        fetchGitHub(
+          `${basePath}/contents/.github/workflows/${f.name}`,
+          githubToken,
+          "application/vnd.github.raw"
+        ).then((res) => (res.ok ? res.text().then((t) => `# ${f.name}\n${t}`) : null))
+      )
+    );
+    const validWorkflows = workflowContents.filter(Boolean);
+    if (validWorkflows.length > 0) {
+      ciWorkflows = validWorkflows.join("\n\n---\n\n");
+    }
+  }
+
+  const dockerConfig = dockerfileContent ?? dockerComposeContent ?? null;
+  const testConfig = vitestConfig ?? jestConfig ?? playwrightConfig ?? null;
+  const envExample = envExampleContent ?? envSampleContent ?? null;
+  const existingAgentConfig = claudeMd ?? cursorRules ?? null;
 
   const repoContext: RepoContext = {
     name: `${owner}/${repo}`,
@@ -223,6 +312,12 @@ export async function POST(request: Request) {
     packageDeps: packageData?.dependencies ?? null,
     devDeps: packageData?.devDependencies ?? null,
     tsconfigOptions: tsconfigData?.compilerOptions ?? null,
+    packageScripts: packageData?.scripts ?? null,
+    ciWorkflows,
+    dockerConfig,
+    testConfig,
+    envExample,
+    existingAgentConfig,
   };
 
   // Generate config using AI

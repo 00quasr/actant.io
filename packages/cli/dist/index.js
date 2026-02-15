@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // src/index.ts
-import { Command as Command6 } from "commander";
+import { Command as Command8 } from "commander";
 
 // src/commands/init.ts
 import { Command as Command2 } from "commander";
@@ -74,7 +74,7 @@ async function refreshTokens() {
 
 // src/lib/api.ts
 var BASE_URL = process.env.ACTANT_API_URL ?? "https://actant.io";
-async function fetchWithAuth(path5, options = {}) {
+async function fetchWithAuth(path7, options = {}) {
   const auth = getStoredAuth();
   if (!auth) {
     throw new Error("Not authenticated. Run `actant login` first.");
@@ -82,7 +82,7 @@ async function fetchWithAuth(path5, options = {}) {
   const headers = new Headers(options.headers);
   headers.set("Authorization", `Bearer ${auth.access_token}`);
   headers.set("Content-Type", "application/json");
-  let response = await fetch(`${BASE_URL}${path5}`, {
+  let response = await fetch(`${BASE_URL}${path7}`, {
     ...options,
     headers
   });
@@ -92,7 +92,7 @@ async function fetchWithAuth(path5, options = {}) {
       throw new Error("Session expired. Run `actant login` to re-authenticate.");
     }
     headers.set("Authorization", `Bearer ${refreshed.access_token}`);
-    response = await fetch(`${BASE_URL}${path5}`, {
+    response = await fetch(`${BASE_URL}${path7}`, {
       ...options,
       headers
     });
@@ -115,6 +115,17 @@ async function exportConfig(id, targetAgent) {
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
     throw new Error(body.error ?? `Failed to export config (${response.status})`);
+  }
+  return await response.json();
+}
+async function generateDocs(input) {
+  const response = await fetchWithAuth("/api/docs/generate", {
+    method: "POST",
+    body: JSON.stringify(input)
+  });
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.message || body.error || `Failed to generate docs (${response.status})`);
   }
   return await response.json();
 }
@@ -856,12 +867,470 @@ Detected agent: ${label}`));
   }
 });
 
+// src/commands/analyze.ts
+import { Command as Command6 } from "commander";
+import chalk6 from "chalk";
+import ora5 from "ora";
+
+// src/lib/project-analyzer.ts
+import fs4 from "fs";
+import path5 from "path";
+var IGNORE_DIRS = /* @__PURE__ */ new Set([
+  "node_modules",
+  ".git",
+  "dist",
+  ".next",
+  "build",
+  ".cache",
+  "__pycache__",
+  ".venv",
+  "venv",
+  "target",
+  "vendor"
+]);
+var MAX_FILE_SIZE = 10 * 1024;
+var MAX_TREE_DEPTH = 4;
+var KEY_FILE_PATHS = [
+  "README.md",
+  "package.json",
+  "tsconfig.json",
+  "jsconfig.json",
+  "Dockerfile",
+  "docker-compose.yml",
+  ".env.example",
+  ".env.sample",
+  "CLAUDE.md",
+  ".cursorrules",
+  ".windsurfrules",
+  "opencode.json",
+  "requirements.txt",
+  "Gemfile",
+  "go.mod",
+  "Cargo.toml"
+];
+var KEY_FILE_PATTERNS = [
+  /^jest\.config\.\w+$/,
+  /^vitest\.config\.\w+$/,
+  /^playwright\.config\.\w+$/
+];
+function buildFileTree(cwd, prefix, depth) {
+  if (depth > MAX_TREE_DEPTH) return [];
+  let entries;
+  try {
+    entries = fs4.readdirSync(path5.join(cwd, prefix), { withFileTypes: true });
+  } catch {
+    return [];
+  }
+  const results = [];
+  for (const entry of entries) {
+    const relative = prefix ? `${prefix}/${entry.name}` : entry.name;
+    if (entry.isDirectory()) {
+      if (IGNORE_DIRS.has(entry.name)) continue;
+      results.push(relative + "/");
+      results.push(...buildFileTree(cwd, relative, depth + 1));
+    } else {
+      results.push(relative);
+    }
+  }
+  return results;
+}
+function safeReadFile(filePath) {
+  try {
+    if (!fs4.existsSync(filePath)) return null;
+    const stat = fs4.statSync(filePath);
+    if (stat.size > MAX_FILE_SIZE) {
+      return fs4.readFileSync(filePath, "utf-8").slice(0, MAX_FILE_SIZE);
+    }
+    return fs4.readFileSync(filePath, "utf-8");
+  } catch {
+    return null;
+  }
+}
+function detectFramework(deps, devDeps, cwd) {
+  const allDeps = { ...deps, ...devDeps };
+  const nextConfigs = ["next.config.js", "next.config.mjs", "next.config.ts"];
+  for (const cfg of nextConfigs) {
+    if (fs4.existsSync(path5.join(cwd, cfg))) return "next.js";
+  }
+  if ("next" in allDeps) return "next.js";
+  if ("@angular/core" in allDeps) return "angular";
+  if ("nuxt" in allDeps) return "nuxt";
+  if ("vue" in allDeps) return "vue";
+  if ("@sveltejs/kit" in allDeps) return "sveltekit";
+  if ("express" in allDeps) return "express";
+  if ("fastify" in allDeps) return "fastify";
+  const requirementsPath = path5.join(cwd, "requirements.txt");
+  if (fs4.existsSync(requirementsPath)) {
+    const content = safeReadFile(requirementsPath) ?? "";
+    if (content.toLowerCase().includes("django")) return "django";
+    if (content.toLowerCase().includes("flask")) return "flask";
+  }
+  if (fs4.existsSync(path5.join(cwd, "Gemfile"))) return "rails";
+  if (fs4.existsSync(path5.join(cwd, "go.mod"))) return "go";
+  if (fs4.existsSync(path5.join(cwd, "Cargo.toml"))) return "rust";
+  return null;
+}
+function detectLanguage(cwd) {
+  if (fs4.existsSync(path5.join(cwd, "tsconfig.json"))) return "typescript";
+  if (fs4.existsSync(path5.join(cwd, "jsconfig.json"))) return "javascript";
+  if (fs4.existsSync(path5.join(cwd, "package.json"))) return "javascript";
+  if (fs4.existsSync(path5.join(cwd, "requirements.txt"))) return "python";
+  if (fs4.existsSync(path5.join(cwd, "Gemfile"))) return "ruby";
+  if (fs4.existsSync(path5.join(cwd, "go.mod"))) return "go";
+  if (fs4.existsSync(path5.join(cwd, "Cargo.toml"))) return "rust";
+  return null;
+}
+function detectTestFramework(deps, devDeps, cwd) {
+  const allDeps = { ...deps, ...devDeps };
+  if ("vitest" in allDeps) return "vitest";
+  if ("jest" in allDeps) return "jest";
+  if ("mocha" in allDeps) return "mocha";
+  if ("playwright" in allDeps || "@playwright/test" in allDeps) return "playwright";
+  if ("cypress" in allDeps) return "cypress";
+  const requirementsPath = path5.join(cwd, "requirements.txt");
+  if (fs4.existsSync(requirementsPath)) {
+    const content = safeReadFile(requirementsPath) ?? "";
+    if (content.toLowerCase().includes("pytest")) return "pytest";
+  }
+  return null;
+}
+function detectCIPlatform(cwd) {
+  if (fs4.existsSync(path5.join(cwd, ".github", "workflows"))) return "github-actions";
+  if (fs4.existsSync(path5.join(cwd, ".gitlab-ci.yml"))) return "gitlab-ci";
+  if (fs4.existsSync(path5.join(cwd, ".circleci"))) return "circleci";
+  if (fs4.existsSync(path5.join(cwd, "Jenkinsfile"))) return "jenkins";
+  return null;
+}
+function parseEnvFile(filePath) {
+  const content = safeReadFile(filePath);
+  if (!content) return [];
+  return content.split("\n").map((line) => line.trim()).filter((line) => line && !line.startsWith("#")).map((line) => line.split("=")[0].trim()).filter((name) => name.length > 0);
+}
+function collectCIWorkflows(cwd) {
+  const workflowDir = path5.join(cwd, ".github", "workflows");
+  if (!fs4.existsSync(workflowDir)) return [];
+  try {
+    const entries = fs4.readdirSync(workflowDir).filter((f) => f.endsWith(".yml") || f.endsWith(".yaml"));
+    return entries.slice(0, 2).map((name) => {
+      const filePath = path5.join(workflowDir, name);
+      const content = safeReadFile(filePath) ?? "";
+      return { path: `.github/workflows/${name}`, content };
+    });
+  } catch {
+    return [];
+  }
+}
+async function analyzeProject(cwd) {
+  let name = path5.basename(cwd);
+  let packageScripts = null;
+  let dependencies = null;
+  let devDependencies = null;
+  const pkgPath = path5.join(cwd, "package.json");
+  if (fs4.existsSync(pkgPath)) {
+    try {
+      const raw = fs4.readFileSync(pkgPath, "utf-8");
+      const pkg = JSON.parse(raw);
+      if (pkg.name) name = pkg.name;
+      packageScripts = pkg.scripts ?? null;
+      dependencies = pkg.dependencies ?? null;
+      devDependencies = pkg.devDependencies ?? null;
+    } catch {
+    }
+  }
+  const fileTree = buildFileTree(cwd, "", 0);
+  const keyFiles = [];
+  for (const filePath of KEY_FILE_PATHS) {
+    const content = safeReadFile(path5.join(cwd, filePath));
+    if (content !== null) {
+      keyFiles.push({ path: filePath, content });
+    }
+  }
+  try {
+    const rootEntries = fs4.readdirSync(cwd);
+    for (const entry of rootEntries) {
+      if (KEY_FILE_PATTERNS.some((p) => p.test(entry))) {
+        const content = safeReadFile(path5.join(cwd, entry));
+        if (content !== null) {
+          keyFiles.push({ path: entry, content });
+        }
+      }
+    }
+  } catch {
+  }
+  const workflows = collectCIWorkflows(cwd);
+  for (const wf of workflows) {
+    if (!keyFiles.some((f) => f.path === wf.path)) {
+      keyFiles.push(wf);
+    }
+  }
+  const clineDir = path5.join(cwd, ".clinerules");
+  if (fs4.existsSync(clineDir)) {
+    try {
+      const entries = fs4.readdirSync(clineDir).filter((f) => f.endsWith(".md"));
+      for (const entry of entries.slice(0, 3)) {
+        const content = safeReadFile(path5.join(clineDir, entry));
+        if (content !== null) {
+          keyFiles.push({ path: `.clinerules/${entry}`, content });
+        }
+      }
+    } catch {
+    }
+  }
+  const framework = detectFramework(dependencies, devDependencies, cwd);
+  const language = detectLanguage(cwd);
+  const testFramework = detectTestFramework(dependencies, devDependencies, cwd);
+  const ciPlatform = detectCIPlatform(cwd);
+  const hasDocker = fs4.existsSync(path5.join(cwd, "Dockerfile")) || fs4.existsSync(path5.join(cwd, "docker-compose.yml"));
+  let envVars = [];
+  const envExamplePath = path5.join(cwd, ".env.example");
+  const envSamplePath = path5.join(cwd, ".env.sample");
+  if (fs4.existsSync(envExamplePath)) {
+    envVars = parseEnvFile(envExamplePath);
+  } else if (fs4.existsSync(envSamplePath)) {
+    envVars = parseEnvFile(envSamplePath);
+  }
+  return {
+    name,
+    fileTree,
+    keyFiles,
+    packageScripts,
+    dependencies,
+    devDependencies,
+    framework,
+    language,
+    testFramework,
+    ciPlatform,
+    hasDocker,
+    envVars
+  };
+}
+
+// src/commands/analyze.ts
+var analyzeCommand = new Command6("analyze").description("Analyze the current project structure and detected tools").option("--json", "Output raw JSON instead of formatted summary").action(async (options) => {
+  const cwd = process.cwd();
+  const spinner = ora5("Analyzing project...").start();
+  let analysis;
+  try {
+    analysis = await analyzeProject(cwd);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Analysis failed";
+    spinner.fail(message);
+    process.exit(1);
+  }
+  spinner.stop();
+  if (options.json) {
+    console.log(JSON.stringify(analysis, null, 2));
+    return;
+  }
+  console.log();
+  console.log(chalk6.bold(`Project: ${analysis.name}`));
+  console.log();
+  const detectedItems = [
+    ["Framework", analysis.framework],
+    ["Language", analysis.language],
+    ["Test framework", analysis.testFramework],
+    ["CI platform", analysis.ciPlatform],
+    ["Docker", analysis.hasDocker ? "yes" : "no"]
+  ];
+  for (const [label, value] of detectedItems) {
+    const display = value ?? chalk6.dim("not detected");
+    console.log(`  ${chalk6.dim(label + ":")} ${value ? value : display}`);
+  }
+  console.log();
+  console.log(`  ${chalk6.dim("Files:")} ${analysis.fileTree.length}`);
+  if (analysis.keyFiles.length > 0) {
+    console.log();
+    console.log(chalk6.bold("Key files:"));
+    for (const file of analysis.keyFiles) {
+      const size = Buffer.byteLength(file.content, "utf-8");
+      const sizeStr = size < 1024 ? `${size}B` : `${(size / 1024).toFixed(1)}KB`;
+      console.log(`  ${file.path} ${chalk6.dim(`(${sizeStr})`)}`);
+    }
+  }
+  if (analysis.envVars.length > 0) {
+    console.log();
+    console.log(chalk6.bold("Environment variables:"));
+    for (const v of analysis.envVars) {
+      console.log(`  ${v}`);
+    }
+  }
+  if (analysis.packageScripts) {
+    const scriptNames = Object.keys(analysis.packageScripts);
+    if (scriptNames.length > 0) {
+      console.log();
+      console.log(chalk6.bold("Package scripts:"));
+      for (const name of scriptNames) {
+        console.log(`  ${name}`);
+      }
+    }
+  }
+  console.log();
+});
+
+// src/commands/docs.ts
+import { Command as Command7 } from "commander";
+import { confirm as confirm3 } from "@inquirer/prompts";
+import ora6 from "ora";
+import chalk7 from "chalk";
+import fs5 from "fs";
+import path6 from "path";
+var COMMON_DOC_FILES = [
+  "CLAUDE.md",
+  ".cursorrules",
+  ".windsurfrules",
+  "opencode.json",
+  "CONTRIBUTING.md",
+  "ARCHITECTURE.md",
+  "DEVELOPMENT.md",
+  "SETUP.md"
+];
+function readExistingDocs(cwd) {
+  const docs = {};
+  for (const fileName of COMMON_DOC_FILES) {
+    const filePath = path6.join(cwd, fileName);
+    if (fs5.existsSync(filePath)) {
+      try {
+        docs[fileName] = fs5.readFileSync(filePath, "utf-8");
+      } catch {
+      }
+    }
+  }
+  const clineDir = path6.join(cwd, ".clinerules");
+  if (fs5.existsSync(clineDir)) {
+    try {
+      const entries = fs5.readdirSync(clineDir).filter((f) => f.endsWith(".md"));
+      for (const entry of entries) {
+        const filePath = path6.join(clineDir, entry);
+        docs[`.clinerules/${entry}`] = fs5.readFileSync(filePath, "utf-8");
+      }
+    } catch {
+    }
+  }
+  const cursorRulesDir = path6.join(cwd, ".cursor", "rules");
+  if (fs5.existsSync(cursorRulesDir)) {
+    try {
+      const entries = fs5.readdirSync(cursorRulesDir).filter((f) => f.endsWith(".mdc"));
+      for (const entry of entries) {
+        const filePath = path6.join(cursorRulesDir, entry);
+        docs[`.cursor/rules/${entry}`] = fs5.readFileSync(filePath, "utf-8");
+      }
+    } catch {
+    }
+  }
+  return docs;
+}
+var docsCommand = new Command7("docs").description("Generate agent documentation for the current project").option("--output <dir>", "Output directory (default: current directory root)").option("--update", "Read existing docs and improve them").option("--name <name>", "Project name override").action(async (options) => {
+  if (!isAuthenticated()) {
+    console.log(chalk7.dim("Not authenticated. Starting login flow...\n"));
+    await loginCommand.parseAsync([], { from: "user" });
+    if (!isAuthenticated()) {
+      console.log(chalk7.red("Authentication required. Aborting."));
+      process.exit(1);
+    }
+  }
+  const cwd = process.cwd();
+  const spinner = ora6("Analyzing project...").start();
+  let analysis;
+  try {
+    analysis = await analyzeProject(cwd);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Analysis failed";
+    spinner.fail(message);
+    process.exit(1);
+  }
+  if (options.name) {
+    analysis.name = options.name;
+  }
+  spinner.succeed("Project analyzed");
+  console.log();
+  console.log(`  ${chalk7.dim("Project:")} ${analysis.name}`);
+  if (analysis.framework) {
+    console.log(`  ${chalk7.dim("Framework:")} ${analysis.framework}`);
+  }
+  if (analysis.language) {
+    console.log(`  ${chalk7.dim("Language:")} ${analysis.language}`);
+  }
+  console.log(`  ${chalk7.dim("Files:")} ${analysis.fileTree.length}`);
+  console.log();
+  let existingDocs;
+  if (options.update) {
+    existingDocs = readExistingDocs(cwd);
+    const docCount = Object.keys(existingDocs).length;
+    if (docCount > 0) {
+      console.log(chalk7.dim(`Found ${docCount} existing doc(s) to improve.`));
+    } else {
+      console.log(chalk7.dim("No existing docs found. Generating fresh."));
+    }
+    console.log();
+  }
+  const repoContext = {
+    name: analysis.name,
+    description: null,
+    language: analysis.language,
+    topics: [],
+    readme: analysis.keyFiles.find((f) => f.path === "README.md")?.content ?? null,
+    fileTree: analysis.fileTree,
+    packageDeps: analysis.dependencies,
+    devDeps: analysis.devDependencies,
+    tsconfigOptions: null,
+    packageScripts: analysis.packageScripts,
+    ciWorkflows: analysis.keyFiles.filter((f) => f.path.includes(".github/workflows")).map((f) => f.content).join("\n---\n") || null,
+    dockerConfig: analysis.keyFiles.find((f) => f.path === "Dockerfile")?.content ?? null,
+    testConfig: analysis.keyFiles.find((f) => /jest|vitest|playwright/.test(f.path))?.content ?? null,
+    envExample: analysis.keyFiles.find((f) => f.path === ".env.example")?.content ?? null,
+    existingAgentConfig: analysis.keyFiles.find((f) => f.path === "CLAUDE.md" || f.path === ".cursorrules")?.content ?? null
+  };
+  const genSpinner = ora6("Generating documentation...").start();
+  let result;
+  try {
+    result = await generateDocs({
+      repoContext,
+      existingDocs
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Generation failed";
+    genSpinner.fail(message);
+    process.exit(1);
+  }
+  genSpinner.succeed("Documentation generated");
+  console.log();
+  const fileEntries = Object.entries(result.docs);
+  console.log(chalk7.bold("Generated files:"));
+  for (const [filePath, content] of fileEntries) {
+    const words = content.split(/\s+/).length;
+    console.log(`  ${filePath} ${chalk7.dim(`(${words} words)`)}`);
+  }
+  console.log();
+  const proceed = await confirm3({
+    message: "Write generated docs to disk?",
+    default: true
+  });
+  if (!proceed) {
+    console.log(chalk7.dim("Aborted."));
+    process.exit(0);
+  }
+  const outputDir = options.output ? path6.resolve(cwd, options.output) : cwd;
+  const files = fileEntries.map(([filePath, content]) => ({
+    path: filePath,
+    content
+  }));
+  const writeResult = writeExportFiles(files, outputDir);
+  console.log();
+  console.log(chalk7.green("Docs written successfully!"));
+  for (const written of writeResult.written) {
+    console.log(`  ${chalk7.dim("+")} ${written}`);
+  }
+  console.log();
+});
+
 // src/index.ts
-var program = new Command6();
+var program = new Command8();
 program.name("actant").description("CLI for actant.io \u2014 configure AI coding agents").version("0.1.0");
 program.addCommand(initCommand);
 program.addCommand(loginCommand);
 program.addCommand(logoutCommand);
 program.addCommand(listCommand);
 program.addCommand(pushCommand);
+program.addCommand(analyzeCommand);
+program.addCommand(docsCommand);
 program.parse();

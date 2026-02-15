@@ -63,7 +63,8 @@ export default function PricingPage() {
           </div>
 
           {/* Pro plan */}
-          <div className="rounded-lg border border-foreground/20 p-6 flex flex-col">
+          <div className="rounded-lg border border-foreground/20 p-6 flex flex-col relative overflow-hidden">
+            <span className="absolute top-3 right-3 rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium text-foreground">Popular</span>
             <h2 className="text-lg font-semibold">Pro</h2>
             <div className="mt-2">
               <span className="text-3xl font-bold tracking-tight">$10</span>

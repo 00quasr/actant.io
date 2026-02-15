@@ -1,5 +1,5 @@
 import { getStoredAuth, refreshTokens } from "./auth.js";
-import type { ConfigListItem, ExportResult, AgentType, PushConfigInput, PushConfigResult } from "../types.js";
+import type { ConfigListItem, ExportResult, AgentType, PushConfigInput, PushConfigResult, DocsGenerateResult } from "../types.js";
 
 const BASE_URL = process.env.ACTANT_API_URL ?? "https://actant.io";
 
@@ -67,6 +67,27 @@ export async function exportConfig(
   }
 
   return (await response.json()) as ExportResult;
+}
+
+export interface DocsGenerateInput {
+  repoContext?: Record<string, unknown>;
+  projectDescription?: string;
+  techStack?: string[];
+  existingDocs?: Record<string, string>;
+}
+
+export async function generateDocs(input: DocsGenerateInput): Promise<DocsGenerateResult> {
+  const response = await fetchWithAuth("/api/docs/generate", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+
+  if (!response.ok) {
+    const body = (await response.json().catch(() => ({}))) as { error?: string; message?: string };
+    throw new Error(body.message || body.error || `Failed to generate docs (${response.status})`);
+  }
+
+  return (await response.json()) as DocsGenerateResult;
 }
 
 export async function pushConfig(data: PushConfigInput, configId?: string): Promise<PushConfigResult> {

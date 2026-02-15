@@ -7,10 +7,12 @@ import {
   ChevronDownIcon,
   ChevronRightIcon,
   FileTextIcon,
+  ReloadIcon,
 } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useDocsGeneration } from "@/hooks/use-docs-generation";
 
 const COMMON_DOC_FILES = [
   "README.md",
@@ -39,14 +41,32 @@ interface DocsTabProps {
   docs: Record<string, string>;
   setDoc: (filename: string, content: string) => void;
   removeDoc: (filename: string) => void;
+  configName?: string;
+  configDescription?: string;
+  techStack?: string[];
 }
 
-export function DocsTab({ docs, setDoc, removeDoc }: DocsTabProps) {
+export function DocsTab({ docs, setDoc, removeDoc, configName, configDescription, techStack }: DocsTabProps) {
   const [expandedDoc, setExpandedDoc] = useState<string | null>(
     Object.keys(docs)[0] ?? null
   );
   const [newFilename, setNewFilename] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
+  const { status: genStatus, error: genError, generateDocs } = useDocsGeneration();
+
+  async function handleGenerate() {
+    const result = await generateDocs({
+      configName,
+      configDescription,
+      techStack,
+      existingDocs: Object.keys(docs).length > 0 ? docs : undefined,
+    });
+    if (result) {
+      for (const [filename, content] of Object.entries(result)) {
+        setDoc(filename, content);
+      }
+    }
+  }
 
   const docEntries = Object.entries(docs);
   const existingFilenames = new Set(Object.keys(docs));
@@ -81,20 +101,37 @@ export function DocsTab({ docs, setDoc, removeDoc }: DocsTabProps) {
         <div className="text-center py-12 space-y-3">
           <FileTextIcon className="size-8 text-muted-foreground/50 mx-auto" />
           <p className="text-sm text-muted-foreground">
-            No documentation files yet. Generate with AI or add manually.
+            No documentation files yet.
           </p>
-          <div className="flex flex-wrap gap-2 justify-center pt-2">
-            {suggestedFiles.slice(0, 3).map((filename) => (
-              <Button
-                key={filename}
-                variant="outline"
-                size="sm"
-                onClick={() => handleAddSuggested(filename)}
-              >
-                <PlusIcon className="size-3.5" />
-                {filename}
-              </Button>
-            ))}
+          {genStatus === "generating" ? (
+            <div className="flex items-center justify-center gap-2 pt-2">
+              <ReloadIcon className="size-4 animate-spin text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Generating documentation...</span>
+            </div>
+          ) : (
+            <Button onClick={handleGenerate} size="sm" className="mt-1">
+              Generate Docs with AI
+            </Button>
+          )}
+          {genError && (
+            <p className="text-xs text-destructive/80">{genError}</p>
+          )}
+          <div className="space-y-1.5 pt-2">
+            <p className="text-xs text-muted-foreground">Or add manually:</p>
+            <div className="flex flex-wrap gap-2 justify-center">
+              {suggestedFiles.slice(0, 3).map((filename) => (
+                <Button
+                  key={filename}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleAddSuggested(filename)}
+                  disabled={genStatus === "generating"}
+                >
+                  <PlusIcon className="size-3.5" />
+                  {filename}
+                </Button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -215,7 +252,27 @@ export function DocsTab({ docs, setDoc, removeDoc }: DocsTabProps) {
               ))}
             </div>
           )}
+          <div className="ml-auto">
+            {genStatus === "generating" ? (
+              <div className="flex items-center gap-2">
+                <ReloadIcon className="size-3.5 animate-spin text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">Generating...</span>
+              </div>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleGenerate}
+              >
+                <ReloadIcon className="size-3.5" />
+                Regenerate All Docs
+              </Button>
+            )}
+          </div>
         </div>
+      )}
+      {genError && (
+        <p className="text-xs text-destructive/80">{genError}</p>
       )}
     </div>
   );

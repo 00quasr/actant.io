@@ -24,17 +24,17 @@ export function SkillCard({ skill, enabled, onToggle }: SkillCardProps) {
     <Card className="py-4">
       <CardContent className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="font-medium text-sm truncate">{skill.name}</span>
-            <Badge variant="secondary" className="text-[10px] shrink-0">
+          <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+            <Badge variant="secondary" className="text-[10px]">
               {SKILL_CATEGORY_LABELS[skill.category as SkillCategory] ?? skill.category}
             </Badge>
             {skill.source && skill.source !== "custom" && (
-              <Badge variant="outline" className="text-[10px] shrink-0">
+              <Badge variant="outline" className="text-[10px]">
                 {SOURCE_LABELS[skill.source] ?? skill.source}
               </Badge>
             )}
           </div>
+          <p className="font-medium text-sm truncate mb-0.5">{skill.name}</p>
           <p className="text-xs text-muted-foreground line-clamp-2">
             {skill.description}
           </p>

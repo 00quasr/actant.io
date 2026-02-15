@@ -49,7 +49,7 @@ const FEATURES: Record<string, Record<(typeof AGENTS)[number], boolean>> = {
 
 export function AgentComparison() {
   return (
-    <section className="px-6 py-16 sm:py-24">
+    <section className="px-6 py-20 sm:py-28">
       <div className="mx-auto max-w-5xl">
         <FadeIn>
           <p className="text-center text-xs font-medium uppercase tracking-wider text-muted-foreground mb-3">
@@ -65,7 +65,7 @@ export function AgentComparison() {
         </FadeIn>
 
         <FadeIn delay={100}>
-          <div className="mt-8 rounded-lg border overflow-hidden">
+          <div className="mt-10 rounded-lg border overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[540px] text-sm">
                 <thead>
@@ -97,7 +97,7 @@ export function AgentComparison() {
                           {support[agent] ? (
                             <CheckIcon className="mx-auto size-4 text-foreground" />
                           ) : (
-                            <Cross2Icon className="mx-auto size-3.5 text-muted-foreground/40" />
+                            <Cross2Icon className="mx-auto size-3.5 text-muted-foreground/30" />
                           )}
                         </td>
                       ))}

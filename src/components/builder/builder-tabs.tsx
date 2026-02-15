@@ -118,6 +118,9 @@ export function BuilderTabs({
           docs={state.docs}
           setDoc={setDoc}
           removeDoc={removeDoc}
+          configName={state.name}
+          configDescription={state.description}
+          techStack={state.techStack}
         />
       </TabsContent>
     </Tabs>

@@ -51,11 +51,9 @@ export function UserConfigCard({ config }: UserConfigCardProps) {
     <Link href={`/builder/${config.id}`}>
       <Card className="h-full transition-colors hover:border-foreground/20">
         <CardHeader className="pb-2">
-          <div className="flex items-start justify-between gap-2">
-            <CardTitle className="text-sm truncate">{config.name}</CardTitle>
-            <div className="flex items-center gap-1.5 shrink-0">
-              <AgentBadge agent={config.target_agent} />
-            </div>
+          <CardTitle className="text-sm truncate">{config.name}</CardTitle>
+          <div className="flex items-center gap-1.5 pt-1">
+            <AgentBadge agent={config.target_agent} />
           </div>
           {config.description && (
             <CardDescription className="line-clamp-2">

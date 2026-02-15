@@ -40,3 +40,22 @@ export interface PushConfigResult {
   id: string;
   url: string;
 }
+
+export interface ProjectAnalysis {
+  name: string;
+  fileTree: string[];
+  keyFiles: Array<{ path: string; content: string }>;
+  packageScripts: Record<string, string> | null;
+  dependencies: Record<string, string> | null;
+  devDependencies: Record<string, string> | null;
+  framework: string | null;
+  language: string | null;
+  testFramework: string | null;
+  ciPlatform: string | null;
+  hasDocker: boolean;
+  envVars: string[];
+}
+
+export interface DocsGenerateResult {
+  docs: Record<string, string>;
+}

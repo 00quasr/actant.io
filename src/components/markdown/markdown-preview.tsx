@@ -1,5 +1,8 @@
 "use client";
 
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+
 interface MarkdownPreviewProps {
   content: string;
 }
@@ -7,9 +10,7 @@ interface MarkdownPreviewProps {
 export function MarkdownPreview({ content }: MarkdownPreviewProps) {
   return (
     <div className="prose prose-sm prose-neutral dark:prose-invert max-w-none">
-      <pre className="whitespace-pre-wrap font-mono text-xs leading-relaxed bg-transparent border rounded-lg p-4">
-        {content}
-      </pre>
+      <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
     </div>
   );
 }

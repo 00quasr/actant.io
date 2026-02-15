@@ -5,6 +5,8 @@ import { loginCommand } from "./commands/login.js";
 import { logoutCommand } from "./commands/logout.js";
 import { listCommand } from "./commands/list.js";
 import { pushCommand } from "./commands/push.js";
+import { analyzeCommand } from "./commands/analyze.js";
+import { docsCommand } from "./commands/docs.js";
 
 const program = new Command();
 program
@@ -17,5 +19,7 @@ program.addCommand(loginCommand);
 program.addCommand(logoutCommand);
 program.addCommand(listCommand);
 program.addCommand(pushCommand);
+program.addCommand(analyzeCommand);
+program.addCommand(docsCommand);
 
 program.parse();

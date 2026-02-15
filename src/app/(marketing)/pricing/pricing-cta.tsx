@@ -24,7 +24,7 @@ export function PricingCta({ plan }: PricingCtaProps) {
   // Not logged in
   if (!user) {
     return (
-      <Button variant={plan === "pro" ? "default" : "outline"} className="w-full" asChild>
+      <Button variant={plan === "pro" ? "default" : "outline"} className={`w-full ${plan === "pro" ? "bg-foreground hover:bg-foreground/90 text-background" : ""}`} asChild>
         <Link href="/signup">Get Started</Link>
       </Button>
     );
@@ -77,7 +77,7 @@ export function PricingCta({ plan }: PricingCtaProps) {
       <Button
         onClick={handleCheckout}
         disabled={checkoutLoading}
-        className="w-full"
+        className="w-full bg-foreground hover:bg-foreground/90 text-background"
       >
         {checkoutLoading ? "Redirecting..." : "Upgrade to Pro"}
       </Button>

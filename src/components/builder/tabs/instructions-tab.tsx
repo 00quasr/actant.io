@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import type { Extension } from "@codemirror/state";
 import { Button } from "@/components/ui/button";
 import { TemplatePicker } from "@/components/builder/tabs/template-picker";
+import { MarkdownPreview } from "@/components/markdown/markdown-preview";
 import type { AgentType } from "@/types/config";
 import type { Template } from "@/types/marketplace";
 
@@ -75,8 +76,12 @@ export function InstructionsTab({
       </div>
 
       {showPreview ? (
-        <div className="prose prose-sm max-w-none rounded-md border p-4 min-h-96">
-          <pre className="whitespace-pre-wrap font-sans text-sm">{content || "No instructions yet."}</pre>
+        <div className="rounded-md border p-4 min-h-96">
+          {content ? (
+            <MarkdownPreview content={content} />
+          ) : (
+            <p className="text-sm text-muted-foreground">No instructions yet.</p>
+          )}
         </div>
       ) : (
         <div className="rounded-md border overflow-hidden">

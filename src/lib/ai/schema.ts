@@ -47,3 +47,12 @@ export const generatedConfigSchema = z.object({
 });
 
 export type GeneratedConfig = z.infer<typeof generatedConfigSchema>;
+
+export const generatedDocsSchema = z.object({
+  docs: z.array(z.object({
+    filename: z.string(),
+    content: z.string(),
+  })),
+});
+
+export type GeneratedDocs = z.infer<typeof generatedDocsSchema>;

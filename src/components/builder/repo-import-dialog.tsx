@@ -302,6 +302,12 @@ function ImportPreview({
             label="Permissions"
             value={String(Object.keys(result.permissions).length)}
           />
+          {result.docs && Object.keys(result.docs).length > 0 && (
+            <SummaryBadge
+              label="Docs"
+              value={`${Object.keys(result.docs).length} files`}
+            />
+          )}
         </div>
 
         {result.instructions.content && (
@@ -355,6 +361,25 @@ function ImportPreview({
                   <span className="font-medium">{server.name}</span>
                   <span className="text-muted-foreground">
                     ({server.type})
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {result.docs && Object.keys(result.docs).length > 0 && (
+          <div className="space-y-1">
+            <p className="text-xs font-medium text-muted-foreground">Documentation</p>
+            <div className="space-y-1">
+              {Object.entries(result.docs).map(([filename, content]) => (
+                <div key={filename} className="flex items-center justify-between text-xs text-foreground/80">
+                  <div className="flex items-center gap-2">
+                    <span className="size-1 rounded-full bg-foreground/30 shrink-0" />
+                    <span className="font-medium">{filename}</span>
+                  </div>
+                  <span className="text-muted-foreground">
+                    {content.split(/\s+/).filter(Boolean).length} words
                   </span>
                 </div>
               ))}

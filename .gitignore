@@ -49,3 +49,4 @@ extensions/vscode/out/
 .git-rewrite/
 
 .cursor/
+reference/

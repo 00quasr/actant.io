@@ -11,8 +11,12 @@ import { docsCommand } from "./commands/docs.js";
 const program = new Command();
 program
   .name("actant")
-  .description("CLI for actant.io \u2014 configure AI coding agents")
-  .version("0.1.0");
+  .description("CLI for actant.io — configure AI coding agents")
+  .version("0.1.0")
+  .action(async () => {
+    const { launchDashboard } = await import("./dashboard/app.js");
+    await launchDashboard();
+  });
 
 program.addCommand(initCommand);
 program.addCommand(loginCommand);

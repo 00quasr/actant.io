@@ -1,7 +1,11 @@
 export const SITE_NAME = "Actant";
 export const SITE_DESCRIPTION =
   "Configure, share, and export CLI agent configurations for Claude Code, Cursor, Windsurf, Cline, and OpenCode.";
-export const SITE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://actant.io";
+function resolveUrl(raw: string): string {
+  if (raw.startsWith("http://") || raw.startsWith("https://")) return raw;
+  return `https://${raw}`;
+}
+export const SITE_URL = resolveUrl(process.env.NEXT_PUBLIC_APP_URL ?? "https://actant.io");
 
 export const NAV_ITEMS = {
   marketing: [

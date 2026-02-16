@@ -4,7 +4,9 @@ CLI agent configuration platform. Build, share, and export configurations for AI
 
 Actant provides a visual builder for creating configuration files that AI coding agents read to understand your project. Instead of manually writing rules files, permission configs, and MCP server definitions, you use the builder to assemble everything and export a ready-to-use set of files.
 
-<img width="3024" height="8198" alt="grafik" src="https://github.com/user-attachments/assets/7a585eb6-bf6b-4f9b-b1de-99f8f81c815d" />
+
+https://github.com/user-attachments/assets/078cc9be-4312-4060-894c-f8b81a702aa9
+
 
 ## Supported Agents
 

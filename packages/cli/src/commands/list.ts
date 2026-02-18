@@ -32,15 +32,11 @@ export const listCommand = new Command("list")
         chalk.bold(
           padRight("Name", nameWidth) +
             padRight("Agent", agentWidth) +
-            padRight("Updated", dateWidth)
-        )
+            padRight("Updated", dateWidth),
+        ),
       );
       console.log(
-        chalk.dim(
-          "-".repeat(nameWidth) +
-            "-".repeat(agentWidth) +
-            "-".repeat(dateWidth)
-        )
+        chalk.dim("-".repeat(nameWidth) + "-".repeat(agentWidth) + "-".repeat(dateWidth)),
       );
 
       for (const config of configs) {
@@ -49,9 +45,7 @@ export const listCommand = new Command("list")
         const date = new Date(config.updated_at).toLocaleDateString();
 
         console.log(
-          padRight(name, nameWidth) +
-            padRight(agent, agentWidth) +
-            padRight(date, dateWidth)
+          padRight(name, nameWidth) + padRight(agent, agentWidth) + padRight(date, dateWidth),
         );
       }
     } catch (error) {

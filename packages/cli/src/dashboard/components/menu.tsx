@@ -45,9 +45,7 @@ export function Menu({ onSelect, onQuit, authenticated }: MenuProps) {
           <React.Fragment key={item.id}>
             {item.separator && <Box marginTop={1} />}
             <Box>
-              <Text color={isSelected ? "cyan" : undefined}>
-                {isSelected ? " > " : "   "}
-              </Text>
+              <Text color={isSelected ? "cyan" : undefined}>{isSelected ? " > " : "   "}</Text>
               <Text bold={isSelected} color={isSelected ? "cyan" : undefined}>
                 {item.label.padEnd(20)}
               </Text>

@@ -12,11 +12,10 @@ export default function OpenCodePage() {
     <article>
       <h1 className="text-3xl font-bold tracking-tight">OpenCode</h1>
       <p className="mt-4 text-muted-foreground leading-relaxed">
-        OpenCode is an open-source terminal-based AI coding assistant. It uses
-        a single JSON configuration file to define project context, behavioral
-        instructions, and MCP server connections. The JSON-first approach makes
-        OpenCode configurations easy to validate, version control, and share
-        programmatically.
+        OpenCode is an open-source terminal-based AI coding assistant. It uses a single JSON
+        configuration file to define project context, behavioral instructions, and MCP server
+        connections. The JSON-first approach makes OpenCode configurations easy to validate, version
+        control, and share programmatically.
       </p>
 
       {/* ── File Overview ────────────────────────────────────── */}
@@ -38,27 +37,20 @@ export default function OpenCodePage() {
         </table>
       </div>
       <p className="text-muted-foreground leading-relaxed">
-        OpenCode uses a single file for all configuration. This is the
-        simplest configuration model of any supported agent. Everything &mdash;
-        instructions, MCP server definitions, and options &mdash; lives in one
-        JSON document at your project root.
+        OpenCode uses a single file for all configuration. This is the simplest configuration model
+        of any supported agent. Everything &mdash; instructions, MCP server definitions, and options
+        &mdash; lives in one JSON document at your project root.
       </p>
 
       {/* ── opencode.json ────────────────────────────────────── */}
       <h2 className="text-xl font-semibold mt-10 mb-4">opencode.json</h2>
       <p className="text-muted-foreground mb-3 leading-relaxed">
         The configuration file is a JSON object with a{" "}
-        <code className="bg-muted px-1.5 py-0.5 rounded text-sm text-foreground">
-          $schema
-        </code>{" "}
+        <code className="bg-muted px-1.5 py-0.5 rounded text-sm text-foreground">$schema</code>{" "}
         reference for editor autocompletion, an{" "}
-        <code className="bg-muted px-1.5 py-0.5 rounded text-sm text-foreground">
-          instructions
-        </code>{" "}
+        <code className="bg-muted px-1.5 py-0.5 rounded text-sm text-foreground">instructions</code>{" "}
         array, and an optional{" "}
-        <code className="bg-muted px-1.5 py-0.5 rounded text-sm text-foreground">
-          mcpServers
-        </code>{" "}
+        <code className="bg-muted px-1.5 py-0.5 rounded text-sm text-foreground">mcpServers</code>{" "}
         object.
       </p>
       <pre className="bg-muted rounded-lg p-4 text-sm overflow-x-auto">
@@ -123,7 +115,9 @@ export default function OpenCodePage() {
               <td className="p-3 font-mono text-xs">instructions</td>
               <td className="p-3">string[]</td>
               <td className="p-3">Yes</td>
-              <td className="p-3">Array of instruction strings. Each string is a separate rule or guideline.</td>
+              <td className="p-3">
+                Array of instruction strings. Each string is a separate rule or guideline.
+              </td>
             </tr>
             <tr>
               <td className="p-3 font-mono text-xs">mcpServers</td>
@@ -138,40 +132,38 @@ export default function OpenCodePage() {
       {/* ── Instructions Array ───────────────────────────────── */}
       <h2 className="text-xl font-semibold mt-10 mb-4">The Instructions Array</h2>
       <p className="text-muted-foreground mb-3 leading-relaxed">
-        Unlike other agents that use Markdown files, OpenCode takes an array of
-        strings. Each string is an individual instruction or rule. OpenCode
-        concatenates these strings into context for the AI model.
+        Unlike other agents that use Markdown files, OpenCode takes an array of strings. Each string
+        is an individual instruction or rule. OpenCode concatenates these strings into context for
+        the AI model.
       </p>
       <p className="text-muted-foreground mb-4 leading-relaxed">
         Writing guidelines for the instructions array:
       </p>
       <ul className="list-disc list-inside space-y-3 text-muted-foreground leading-relaxed">
         <li>
-          <span className="text-foreground font-medium">One concept per string.</span>{" "}
-          Each instruction should cover a single rule or piece of context. This
-          makes it easy to add, remove, and reorder instructions.
+          <span className="text-foreground font-medium">One concept per string.</span> Each
+          instruction should cover a single rule or piece of context. This makes it easy to add,
+          remove, and reorder instructions.
         </li>
         <li>
           <span className="text-foreground font-medium">Keep instructions self-contained.</span>{" "}
-          Each string should be understandable on its own without requiring
-          context from other strings. Avoid references like &ldquo;as mentioned
-          above.&rdquo;
+          Each string should be understandable on its own without requiring context from other
+          strings. Avoid references like &ldquo;as mentioned above.&rdquo;
         </li>
         <li>
-          <span className="text-foreground font-medium">Use imperative language.</span>{" "}
-          Write &ldquo;Use TypeScript strict mode&rdquo; not &ldquo;We use
-          TypeScript strict mode&rdquo; or &ldquo;TypeScript strict mode should
-          be used.&rdquo;
+          <span className="text-foreground font-medium">Use imperative language.</span> Write
+          &ldquo;Use TypeScript strict mode&rdquo; not &ldquo;We use TypeScript strict mode&rdquo;
+          or &ldquo;TypeScript strict mode should be used.&rdquo;
         </li>
         <li>
-          <span className="text-foreground font-medium">Include Markdown formatting within strings.</span>{" "}
-          You can use backticks for inline code and basic Markdown within each
-          string for emphasis.
+          <span className="text-foreground font-medium">
+            Include Markdown formatting within strings.
+          </span>{" "}
+          You can use backticks for inline code and basic Markdown within each string for emphasis.
         </li>
         <li>
-          <span className="text-foreground font-medium">Order matters.</span>{" "}
-          Place project context and stack information first, followed by
-          conventions, then specific rules and commands.
+          <span className="text-foreground font-medium">Order matters.</span> Place project context
+          and stack information first, followed by conventions, then specific rules and commands.
         </li>
       </ul>
 
@@ -216,20 +208,12 @@ export default function OpenCodePage() {
       <h2 className="text-xl font-semibold mt-10 mb-4">MCP Servers</h2>
       <p className="text-muted-foreground mb-3 leading-relaxed">
         The{" "}
-        <code className="bg-muted px-1.5 py-0.5 rounded text-sm text-foreground">
-          mcpServers
-        </code>{" "}
-        object uses the same format as Claude Code and Cursor. Each key is a
-        server name, and the value is an object with{" "}
-        <code className="bg-muted px-1.5 py-0.5 rounded text-sm text-foreground">
-          command
-        </code>,{" "}
-        <code className="bg-muted px-1.5 py-0.5 rounded text-sm text-foreground">
-          args
-        </code>, and optional{" "}
-        <code className="bg-muted px-1.5 py-0.5 rounded text-sm text-foreground">
-          env
-        </code>{" "}
+        <code className="bg-muted px-1.5 py-0.5 rounded text-sm text-foreground">mcpServers</code>{" "}
+        object uses the same format as Claude Code and Cursor. Each key is a server name, and the
+        value is an object with{" "}
+        <code className="bg-muted px-1.5 py-0.5 rounded text-sm text-foreground">command</code>,{" "}
+        <code className="bg-muted px-1.5 py-0.5 rounded text-sm text-foreground">args</code>, and
+        optional <code className="bg-muted px-1.5 py-0.5 rounded text-sm text-foreground">env</code>{" "}
         fields.
       </p>
       <pre className="bg-muted rounded-lg p-4 text-sm overflow-x-auto">
@@ -262,38 +246,34 @@ export default function OpenCodePage() {
           JSON format requirements
         </p>
         <p className="text-muted-foreground">
-          opencode.json must be valid JSON. Unlike Markdown-based configs, even
-          small syntax errors (trailing commas, unescaped quotes) will prevent
-          the file from loading. Use the Actant builder or a JSON validator to
-          check your file before deploying.
+          opencode.json must be valid JSON. Unlike Markdown-based configs, even small syntax errors
+          (trailing commas, unescaped quotes) will prevent the file from loading. Use the Actant
+          builder or a JSON validator to check your file before deploying.
         </p>
       </div>
 
       {/* ── Comparison with Other Agents ──────────────────────── */}
-      <h2 className="text-xl font-semibold mt-10 mb-4">
-        Comparison with Other Agents
-      </h2>
+      <h2 className="text-xl font-semibold mt-10 mb-4">Comparison with Other Agents</h2>
       <ul className="list-disc list-inside space-y-2 text-muted-foreground leading-relaxed">
         <li>
-          Unlike Claude Code and Cursor, OpenCode uses JSON instead of
-          Markdown for instructions. This makes it more structured but less
-          expressive.
+          Unlike Claude Code and Cursor, OpenCode uses JSON instead of Markdown for instructions.
+          This makes it more structured but less expressive.
         </li>
         <li>
-          Unlike Cline, OpenCode uses a single file instead of multiple files.
-          All rules must fit into one instructions array.
+          Unlike Cline, OpenCode uses a single file instead of multiple files. All rules must fit
+          into one instructions array.
         </li>
         <li>
-          Unlike Windsurf, OpenCode has no character limit. The instructions
-          array can contain as many strings as needed.
+          Unlike Windsurf, OpenCode has no character limit. The instructions array can contain as
+          many strings as needed.
         </li>
         <li>
-          OpenCode supports MCP servers, making it one of three agents (with
-          Claude Code and Cursor) that can connect to external tools.
+          OpenCode supports MCP servers, making it one of three agents (with Claude Code and Cursor)
+          that can connect to external tools.
         </li>
         <li>
-          OpenCode does not support permissions or skills. All behavioral rules
-          must go in the instructions array.
+          OpenCode does not support permissions or skills. All behavioral rules must go in the
+          instructions array.
         </li>
       </ul>
 
@@ -301,39 +281,37 @@ export default function OpenCodePage() {
       <h2 className="text-xl font-semibold mt-10 mb-4">Best Practices</h2>
       <ul className="list-disc list-inside space-y-3 text-muted-foreground leading-relaxed">
         <li>
-          <span className="text-foreground font-medium">Include the $schema field.</span>{" "}
-          It enables autocompletion and validation in VS Code and other editors
-          that support JSON Schema.
+          <span className="text-foreground font-medium">Include the $schema field.</span> It enables
+          autocompletion and validation in VS Code and other editors that support JSON Schema.
         </li>
         <li>
-          <span className="text-foreground font-medium">Use header strings to organize sections.</span>{" "}
-          Strings like &ldquo;## Code Style&rdquo; act as section dividers
-          within the flat array, making the configuration more readable.
+          <span className="text-foreground font-medium">
+            Use header strings to organize sections.
+          </span>{" "}
+          Strings like &ldquo;## Code Style&rdquo; act as section dividers within the flat array,
+          making the configuration more readable.
         </li>
         <li>
           <span className="text-foreground font-medium">Keep individual instructions short.</span>{" "}
-          One sentence per instruction is ideal. Long multi-paragraph strings
-          are harder to maintain and reorder.
+          One sentence per instruction is ideal. Long multi-paragraph strings are harder to maintain
+          and reorder.
         </li>
         <li>
           <span className="text-foreground font-medium">Validate your JSON before deploying.</span>{" "}
-          A single syntax error will prevent the entire file from loading. Run
-          your file through{" "}
-          <code className="bg-muted px-1.5 py-0.5 rounded text-sm text-foreground">
-            json_pp
-          </code>{" "}
-          or a similar tool to check for errors.
+          A single syntax error will prevent the entire file from loading. Run your file through{" "}
+          <code className="bg-muted px-1.5 py-0.5 rounded text-sm text-foreground">json_pp</code> or
+          a similar tool to check for errors.
         </li>
         <li>
           <span className="text-foreground font-medium">Add MCP servers for your data layer.</span>{" "}
-          OpenCode supports MCP, so take advantage of it. Connect to Supabase,
-          GitHub, or other services your project depends on.
+          OpenCode supports MCP, so take advantage of it. Connect to Supabase, GitHub, or other
+          services your project depends on.
         </li>
         <li>
           <span className="text-foreground font-medium">Add .mcp credentials to .gitignore.</span>{" "}
-          Since MCP configurations are embedded in opencode.json, consider
-          using environment variable references or keeping a separate
-          opencode.local.json with real tokens that is gitignored.
+          Since MCP configurations are embedded in opencode.json, consider using environment
+          variable references or keeping a separate opencode.local.json with real tokens that is
+          gitignored.
         </li>
       </ul>
 
@@ -350,9 +328,7 @@ export default function OpenCodePage() {
         </li>
         <li>
           Run{" "}
-          <code className="bg-muted px-1.5 py-0.5 rounded text-sm text-foreground">
-            opencode
-          </code>{" "}
+          <code className="bg-muted px-1.5 py-0.5 rounded text-sm text-foreground">opencode</code>{" "}
           in your terminal to start with the configuration loaded.
         </li>
       </ol>

@@ -1,7 +1,9 @@
 import { createClient } from "@/lib/supabase/client";
 import type { Config } from "@/types/marketplace";
 import type { AgentConfig } from "@/types/config";
-function toDbConfig(config: AgentConfig & { id?: string; documentType?: string; content?: Record<string, unknown> }) {
+function toDbConfig(
+  config: AgentConfig & { id?: string; documentType?: string; content?: Record<string, unknown> },
+) {
   return {
     name: config.name,
     description: config.description || null,
@@ -19,7 +21,12 @@ function toDbConfig(config: AgentConfig & { id?: string; documentType?: string; 
   };
 }
 
-export function fromDbConfig(row: Config): AgentConfig & { id: string; documentType: string; content: Record<string, unknown>; docs: Record<string, string> } {
+export function fromDbConfig(row: Config): AgentConfig & {
+  id: string;
+  documentType: string;
+  content: Record<string, unknown>;
+  docs: Record<string, string>;
+} {
   const rawContent = (row.content as Record<string, unknown>) ?? {};
   const docs = (rawContent.docs as Record<string, string>) ?? {};
   return {
@@ -38,7 +45,9 @@ export function fromDbConfig(row: Config): AgentConfig & { id: string; documentT
   };
 }
 
-export async function createConfig(config: AgentConfig & { documentType?: string; content?: Record<string, unknown> }): Promise<Config> {
+export async function createConfig(
+  config: AgentConfig & { documentType?: string; content?: Record<string, unknown> },
+): Promise<Config> {
   const supabase = createClient();
   const { data, error } = await supabase
     .from("configs")
@@ -52,11 +61,7 @@ export async function createConfig(config: AgentConfig & { documentType?: string
 
 export async function getConfig(id: string): Promise<Config> {
   const supabase = createClient();
-  const { data, error } = await supabase
-    .from("configs")
-    .select("*")
-    .eq("id", id)
-    .single();
+  const { data, error } = await supabase.from("configs").select("*").eq("id", id).single();
 
   if (error) throw error;
   return data;
@@ -64,7 +69,7 @@ export async function getConfig(id: string): Promise<Config> {
 
 export async function updateConfig(
   id: string,
-  config: Partial<AgentConfig> & { documentType?: string; content?: Record<string, unknown> }
+  config: Partial<AgentConfig> & { documentType?: string; content?: Record<string, unknown> },
 ): Promise<Config> {
   const supabase = createClient();
 

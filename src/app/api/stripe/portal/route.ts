@@ -19,10 +19,7 @@ export async function POST() {
     .single();
 
   if (profileError) {
-    return NextResponse.json(
-      { error: "Failed to fetch profile" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to fetch profile" }, { status: 500 });
   }
 
   if (!profile.stripe_customer_id) {

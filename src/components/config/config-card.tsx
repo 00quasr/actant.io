@@ -20,9 +20,7 @@ export function ConfigCard({ listing }: ConfigCardProps) {
               <AgentBadge agent={listing.target_agent} />
             </div>
           </div>
-          <CardDescription className="line-clamp-2">
-            {listing.description}
-          </CardDescription>
+          <CardDescription className="line-clamp-2">{listing.description}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between">

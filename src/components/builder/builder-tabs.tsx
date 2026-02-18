@@ -60,9 +60,7 @@ export function BuilderTabs({
         <TabsTrigger value="mcp">MCP Servers</TabsTrigger>
         <TabsTrigger value="permissions">Permissions</TabsTrigger>
         <TabsTrigger value="rules">Rules</TabsTrigger>
-        <TabsTrigger value="docs">
-          Docs{docsCount > 0 ? ` (${docsCount})` : ""}
-        </TabsTrigger>
+        <TabsTrigger value="docs">Docs{docsCount > 0 ? ` (${docsCount})` : ""}</TabsTrigger>
       </TabsList>
 
       <TabsContent value="instructions" className="pt-6">

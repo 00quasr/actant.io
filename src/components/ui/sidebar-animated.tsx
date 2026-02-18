@@ -18,9 +18,7 @@ interface SidebarContextProps {
   animate: boolean;
 }
 
-const SidebarContext = createContext<SidebarContextProps | undefined>(
-  undefined
-);
+const SidebarContext = createContext<SidebarContextProps | undefined>(undefined);
 
 export const useSidebar = () => {
   const context = useContext(SidebarContext);
@@ -47,9 +45,7 @@ export const SidebarProvider = ({
   const setOpen = setOpenProp !== undefined ? setOpenProp : setOpenState;
 
   return (
-    <SidebarContext.Provider value={{ open, setOpen, animate }}>
-      {children}
-    </SidebarContext.Provider>
+    <SidebarContext.Provider value={{ open, setOpen, animate }}>{children}</SidebarContext.Provider>
   );
 };
 
@@ -94,7 +90,7 @@ export const DesktopSidebar = ({
       <motion.div
         className={cn(
           "h-screen py-4 hidden md:flex md:flex-col bg-background border-r w-[240px] flex-shrink-0 fixed left-0 top-0 z-40 overflow-hidden",
-          className
+          className,
         )}
         animate={{
           width: animate ? (open ? "240px" : "60px") : "240px",
@@ -110,11 +106,7 @@ export const DesktopSidebar = ({
   );
 };
 
-export const MobileSidebar = ({
-  className,
-  children,
-  ...props
-}: React.ComponentProps<"div">) => {
+export const MobileSidebar = ({ className, children, ...props }: React.ComponentProps<"div">) => {
   const { open, setOpen } = useSidebar();
   return (
     <>
@@ -126,10 +118,7 @@ export const MobileSidebar = ({
           Actant
         </Link>
         <div className="flex justify-end z-20">
-          <Menu
-            className="text-foreground cursor-pointer size-5"
-            onClick={() => setOpen(!open)}
-          />
+          <Menu className="text-foreground cursor-pointer size-5" onClick={() => setOpen(!open)} />
         </div>
         <AnimatePresence>
           {open && (
@@ -143,7 +132,7 @@ export const MobileSidebar = ({
               }}
               className={cn(
                 "fixed h-full w-full inset-0 bg-background p-6 z-[100] flex flex-col justify-between",
-                className
+                className,
               )}
             >
               <div
@@ -181,14 +170,12 @@ export const SidebarLink = ({
         active
           ? "bg-secondary text-foreground"
           : "text-muted-foreground hover:bg-muted hover:text-foreground",
-        className
+        className,
       )}
       {...props}
     >
       {/* Fixed-width icon column — stays centered in collapsed state */}
-      <div className="w-[60px] flex items-center justify-center shrink-0">
-        {link.icon}
-      </div>
+      <div className="w-[60px] flex items-center justify-center shrink-0">{link.icon}</div>
       <motion.span
         animate={{
           display: animate ? (open ? "inline-block" : "none") : "inline-block",
@@ -202,13 +189,7 @@ export const SidebarLink = ({
   );
 };
 
-export const SidebarLabel = ({
-  label,
-  className,
-}: {
-  label: string;
-  className?: string;
-}) => {
+export const SidebarLabel = ({ label, className }: { label: string; className?: string }) => {
   const { open, animate } = useSidebar();
   return (
     <motion.div
@@ -222,7 +203,7 @@ export const SidebarLabel = ({
       <span
         className={cn(
           "block text-xs font-medium uppercase tracking-wider text-muted-foreground px-5 pt-4 pb-1",
-          className
+          className,
         )}
       >
         {label}

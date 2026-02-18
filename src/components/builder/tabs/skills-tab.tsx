@@ -40,7 +40,7 @@ export function SkillsTab({ skills, targetAgent, addSkill, removeSkill }: Skills
   };
 
   const compatibleSkills = availableSkills.filter(
-    (s) => s.compatible_agents.length === 0 || s.compatible_agents.includes(targetAgent)
+    (s) => s.compatible_agents.length === 0 || s.compatible_agents.includes(targetAgent),
   );
 
   if (loading) {

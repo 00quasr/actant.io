@@ -13,7 +13,15 @@ import {
 import { AGENT_TYPES, AGENT_LABELS, type AgentType } from "@/types/config";
 import { USE_CASE_LABELS, type UseCase } from "@/types/config";
 
-const USE_CASES: UseCase[] = ["frontend", "backend", "fullstack", "mobile", "devops", "data", "general"];
+const USE_CASES: UseCase[] = [
+  "frontend",
+  "backend",
+  "fullstack",
+  "mobile",
+  "devops",
+  "data",
+  "general",
+];
 
 const SORT_OPTIONS = [
   { value: "newest", label: "Newest" },
@@ -41,9 +49,7 @@ export function FilterSidebar() {
   }
 
   function toggleFilter(key: string, value: string, current: string[]) {
-    const next = current.includes(value)
-      ? current.filter((v) => v !== value)
-      : [...current, value];
+    const next = current.includes(value) ? current.filter((v) => v !== value) : [...current, value];
     updateParams(key, next.join(","));
   }
 

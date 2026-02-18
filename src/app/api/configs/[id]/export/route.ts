@@ -10,10 +10,7 @@ const exportBodySchema = z.object({
   targetAgent: z.enum(["claude-code", "cursor", "windsurf", "cline", "opencode"]),
 });
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
   let body: unknown;
@@ -27,7 +24,7 @@ export async function POST(
   if (!parsed.success) {
     return NextResponse.json(
       { error: `Invalid targetAgent. Must be one of: ${AGENT_TYPES.join(", ")}` },
-      { status: 400 }
+      { status: 400 },
     );
   }
 

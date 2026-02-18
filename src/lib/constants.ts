@@ -31,9 +31,7 @@ export const NAV_ITEMS = {
     },
     {
       title: "Account",
-      items: [
-        { label: "Settings", href: "/profile/settings", icon: "GearIcon" },
-      ],
+      items: [{ label: "Settings", href: "/profile/settings", icon: "GearIcon" }],
     },
   ],
   docs: [

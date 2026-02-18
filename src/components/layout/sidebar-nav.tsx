@@ -14,12 +14,7 @@ import {
   ExitIcon,
 } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { PlanBadge } from "@/components/billing/plan-badge";
 import { NAV_ITEMS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -50,9 +45,7 @@ function NavItems({ onNavigate }: { onNavigate?: () => void }) {
             {group.items.map((item) => {
               const Icon = ICON_MAP[item.icon];
               const isActive =
-                item.href === "/builder"
-                  ? pathname === "/builder"
-                  : pathname.startsWith(item.href);
+                item.href === "/builder" ? pathname === "/builder" : pathname.startsWith(item.href);
 
               return (
                 <Link
@@ -63,7 +56,7 @@ function NavItems({ onNavigate }: { onNavigate?: () => void }) {
                     "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
                     isActive
                       ? "bg-secondary text-foreground"
-                      : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
+                      : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground",
                   )}
                 >
                   {Icon && <Icon className="size-4 shrink-0" />}
@@ -91,11 +84,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <div className="flex h-full flex-col">
       <div className="px-4 py-5">
-        <Link
-          href="/"
-          onClick={onNavigate}
-          className="text-lg font-semibold tracking-tight"
-        >
+        <Link href="/" onClick={onNavigate} className="text-lg font-semibold tracking-tight">
           Actant
         </Link>
       </div>
@@ -142,7 +131,10 @@ export function SidebarNav() {
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="hidden h-screen w-60 shrink-0 border-r md:block sticky top-0" aria-label="Main navigation">
+      <aside
+        className="hidden h-screen w-60 shrink-0 border-r md:block sticky top-0"
+        aria-label="Main navigation"
+      >
         <SidebarContent />
       </aside>
 

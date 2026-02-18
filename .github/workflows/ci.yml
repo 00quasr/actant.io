@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Lint (web)
+        run: npm run lint
+
+      - name: Lint (cli)
+        run: npm run lint:cli
+
+      - name: Format check
+        run: npm run format:check
+
+      - name: Typecheck (web)
+        run: npm run typecheck
+
+      - name: Typecheck (cli)
+        run: npm run typecheck:cli
+
+      - name: Test
+        run: npm run test:all
+
+      - name: Build (web)
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder
+          NEXT_PUBLIC_APP_URL: http://localhost:3000
+
+      - name: Build (cli)
+        run: npm run build:cli

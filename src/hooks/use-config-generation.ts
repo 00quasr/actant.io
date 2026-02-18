@@ -6,13 +6,7 @@ import type { GenerationInput } from "@/validations/generation";
 import type { ClarifyingQuestion } from "@/lib/ai/questions-schema";
 import type { QuestionAnswer } from "@/lib/ai/prompts";
 
-type GenerationStatus =
-  | "idle"
-  | "asking"
-  | "answering"
-  | "generating"
-  | "done"
-  | "error";
+type GenerationStatus = "idle" | "asking" | "answering" | "generating" | "done" | "error";
 
 export function useConfigGeneration() {
   const [status, setStatus] = useState<GenerationStatus>("idle");
@@ -25,7 +19,7 @@ export function useConfigGeneration() {
   async function generateQuestions(
     projectDescription: string,
     techStack: string[],
-    documentType?: string
+    documentType?: string,
   ) {
     setStatus("asking");
     setError(null);
@@ -57,7 +51,7 @@ export function useConfigGeneration() {
   async function autoAnswer(
     projectDescription: string,
     techStack: string[],
-    currentQuestions: ClarifyingQuestion[]
+    currentQuestions: ClarifyingQuestion[],
   ): Promise<Record<string, string> | null> {
     setAutoAnswering(true);
     try {
@@ -119,7 +113,14 @@ export function useConfigGeneration() {
         throw new Error(data.message || data.error || "Generation failed");
       }
 
-      const data = (await res.json()) as { config: AgentConfig & { documentType?: string; content?: Record<string, unknown>; docs?: Record<string, string>; recommendedSkillIds?: string[] } };
+      const data = (await res.json()) as {
+        config: AgentConfig & {
+          documentType?: string;
+          content?: Record<string, unknown>;
+          docs?: Record<string, string>;
+          recommendedSkillIds?: string[];
+        };
+      };
       // Normalize nulls to undefined for compatibility with AgentConfig types
       const config: AgentConfig = {
         ...data.config,

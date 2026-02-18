@@ -8,12 +8,7 @@ export interface ExportResult {
   warnings: string[];
 }
 
-export type AgentType =
-  | "claude-code"
-  | "cursor"
-  | "windsurf"
-  | "cline"
-  | "opencode";
+export type AgentType = "claude-code" | "cursor" | "windsurf" | "cline" | "opencode";
 
 export interface ConfigListItem {
   id: string;

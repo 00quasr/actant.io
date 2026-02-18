@@ -79,30 +79,19 @@ export function UpgradeDialog({ open, onOpenChange }: UpgradeDialogProps) {
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Upgrade to Pro</DialogTitle>
-          <DialogDescription>
-            Unlock unlimited configs and AI generations.
-          </DialogDescription>
+          <DialogDescription>Unlock unlimited configs and AI generations.</DialogDescription>
         </DialogHeader>
 
         <div className="mt-2">
           <div className="grid grid-cols-3 gap-x-4 border-b pb-2">
-            <span className="text-sm font-medium text-muted-foreground">
-              Feature
-            </span>
-            <span className="text-sm font-medium text-muted-foreground text-center">
-              Free
-            </span>
-            <span className="text-sm font-medium text-muted-foreground text-center">
-              Pro
-            </span>
+            <span className="text-sm font-medium text-muted-foreground">Feature</span>
+            <span className="text-sm font-medium text-muted-foreground text-center">Free</span>
+            <span className="text-sm font-medium text-muted-foreground text-center">Pro</span>
           </div>
 
           <div className="divide-y">
             {features.map((feature) => (
-              <div
-                key={feature.label}
-                className="grid grid-cols-3 gap-x-4 py-2.5 items-center"
-              >
+              <div key={feature.label} className="grid grid-cols-3 gap-x-4 py-2.5 items-center">
                 <span className="text-sm text-foreground">{feature.label}</span>
                 <div className="flex justify-center">
                   <FeatureValue value={feature.free} />
@@ -117,17 +106,11 @@ export function UpgradeDialog({ open, onOpenChange }: UpgradeDialogProps) {
 
         <div className="mt-4 flex flex-col items-center gap-3">
           <div className="text-center">
-            <span className="text-2xl font-semibold tracking-tight">
-              $10
-            </span>
+            <span className="text-2xl font-semibold tracking-tight">$10</span>
             <span className="text-sm text-muted-foreground"> / month</span>
           </div>
 
-          <Button
-            onClick={handleCheckout}
-            disabled={loading}
-            className="w-full"
-          >
+          <Button onClick={handleCheckout} disabled={loading} className="w-full">
             {loading ? "Redirecting..." : "Upgrade to Pro"}
           </Button>
         </div>

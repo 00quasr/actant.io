@@ -67,11 +67,10 @@ function parseMcpJson(content: string): ParsedConfig["mcpServers"] {
       command: entry.command,
       args: Array.isArray(entry.args) ? entry.args.map(String) : undefined,
       url: typeof entry.url === "string" ? entry.url : undefined,
-      env: entry.env && typeof entry.env === "object"
-        ? Object.fromEntries(
-            Object.entries(entry.env).map(([k, v]) => [k, String(v)])
-          )
-        : undefined,
+      env:
+        entry.env && typeof entry.env === "object"
+          ? Object.fromEntries(Object.entries(entry.env).map(([k, v]) => [k, String(v)]))
+          : undefined,
       enabled: true,
     });
   }
@@ -107,7 +106,12 @@ function parseClaudePermissions(content: string): ParsedConfig["permissions"] {
   return result;
 }
 
-function parseCursorMdcFrontmatter(content: string): { title: string; content: string; glob?: string; alwaysApply?: boolean } {
+function parseCursorMdcFrontmatter(content: string): {
+  title: string;
+  content: string;
+  glob?: string;
+  alwaysApply?: boolean;
+} {
   const lines = content.split("\n");
   let title = "";
   let glob: string | undefined;
@@ -162,13 +166,16 @@ function parseClaudeCode(files: ScannedFile[], name: string): ParsedConfig {
     config.mcpServers = parseMcpJson(mcpFile.content);
   }
 
-  const skillFiles = files.filter((f) => f.path.includes(".claude/skills/") && f.path.endsWith("SKILL.md"));
+  const skillFiles = files.filter(
+    (f) => f.path.includes(".claude/skills/") && f.path.endsWith("SKILL.md"),
+  );
   for (const skill of skillFiles) {
     const parts = skill.path.split("/");
     const skillDirIdx = parts.indexOf("skills");
-    const skillName = skillDirIdx >= 0 && skillDirIdx + 1 < parts.length
-      ? parts[skillDirIdx + 1] ?? "unknown"
-      : "unknown";
+    const skillName =
+      skillDirIdx >= 0 && skillDirIdx + 1 < parts.length
+        ? (parts[skillDirIdx + 1] ?? "unknown")
+        : "unknown";
 
     config.skills.push({
       skillId: skillName,

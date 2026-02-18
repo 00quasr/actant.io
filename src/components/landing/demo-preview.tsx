@@ -12,8 +12,7 @@ export function DemoPreview() {
             Build your config visually
           </h2>
           <p className="mx-auto mt-3 max-w-lg text-center text-sm text-muted-foreground">
-            A single builder interface for instructions, skills, MCP servers, and
-            export settings.
+            A single builder interface for instructions, skills, MCP servers, and export settings.
           </p>
         </FadeIn>
 
@@ -26,9 +25,7 @@ export function DemoPreview() {
                 <span className="size-2.5 rounded-full bg-muted-foreground/20" />
                 <span className="size-2.5 rounded-full bg-muted-foreground/20" />
               </div>
-              <span className="ml-2 text-xs text-muted-foreground">
-                actant.io/builder
-              </span>
+              <span className="ml-2 text-xs text-muted-foreground">actant.io/builder</span>
             </div>
 
             <div className="grid sm:grid-cols-[180px_1fr]">
@@ -40,14 +37,12 @@ export function DemoPreview() {
                       <div
                         key={tab}
                         className={`rounded-md px-3 py-1.5 text-xs ${
-                          i === 0
-                            ? "bg-muted font-medium"
-                            : "text-muted-foreground"
+                          i === 0 ? "bg-muted font-medium" : "text-muted-foreground"
                         }`}
                       >
                         {tab}
                       </div>
-                    )
+                    ),
                   )}
                 </div>
               </div>

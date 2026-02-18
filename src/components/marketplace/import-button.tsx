@@ -11,8 +11,6 @@ export function ImportButton({ listingId }: ImportButtonProps) {
   const router = useRouter();
 
   return (
-    <Button onClick={() => router.push(`/builder/import/${listingId}`)}>
-      Use this config
-    </Button>
+    <Button onClick={() => router.push(`/builder/import/${listingId}`)}>Use this config</Button>
   );
 }

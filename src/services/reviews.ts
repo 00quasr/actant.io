@@ -21,7 +21,9 @@ export async function createReview(data: {
 }): Promise<Review> {
   const supabase = createClient();
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Not authenticated");
 
   const { data: review, error } = await supabase
@@ -41,7 +43,7 @@ export async function createReview(data: {
 
 export async function updateReview(
   id: string,
-  data: { rating: number; comment?: string }
+  data: { rating: number; comment?: string },
 ): Promise<Review> {
   const supabase = createClient();
 

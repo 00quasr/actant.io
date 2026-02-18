@@ -15,7 +15,11 @@ import { AiGenerateDialog } from "@/components/builder/ai-generate-dialog";
 import { RULE_PRESETS, PERMISSION_PRESETS } from "@/lib/presets";
 
 interface BuilderShellProps {
-  initialConfig?: AgentConfig & { id?: string; content?: Record<string, unknown>; docs?: Record<string, string> };
+  initialConfig?: AgentConfig & {
+    id?: string;
+    content?: Record<string, unknown>;
+    docs?: Record<string, string>;
+  };
   initialTemplate?: Template;
 }
 
@@ -47,7 +51,9 @@ export function BuilderShell({ initialConfig, initialTemplate }: BuilderShellPro
   } = useConfig(initialConfig);
 
   const stateRef = useRef(state);
-  useEffect(() => { stateRef.current = state; });
+  useEffect(() => {
+    stateRef.current = state;
+  });
 
   const handleCreate = useCallback(async () => {
     const current = stateRef.current;
@@ -81,8 +87,23 @@ export function BuilderShell({ initialConfig, initialTemplate }: BuilderShellPro
 
   const handleLoadTemplate = (template: Template) => {
     const instructions = template.instructions as { content: string; templateId?: string };
-    const rules = (template.rules as Array<{ title: string; content: string; glob?: string; alwaysApply?: boolean }>) ?? [];
-    const mcpServers = (template.mcp_servers as Array<{ name: string; type: "stdio" | "sse" | "streamable-http"; command?: string; args?: string[]; url?: string; env?: Record<string, string>; enabled: boolean }>) ?? [];
+    const rules =
+      (template.rules as Array<{
+        title: string;
+        content: string;
+        glob?: string;
+        alwaysApply?: boolean;
+      }>) ?? [];
+    const mcpServers =
+      (template.mcp_servers as Array<{
+        name: string;
+        type: "stdio" | "sse" | "streamable-http";
+        command?: string;
+        args?: string[];
+        url?: string;
+        env?: Record<string, string>;
+        enabled: boolean;
+      }>) ?? [];
     const permissions = (template.permissions ?? {}) as Record<string, "allow" | "ask" | "deny">;
 
     loadTemplate({
@@ -220,7 +241,9 @@ export function BuilderShell({ initialConfig, initialTemplate }: BuilderShellPro
         onSave={saveNow}
       />
       <div className="flex flex-1 min-h-0">
-        <div className={`flex-1 min-w-0 min-h-0 overflow-y-auto ${previewVisible ? "lg:w-3/5" : "w-full"}`}>
+        <div
+          className={`flex-1 min-w-0 min-h-0 overflow-y-auto ${previewVisible ? "lg:w-3/5" : "w-full"}`}
+        >
           <BuilderTabs
             state={state}
             setInstructions={setInstructions}

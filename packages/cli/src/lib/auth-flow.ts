@@ -27,7 +27,7 @@ export function startBrowserAuthFlow(): Promise<StoredAuth> {
 
       res.writeHead(200, { "Content-Type": "text/html" });
       res.end(
-        "<html><body><p>Authentication successful! You can close this tab.</p></body></html>"
+        "<html><body><p>Authentication successful! You can close this tab.</p></body></html>",
       );
 
       server.close();

@@ -7,11 +7,7 @@ interface FavoritesListProps {
 
 export function FavoritesList({ listings }: FavoritesListProps) {
   if (listings.length === 0) {
-    return (
-      <p className="py-8 text-center text-sm text-muted-foreground">
-        No favorites yet
-      </p>
-    );
+    return <p className="py-8 text-center text-sm text-muted-foreground">No favorites yet</p>;
   }
 
   return (

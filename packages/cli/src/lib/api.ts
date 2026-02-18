@@ -1,12 +1,16 @@
 import { getStoredAuth, refreshTokens } from "./auth.js";
-import type { ConfigListItem, ExportResult, AgentType, PushConfigInput, PushConfigResult, DocsGenerateResult } from "../types.js";
+import type {
+  ConfigListItem,
+  ExportResult,
+  AgentType,
+  PushConfigInput,
+  PushConfigResult,
+  DocsGenerateResult,
+} from "../types.js";
 
 const BASE_URL = process.env.ACTANT_API_URL ?? "https://actant.io";
 
-async function fetchWithAuth(
-  path: string,
-  options: RequestInit = {}
-): Promise<Response> {
+async function fetchWithAuth(path: string, options: RequestInit = {}): Promise<Response> {
   const auth = getStoredAuth();
   if (!auth) {
     throw new Error("Not authenticated. Run `actant login` first.");
@@ -50,10 +54,7 @@ export async function getConfigs(): Promise<ConfigListItem[]> {
   return (await response.json()) as ConfigListItem[];
 }
 
-export async function exportConfig(
-  id: string,
-  targetAgent: AgentType
-): Promise<ExportResult> {
+export async function exportConfig(id: string, targetAgent: AgentType): Promise<ExportResult> {
   const response = await fetchWithAuth(`/api/configs/${id}/export-json`, {
     method: "POST",
     body: JSON.stringify({ targetAgent }),
@@ -90,7 +91,10 @@ export async function generateDocs(input: DocsGenerateInput): Promise<DocsGenera
   return (await response.json()) as DocsGenerateResult;
 }
 
-export async function pushConfig(data: PushConfigInput, configId?: string): Promise<PushConfigResult> {
+export async function pushConfig(
+  data: PushConfigInput,
+  configId?: string,
+): Promise<PushConfigResult> {
   const apiPath = configId ? `/api/configs/${configId}` : "/api/configs/push";
   const method = configId ? "PUT" : "POST";
 

@@ -29,7 +29,7 @@ function Dashboard() {
     (target: ScreenId) => {
       navigate(target);
     },
-    [navigate]
+    [navigate],
   );
 
   if (screen === "analyze") {
@@ -54,11 +54,7 @@ function Dashboard() {
   return (
     <Box flexDirection="column">
       <Header authenticated={authenticated} compact={compact} />
-      <Menu
-        onSelect={handleSelect}
-        onQuit={handleQuit}
-        authenticated={authenticated}
-      />
+      <Menu onSelect={handleSelect} onQuit={handleQuit} authenticated={authenticated} />
       <Footer />
     </Box>
   );
@@ -66,7 +62,9 @@ function Dashboard() {
 
 export async function launchDashboard(): Promise<void> {
   if (!process.stdin.isTTY) {
-    console.error("Dashboard requires an interactive terminal. Use subcommands (e.g. `actant analyze`) for non-interactive use.");
+    console.error(
+      "Dashboard requires an interactive terminal. Use subcommands (e.g. `actant analyze`) for non-interactive use.",
+    );
     process.exit(1);
   }
   const instance = render(<Dashboard />);

@@ -71,17 +71,10 @@ export function LoginForm() {
     <div className="flex w-full max-w-sm flex-col gap-6">
       <div className="text-center">
         <h1 className="text-2xl font-semibold tracking-tight">Sign in</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Sign in to your account to continue
-        </p>
+        <p className="mt-1 text-sm text-muted-foreground">Sign in to your account to continue</p>
       </div>
 
-      <Button
-        variant="outline"
-        className="w-full"
-        onClick={signInWithGitHub}
-        type="button"
-      >
+      <Button variant="outline" className="w-full" onClick={signInWithGitHub} type="button">
         <GitHubLogoIcon className="size-4" />
         Continue with GitHub
       </Button>
@@ -144,7 +137,10 @@ export function LoginForm() {
 
       <p className="text-center text-sm text-muted-foreground">
         Don&apos;t have an account?{" "}
-        <Link href="/signup" className="font-medium text-foreground underline-offset-4 hover:underline">
+        <Link
+          href="/signup"
+          className="font-medium text-foreground underline-offset-4 hover:underline"
+        >
           Sign up
         </Link>
       </p>

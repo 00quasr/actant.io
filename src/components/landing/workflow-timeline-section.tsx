@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  Settings,
-  Layers,
-  Sparkles,
-  Share2,
-  Terminal,
-} from "lucide-react";
+import { Settings, Layers, Sparkles, Share2, Terminal } from "lucide-react";
 import RadialOrbitalTimeline from "@/components/ui/radial-orbital-timeline";
 import { FadeIn } from "./fade-in";
 
@@ -15,8 +9,7 @@ const workflowData = [
     id: 1,
     title: "Choose Agent",
     date: "Step 1",
-    content:
-      "Pick your AI coding agent — Claude Code, Cursor, Windsurf, Cline, or OpenCode.",
+    content: "Pick your AI coding agent — Claude Code, Cursor, Windsurf, Cline, or OpenCode.",
     category: "Setup",
     icon: Settings,
     relatedIds: [2],
@@ -51,8 +44,7 @@ const workflowData = [
     id: 4,
     title: "Share & Publish",
     date: "Step 4",
-    content:
-      "Publish to the marketplace for others to discover, or share directly with your team.",
+    content: "Publish to the marketplace for others to discover, or share directly with your team.",
     category: "Share",
     icon: Share2,
     relatedIds: [3, 5],
@@ -63,8 +55,7 @@ const workflowData = [
     id: 5,
     title: "Deploy via CLI",
     date: "Step 5",
-    content:
-      "Pull any config into your project instantly with npx actant init.",
+    content: "Pull any config into your project instantly with npx actant init.",
     category: "Deploy",
     icon: Terminal,
     relatedIds: [4],
@@ -85,8 +76,7 @@ export function WorkflowTimelineSection() {
             From config to deploy
           </h2>
           <p className="mx-auto mt-3 max-w-lg text-center text-sm text-muted-foreground">
-            Click any node to explore how Actant takes you from setup to
-            production.
+            Click any node to explore how Actant takes you from setup to production.
           </p>
         </FadeIn>
       </div>

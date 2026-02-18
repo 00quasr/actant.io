@@ -8,9 +8,7 @@ interface PublishedConfigsListProps {
 export function PublishedConfigsList({ listings }: PublishedConfigsListProps) {
   if (listings.length === 0) {
     return (
-      <p className="py-8 text-center text-sm text-muted-foreground">
-        No published configs yet
-      </p>
+      <p className="py-8 text-center text-sm text-muted-foreground">No published configs yet</p>
     );
   }
 

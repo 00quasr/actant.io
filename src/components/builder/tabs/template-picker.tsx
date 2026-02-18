@@ -21,12 +21,7 @@ interface TemplatePickerProps {
   onSelect: (template: Template) => void;
 }
 
-export function TemplatePicker({
-  open,
-  onOpenChange,
-  targetAgent,
-  onSelect,
-}: TemplatePickerProps) {
+export function TemplatePicker({ open, onOpenChange, targetAgent, onSelect }: TemplatePickerProps) {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -99,9 +94,7 @@ export function TemplatePicker({
                     {template.use_case}
                   </Badge>
                 </div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  {template.description}
-                </div>
+                <div className="text-xs text-muted-foreground mt-1">{template.description}</div>
               </button>
             ))
           )}

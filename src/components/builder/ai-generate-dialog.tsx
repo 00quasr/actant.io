@@ -22,15 +22,7 @@ import type { Skill } from "@/types/marketplace";
 import type { ClarifyingQuestion } from "@/lib/ai/questions-schema";
 import type { QuestionAnswer } from "@/lib/ai/prompts";
 
-const QUICK_STACK_OPTIONS = [
-  "React",
-  "Next.js",
-  "Vue",
-  "Node.js",
-  "Python",
-  "Rust",
-  "Go",
-] as const;
+const QUICK_STACK_OPTIONS = ["React", "Next.js", "Vue", "Node.js", "Python", "Rust", "Go"] as const;
 
 const LOADING_STAGES = [
   "Analyzing project context...",
@@ -94,7 +86,7 @@ export function AiGenerateDialog({
 
   useEffect(() => {
     if (limitReached) {
-      setShowUpgrade(true);
+      setShowUpgrade(true); // eslint-disable-line react-hooks/set-state-in-effect -- syncing derived state from hook
     }
   }, [limitReached]);
 
@@ -105,7 +97,7 @@ export function AiGenerateDialog({
 
   function toggleStackItem(item: string) {
     setTechStack((prev) =>
-      prev.includes(item) ? prev.filter((t) => t !== item) : [...prev, item]
+      prev.includes(item) ? prev.filter((t) => t !== item) : [...prev, item],
     );
   }
 
@@ -240,40 +232,30 @@ export function AiGenerateDialog({
           />
         )}
 
-        {status === "asking" && (
-          <StagedLoading contextLabel="Generating questions..." />
-        )}
+        {status === "asking" && <StagedLoading contextLabel="Generating questions..." />}
 
-        {(status === "answering" || (status === "error" && questions.length > 0)) && !showSkillPicker && (
-          <AnswerForm
-            questions={questions}
-            answers={answers}
-            setAnswers={setAnswers}
-            error={error}
-            autoAnswering={autoAnswering}
-            onAutoAnswer={handleAutoAnswer}
-            onSkip={() => handleAnswersDone(false)}
-            onGenerate={() => handleAnswersDone(true)}
-          />
-        )}
+        {(status === "answering" || (status === "error" && questions.length > 0)) &&
+          !showSkillPicker && (
+            <AnswerForm
+              questions={questions}
+              answers={answers}
+              setAnswers={setAnswers}
+              error={error}
+              autoAnswering={autoAnswering}
+              onAutoAnswer={handleAutoAnswer}
+              onSkip={() => handleAnswersDone(false)}
+              onGenerate={() => handleAnswersDone(true)}
+            />
+          )}
 
         {showSkillPicker && status !== "generating" && (
-          <SkillPicker
-            onDone={handleSkillsDone}
-            onSkip={handleSkipSkills}
-          />
+          <SkillPicker onDone={handleSkillsDone} onSkip={handleSkipSkills} />
         )}
 
-        {status === "generating" && (
-          <StagedLoading contextLabel="Generating configuration..." />
-        )}
+        {status === "generating" && <StagedLoading contextLabel="Generating configuration..." />}
 
         {status === "done" && result && (
-          <PreviewState
-            result={result}
-            onAccept={handleAccept}
-            onRegenerate={handleRegenerate}
-          />
+          <PreviewState result={result} onAccept={handleAccept} onRegenerate={handleRegenerate} />
         )}
       </div>
 
@@ -349,19 +331,16 @@ function HeroInput({
   onNext,
 }: HeroInputProps) {
   const customItems = techStack.filter(
-    (t) =>
-      !QUICK_STACK_OPTIONS.includes(t as (typeof QUICK_STACK_OPTIONS)[number])
+    (t) => !QUICK_STACK_OPTIONS.includes(t as (typeof QUICK_STACK_OPTIONS)[number]),
   );
 
   return (
     <div className="flex flex-col items-center">
       <div className="text-center mb-12">
-        <h2 className="text-4xl font-bold tracking-tight">
-          What are you building?
-        </h2>
+        <h2 className="text-4xl font-bold tracking-tight">What are you building?</h2>
         <p className="mt-4 text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
-          Describe your project and we&apos;ll generate a tailored agent config
-          with instructions, rules, MCP servers, permissions, and documentation.
+          Describe your project and we&apos;ll generate a tailored agent config with instructions,
+          rules, MCP servers, permissions, and documentation.
         </p>
       </div>
 
@@ -542,9 +521,7 @@ function AnswerForm({
   return (
     <div className="flex flex-col items-center">
       <div className="text-center mb-10">
-        <h2 className="text-2xl font-bold tracking-tight">
-          A few quick questions
-        </h2>
+        <h2 className="text-2xl font-bold tracking-tight">A few quick questions</h2>
         <p className="mt-2 text-sm text-muted-foreground">
           Help us understand your project better for a more accurate config.
         </p>
@@ -552,12 +529,7 @@ function AnswerForm({
 
       <div className="w-full space-y-6">
         <div className="flex justify-end">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onAutoAnswer}
-            disabled={autoAnswering}
-          >
+          <Button variant="outline" size="sm" onClick={onAutoAnswer} disabled={autoAnswering}>
             {autoAnswering ? (
               <>
                 <span className="size-3 rounded-full border-2 border-muted-foreground/30 border-t-foreground animate-spin mr-2" />
@@ -575,16 +547,12 @@ function AnswerForm({
         {questions.map((q, i) => (
           <div key={q.id} className="rounded-lg border p-5 space-y-3">
             <div className="flex items-start justify-between">
-              <p className="text-sm font-medium leading-relaxed">
-                {q.question}
-              </p>
+              <p className="text-sm font-medium leading-relaxed">{q.question}</p>
               <span className="text-xs text-muted-foreground shrink-0 ml-3">
                 {i + 1} of {questions.length}
               </span>
             </div>
-            {q.context && (
-              <p className="text-xs text-muted-foreground">{q.context}</p>
-            )}
+            {q.context && <p className="text-xs text-muted-foreground">{q.context}</p>}
 
             {q.type === "multiple_choice" && q.options ? (
               <div className="grid grid-cols-2 gap-2">
@@ -662,7 +630,9 @@ function SkillPicker({ onDone, onSkip }: SkillPickerProps) {
       }
     }
     load();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   function toggleSkill(id: string) {
@@ -691,9 +661,7 @@ function SkillPicker({ onDone, onSkip }: SkillPickerProps) {
   return (
     <div className="flex flex-col items-center">
       <div className="text-center mb-10">
-        <h2 className="text-2xl font-bold tracking-tight">
-          Add skills
-        </h2>
+        <h2 className="text-2xl font-bold tracking-tight">Add skills</h2>
         <p className="mt-2 text-sm text-muted-foreground">
           Optionally include skills to enhance your agent&apos;s capabilities.
         </p>
@@ -712,9 +680,7 @@ function SkillPicker({ onDone, onSkip }: SkillPickerProps) {
 
         <div className="max-h-80 overflow-y-auto space-y-2">
           {loading ? (
-            <div className="py-8 text-center text-sm text-muted-foreground">
-              Loading skills...
-            </div>
+            <div className="py-8 text-center text-sm text-muted-foreground">Loading skills...</div>
           ) : filtered.length === 0 ? (
             <div className="py-8 text-center text-sm text-muted-foreground">
               {searchQuery ? "No skills match your search." : "No skills available."}
@@ -735,9 +701,7 @@ function SkillPicker({ onDone, onSkip }: SkillPickerProps) {
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 min-w-0">
-                      <span className="text-sm font-medium truncate">
-                        {skill.name}
-                      </span>
+                      <span className="text-sm font-medium truncate">{skill.name}</span>
                       <span className="shrink-0 rounded-full border px-2 py-0.5 text-[10px] text-muted-foreground">
                         {skill.category}
                       </span>
@@ -747,9 +711,7 @@ function SkillPicker({ onDone, onSkip }: SkillPickerProps) {
                         </span>
                       )}
                     </div>
-                    {isSelected && (
-                      <CheckIcon className="size-4 shrink-0 ml-2" />
-                    )}
+                    {isSelected && <CheckIcon className="size-4 shrink-0 ml-2" />}
                   </div>
                   <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
                     {skill.description}
@@ -798,9 +760,7 @@ function StagedLoading({ contextLabel }: { contextLabel: string }) {
 
   return (
     <div className="flex flex-col items-center py-16">
-      <p className="text-sm font-medium animate-pulse mb-10">
-        {contextLabel}
-      </p>
+      <p className="text-sm font-medium animate-pulse mb-10">{contextLabel}</p>
 
       <div className="w-full max-w-sm space-y-3">
         {LOADING_STAGES.map((label, i) => {
@@ -862,9 +822,7 @@ function PreviewState({ result, onAccept, onRegenerate }: PreviewStateProps) {
   return (
     <div className="flex flex-col items-center">
       <div className="text-center mb-10">
-        <h2 className="text-2xl font-bold tracking-tight">
-          Your config is ready
-        </h2>
+        <h2 className="text-2xl font-bold tracking-tight">Your config is ready</h2>
         <p className="mt-2 text-sm text-muted-foreground">
           Review the generated configuration before applying it.
         </p>
@@ -886,9 +844,7 @@ function PreviewState({ result, onAccept, onRegenerate }: PreviewStateProps) {
           {result.skills.length > 0 && (
             <StatBadge label="Skills" value={String(result.skills.length)} />
           )}
-          {docsCount > 0 && (
-            <StatBadge label="Docs" value={String(docsCount)} />
-          )}
+          {docsCount > 0 && <StatBadge label="Docs" value={String(docsCount)} />}
         </div>
 
         {/* Instructions */}
@@ -960,13 +916,15 @@ function PreviewState({ result, onAccept, onRegenerate }: PreviewStateProps) {
               {Object.entries(result.permissions).map(([tool, value]) => (
                 <div key={tool} className="flex items-center justify-between text-xs">
                   <span className="font-mono text-foreground/80">{tool}</span>
-                  <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
-                    value === "allow"
-                      ? "bg-green-500/10 text-green-700"
-                      : value === "deny"
-                        ? "bg-red-500/10 text-red-700"
-                        : "bg-amber-500/10 text-amber-700"
-                  }`}>
+                  <span
+                    className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
+                      value === "allow"
+                        ? "bg-green-500/10 text-green-700"
+                        : value === "deny"
+                          ? "bg-red-500/10 text-red-700"
+                          : "bg-amber-500/10 text-amber-700"
+                    }`}
+                  >
                     {value}
                   </span>
                 </div>
@@ -988,11 +946,13 @@ function PreviewState({ result, onAccept, onRegenerate }: PreviewStateProps) {
                 <div key={i} className="flex items-center gap-2 text-xs text-foreground/80">
                   <span className="size-1 rounded-full bg-foreground/30 shrink-0" />
                   <span className="font-medium">{skill.skillId}</span>
-                  <span className={`text-[10px] px-1.5 py-0.5 rounded ${
-                    skill.enabled
-                      ? "bg-green-500/10 text-green-700"
-                      : "bg-muted text-muted-foreground"
-                  }`}>
+                  <span
+                    className={`text-[10px] px-1.5 py-0.5 rounded ${
+                      skill.enabled
+                        ? "bg-green-500/10 text-green-700"
+                        : "bg-muted text-muted-foreground"
+                    }`}
+                  >
                     {skill.enabled ? "enabled" : "disabled"}
                   </span>
                 </div>
@@ -1069,15 +1029,9 @@ function PreviewSection({
         className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium hover:bg-muted/30 transition-colors"
       >
         {title}
-        <span className="text-xs text-muted-foreground">
-          {isOpen ? "Collapse" : "Expand"}
-        </span>
+        <span className="text-xs text-muted-foreground">{isOpen ? "Collapse" : "Expand"}</span>
       </button>
-      {isOpen && (
-        <div className="border-t px-4 py-3 max-h-64 overflow-y-auto">
-          {children}
-        </div>
-      )}
+      {isOpen && <div className="border-t px-4 py-3 max-h-64 overflow-y-auto">{children}</div>}
     </div>
   );
 }

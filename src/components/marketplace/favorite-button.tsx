@@ -36,11 +36,7 @@ export function FavoriteButton({ listingId, initialFavorited = false }: Favorite
       disabled={loading}
       aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
     >
-      {favorited ? (
-        <HeartFilledIcon className="size-4" />
-      ) : (
-        <HeartIcon className="size-4" />
-      )}
+      {favorited ? <HeartFilledIcon className="size-4" /> : <HeartIcon className="size-4" />}
     </Button>
   );
 }

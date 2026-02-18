@@ -10,18 +10,12 @@ import { repoImportSchema } from "@/validations/repo-import";
 const FREE_TIER_LIMIT = 5;
 
 function parseGitHubUrl(url: string): { owner: string; repo: string } | null {
-  const match = url.match(
-    /github\.com\/([\w.-]+)\/([\w.-]+)\/?$/
-  );
+  const match = url.match(/github\.com\/([\w.-]+)\/([\w.-]+)\/?$/);
   if (!match) return null;
   return { owner: match[1], repo: match[2] };
 }
 
-async function fetchGitHub(
-  path: string,
-  token: string,
-  accept?: string
-): Promise<Response> {
+async function fetchGitHub(path: string, token: string, accept?: string): Promise<Response> {
   return fetch(`https://api.github.com${path}`, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -31,10 +25,7 @@ async function fetchGitHub(
   });
 }
 
-async function fetchJsonSafe<T>(
-  path: string,
-  token: string
-): Promise<T | null> {
+async function fetchJsonSafe<T>(path: string, token: string): Promise<T | null> {
   const res = await fetchGitHub(path, token);
   if (!res.ok) return null;
   return (await res.json()) as T;
@@ -82,17 +73,14 @@ export async function POST(request: Request) {
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json(
-      { error: "Invalid request body" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
   const parseResult = repoImportSchema.safeParse(body);
   if (!parseResult.success) {
     return NextResponse.json(
       { error: "Validation failed", details: parseResult.error.flatten() },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -112,10 +100,9 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         error: "GitHub not connected",
-        message:
-          "Provide a personal access token or sign in with GitHub to import repositories.",
+        message: "Provide a personal access token or sign in with GitHub to import repositories.",
       },
-      { status: 403 }
+      { status: 403 },
     );
   }
 
@@ -127,10 +114,7 @@ export async function POST(request: Request) {
     .single();
 
   if (profileError || !profile) {
-    return NextResponse.json(
-      { error: "Profile not found" },
-      { status: 404 }
-    );
+    return NextResponse.json({ error: "Profile not found" }, { status: 404 });
   }
 
   const creditsUsed = (profile.generation_credits_used as number) ?? 0;
@@ -141,16 +125,13 @@ export async function POST(request: Request) {
         error: "Generation limit reached",
         message: `Free plan allows ${FREE_TIER_LIMIT} generations. Upgrade to continue.`,
       },
-      { status: 403 }
+      { status: 403 },
     );
   }
 
   const parsed = parseGitHubUrl(repoUrl);
   if (!parsed) {
-    return NextResponse.json(
-      { error: "Invalid GitHub URL" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Invalid GitHub URL" }, { status: 400 });
   }
 
   const { owner, repo } = parsed;
@@ -158,67 +139,77 @@ export async function POST(request: Request) {
 
   // Fetch all GitHub data in parallel
   const [
-    repoMeta, readme, contents, packageJson, tsconfigJson,
-    treeData, workflowsDir,
-    dockerfileContent, dockerComposeContent,
-    envExampleContent, envSampleContent,
-    vitestConfig, jestConfig, playwrightConfig,
-    claudeMd, cursorRules,
+    repoMeta,
+    readme,
+    contents,
+    packageJson,
+    tsconfigJson,
+    treeData,
+    workflowsDir,
+    dockerfileContent,
+    dockerComposeContent,
+    envExampleContent,
+    envSampleContent,
+    vitestConfig,
+    jestConfig,
+    playwrightConfig,
+    claudeMd,
+    cursorRules,
   ] = await Promise.all([
     fetchJsonSafe<GitHubRepoMeta>(basePath, githubToken),
-    fetchGitHub(`${basePath}/readme`, githubToken, "application/vnd.github.raw").then(
-      (res) => (res.ok ? res.text() : null)
+    fetchGitHub(`${basePath}/readme`, githubToken, "application/vnd.github.raw").then((res) =>
+      res.ok ? res.text() : null,
     ),
     fetchJsonSafe<GitHubContentItem[]>(`${basePath}/contents`, githubToken),
-    fetchJsonSafe<GitHubFileContent>(
-      `${basePath}/contents/package.json`,
-      githubToken
-    ),
-    fetchJsonSafe<GitHubFileContent>(
-      `${basePath}/contents/tsconfig.json`,
-      githubToken
-    ),
+    fetchJsonSafe<GitHubFileContent>(`${basePath}/contents/package.json`, githubToken),
+    fetchJsonSafe<GitHubFileContent>(`${basePath}/contents/tsconfig.json`, githubToken),
     // Deep file tree via Trees API
-    fetchJsonSafe<GitHubTreeResponse>(
-      `${basePath}/git/trees/HEAD?recursive=1`,
-      githubToken
-    ),
+    fetchJsonSafe<GitHubTreeResponse>(`${basePath}/git/trees/HEAD?recursive=1`, githubToken),
     // CI workflows directory listing
-    fetchJsonSafe<GitHubContentItem[]>(
-      `${basePath}/contents/.github/workflows`,
-      githubToken
-    ),
+    fetchJsonSafe<GitHubContentItem[]>(`${basePath}/contents/.github/workflows`, githubToken),
     // Docker config
     fetchGitHub(`${basePath}/contents/Dockerfile`, githubToken, "application/vnd.github.raw").then(
-      (res) => (res.ok ? res.text() : null)
+      (res) => (res.ok ? res.text() : null),
     ),
-    fetchGitHub(`${basePath}/contents/docker-compose.yml`, githubToken, "application/vnd.github.raw").then(
-      (res) => (res.ok ? res.text() : null)
-    ),
+    fetchGitHub(
+      `${basePath}/contents/docker-compose.yml`,
+      githubToken,
+      "application/vnd.github.raw",
+    ).then((res) => (res.ok ? res.text() : null)),
     // Env examples
-    fetchGitHub(`${basePath}/contents/.env.example`, githubToken, "application/vnd.github.raw").then(
-      (res) => (res.ok ? res.text() : null)
-    ),
+    fetchGitHub(
+      `${basePath}/contents/.env.example`,
+      githubToken,
+      "application/vnd.github.raw",
+    ).then((res) => (res.ok ? res.text() : null)),
     fetchGitHub(`${basePath}/contents/.env.sample`, githubToken, "application/vnd.github.raw").then(
-      (res) => (res.ok ? res.text() : null)
+      (res) => (res.ok ? res.text() : null),
     ),
     // Test configs
-    fetchGitHub(`${basePath}/contents/vitest.config.ts`, githubToken, "application/vnd.github.raw").then(
-      (res) => (res.ok ? res.text() : null)
-    ),
-    fetchGitHub(`${basePath}/contents/jest.config.ts`, githubToken, "application/vnd.github.raw").then(
-      (res) => (res.ok ? res.text() : null)
-    ),
-    fetchGitHub(`${basePath}/contents/playwright.config.ts`, githubToken, "application/vnd.github.raw").then(
-      (res) => (res.ok ? res.text() : null)
-    ),
+    fetchGitHub(
+      `${basePath}/contents/vitest.config.ts`,
+      githubToken,
+      "application/vnd.github.raw",
+    ).then((res) => (res.ok ? res.text() : null)),
+    fetchGitHub(
+      `${basePath}/contents/jest.config.ts`,
+      githubToken,
+      "application/vnd.github.raw",
+    ).then((res) => (res.ok ? res.text() : null)),
+    fetchGitHub(
+      `${basePath}/contents/playwright.config.ts`,
+      githubToken,
+      "application/vnd.github.raw",
+    ).then((res) => (res.ok ? res.text() : null)),
     // Existing agent configs
     fetchGitHub(`${basePath}/contents/CLAUDE.md`, githubToken, "application/vnd.github.raw").then(
-      (res) => (res.ok ? res.text() : null)
+      (res) => (res.ok ? res.text() : null),
     ),
-    fetchGitHub(`${basePath}/contents/.cursorrules`, githubToken, "application/vnd.github.raw").then(
-      (res) => (res.ok ? res.text() : null)
-    ),
+    fetchGitHub(
+      `${basePath}/contents/.cursorrules`,
+      githubToken,
+      "application/vnd.github.raw",
+    ).then((res) => (res.ok ? res.text() : null)),
   ]);
 
   if (!repoMeta) {
@@ -228,7 +219,7 @@ export async function POST(request: Request) {
         message:
           "Could not access the repository. Check the URL and make sure your GitHub account has access.",
       },
-      { status: 404 }
+      { status: 404 },
     );
   }
 
@@ -246,9 +237,7 @@ export async function POST(request: Request) {
   let packageData: PackageData | null = null;
   if (packageJson?.content) {
     try {
-      const decoded = Buffer.from(packageJson.content, "base64").toString(
-        "utf-8"
-      );
+      const decoded = Buffer.from(packageJson.content, "base64").toString("utf-8");
       packageData = JSON.parse(decoded) as PackageData;
     } catch {
       // ignore malformed package.json
@@ -258,9 +247,7 @@ export async function POST(request: Request) {
   let tsconfigData: TsconfigData | null = null;
   if (tsconfigJson?.content) {
     try {
-      const decoded = Buffer.from(tsconfigJson.content, "base64").toString(
-        "utf-8"
-      );
+      const decoded = Buffer.from(tsconfigJson.content, "base64").toString("utf-8");
       tsconfigData = JSON.parse(decoded) as TsconfigData;
     } catch {
       // ignore malformed tsconfig.json
@@ -269,12 +256,10 @@ export async function POST(request: Request) {
 
   // Use deep tree if available, fall back to root contents listing
   const fileTree = treeData
-    ? treeData.tree.slice(0, 300).map(
-        (item) => `${item.type === "tree" ? "📁" : "📄"} ${item.path}`
-      )
-    : (contents ?? []).map(
-        (item) => `${item.type === "dir" ? "📁" : "📄"} ${item.name}`
-      );
+    ? treeData.tree
+        .slice(0, 300)
+        .map((item) => `${item.type === "tree" ? "📁" : "📄"} ${item.path}`)
+    : (contents ?? []).map((item) => `${item.type === "dir" ? "📁" : "📄"} ${item.name}`);
 
   // Fetch first 2 workflow files if workflows directory exists
   let ciWorkflows: string | null = null;
@@ -287,9 +272,9 @@ export async function POST(request: Request) {
         fetchGitHub(
           `${basePath}/contents/.github/workflows/${f.name}`,
           githubToken,
-          "application/vnd.github.raw"
-        ).then((res) => (res.ok ? res.text().then((t) => `# ${f.name}\n${t}`) : null))
-      )
+          "application/vnd.github.raw",
+        ).then((res) => (res.ok ? res.text().then((t) => `# ${f.name}\n${t}`) : null)),
+      ),
     );
     const validWorkflows = workflowContents.filter(Boolean);
     if (validWorkflows.length > 0) {
@@ -334,19 +319,14 @@ export async function POST(request: Request) {
     });
     generatedConfig = result.object;
   } catch (err) {
-    const message =
-      err instanceof Error ? err.message : "AI generation failed";
-    return NextResponse.json(
-      { error: "Generation failed", message },
-      { status: 500 }
-    );
+    const message = err instanceof Error ? err.message : "AI generation failed";
+    return NextResponse.json({ error: "Generation failed", message }, { status: 500 });
   }
 
   // Increment generation credits
-  const { error: rpcError } = await supabase.rpc(
-    "increment_generation_credits",
-    { p_user_id: user.id }
-  );
+  const { error: rpcError } = await supabase.rpc("increment_generation_credits", {
+    p_user_id: user.id,
+  });
 
   if (rpcError) {
     console.error("Failed to increment generation credits:", rpcError);

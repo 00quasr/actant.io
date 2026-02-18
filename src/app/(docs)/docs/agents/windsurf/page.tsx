@@ -12,11 +12,10 @@ export default function WindsurfPage() {
     <article>
       <h1 className="text-3xl font-bold tracking-tight">Windsurf</h1>
       <p className="mt-4 text-muted-foreground leading-relaxed">
-        Windsurf (by Codeium) is an AI-powered code editor that reads project
-        configuration from a rules file at the project root and an optional
-        rules directory for extended content. Windsurf has a simpler
-        configuration model than Claude Code or Cursor, with fewer files and no
-        MCP server support.
+        Windsurf (by Codeium) is an AI-powered code editor that reads project configuration from a
+        rules file at the project root and an optional rules directory for extended content.
+        Windsurf has a simpler configuration model than Claude Code or Cursor, with fewer files and
+        no MCP server support.
       </p>
 
       {/* ── File Overview ────────────────────────────────────── */}
@@ -45,26 +44,21 @@ export default function WindsurfPage() {
       {/* ── .windsurfrules ───────────────────────────────────── */}
       <h2 className="text-xl font-semibold mt-10 mb-4">.windsurfrules</h2>
       <p className="text-muted-foreground mb-3 leading-relaxed">
-        The primary instructions file, placed at your project root. Windsurf
-        reads this file automatically when you open the project. It accepts
-        plain text or Markdown formatting.
+        The primary instructions file, placed at your project root. Windsurf reads this file
+        automatically when you open the project. It accepts plain text or Markdown formatting.
       </p>
       <div className="bg-muted rounded-lg p-4 text-sm">
-        <p className="text-amber-600 dark:text-amber-400 font-medium mb-2">
-          6,000 character limit
-        </p>
+        <p className="text-amber-600 dark:text-amber-400 font-medium mb-2">6,000 character limit</p>
         <p className="text-muted-foreground">
-          The .windsurfrules file has a hard limit of 6,000 characters. Content
-          beyond this limit is silently truncated. Actant validates this during
-          export and warns you if your instructions exceed the limit. Plan your
-          content carefully and use the rules directory for overflow.
+          The .windsurfrules file has a hard limit of 6,000 characters. Content beyond this limit is
+          silently truncated. Actant validates this during export and warns you if your instructions
+          exceed the limit. Plan your content carefully and use the rules directory for overflow.
         </p>
       </div>
 
       <p className="text-muted-foreground mt-4 mb-3 leading-relaxed">
-        Given the character constraint, focus on the most critical information:
-        your stack, core conventions, and essential patterns. Move detailed
-        guidelines to the rules directory.
+        Given the character constraint, focus on the most critical information: your stack, core
+        conventions, and essential patterns. Move detailed guidelines to the rules directory.
       </p>
       <pre className="bg-muted rounded-lg p-4 text-sm overflow-x-auto">
         <code>{`You are an expert in TypeScript, Next.js 14, and Tailwind CSS.
@@ -100,49 +94,42 @@ export default function WindsurfPage() {
       </pre>
 
       {/* ── Character Limit Strategies ────────────────────────── */}
-      <h2 className="text-xl font-semibold mt-10 mb-4">
-        Working Within the Character Limit
-      </h2>
+      <h2 className="text-xl font-semibold mt-10 mb-4">Working Within the Character Limit</h2>
       <p className="text-muted-foreground mb-4 leading-relaxed">
-        6,000 characters is roughly 1,000-1,200 words. Here are strategies
-        for making the most of the space:
+        6,000 characters is roughly 1,000-1,200 words. Here are strategies for making the most of
+        the space:
       </p>
       <ul className="list-disc list-inside space-y-3 text-muted-foreground leading-relaxed">
         <li>
           <span className="text-foreground font-medium">Use terse, imperative statements.</span>{" "}
-          Write &ldquo;No CSS modules&rdquo; instead of &ldquo;Please avoid
-          using CSS modules in this project because we prefer Tailwind.&rdquo;
+          Write &ldquo;No CSS modules&rdquo; instead of &ldquo;Please avoid using CSS modules in
+          this project because we prefer Tailwind.&rdquo;
         </li>
         <li>
           <span className="text-foreground font-medium">Use bullet lists, not paragraphs.</span>{" "}
-          Bullet points are more character-efficient and easier for the AI to
-          parse than flowing prose.
+          Bullet points are more character-efficient and easier for the AI to parse than flowing
+          prose.
         </li>
         <li>
-          <span className="text-foreground font-medium">Abbreviate paths.</span>{" "}
-          Use shorthand like{" "}
-          <code className="bg-muted px-1.5 py-0.5 rounded text-sm text-foreground">
-            src/app/
-          </code>{" "}
+          <span className="text-foreground font-medium">Abbreviate paths.</span> Use shorthand like{" "}
+          <code className="bg-muted px-1.5 py-0.5 rounded text-sm text-foreground">src/app/</code>{" "}
           instead of writing out the full directory description every time.
         </li>
         <li>
-          <span className="text-foreground font-medium">Omit obvious information.</span>{" "}
-          Do not explain what TypeScript or React are. Focus on your
-          project-specific conventions.
+          <span className="text-foreground font-medium">Omit obvious information.</span> Do not
+          explain what TypeScript or React are. Focus on your project-specific conventions.
         </li>
         <li>
           <span className="text-foreground font-medium">Move examples to the rules directory.</span>{" "}
-          Code examples take a lot of characters. Keep the main file for rules
-          and move examples to{" "}
+          Code examples take a lot of characters. Keep the main file for rules and move examples to{" "}
           <code className="bg-muted px-1.5 py-0.5 rounded text-sm text-foreground">
             .windsurf/rules/rules.md
-          </code>.
+          </code>
+          .
         </li>
         <li>
-          <span className="text-foreground font-medium">Count characters, not words.</span>{" "}
-          Actant shows a character counter during editing to help you stay
-          within the limit.
+          <span className="text-foreground font-medium">Count characters, not words.</span> Actant
+          shows a character counter during editing to help you stay within the limit.
         </li>
       </ul>
 
@@ -151,17 +138,16 @@ export default function WindsurfPage() {
         Rules Directory: .windsurf/rules/rules.md
       </h2>
       <p className="text-muted-foreground mb-3 leading-relaxed">
-        The rules directory provides space for extended guidelines that do not
-        fit in the main .windsurfrules file. The{" "}
+        The rules directory provides space for extended guidelines that do not fit in the main
+        .windsurfrules file. The{" "}
         <code className="bg-muted px-1.5 py-0.5 rounded text-sm text-foreground">
           .windsurf/rules/rules.md
         </code>{" "}
         file has no character limit and is loaded alongside the main rules file.
       </p>
       <p className="text-muted-foreground mb-3 leading-relaxed">
-        Use this file for detailed examples, elaborate explanations, and
-        less-critical guidelines that support but are not essential to the
-        main rules.
+        Use this file for detailed examples, elaborate explanations, and less-critical guidelines
+        that support but are not essential to the main rules.
       </p>
       <pre className="bg-muted rounded-lg p-4 text-sm overflow-x-auto">
         <code>{`# Extended Guidelines
@@ -228,9 +214,7 @@ export const DataTable = <T,>({
       </pre>
 
       {/* ── Content Splitting ────────────────────────────────── */}
-      <h2 className="text-xl font-semibold mt-10 mb-4">
-        Splitting Content Between Files
-      </h2>
+      <h2 className="text-xl font-semibold mt-10 mb-4">Splitting Content Between Files</h2>
       <p className="text-muted-foreground mb-4 leading-relaxed">
         A good strategy is to divide content by priority:
       </p>
@@ -238,41 +222,35 @@ export const DataTable = <T,>({
         <div className="border rounded-lg p-4">
           <p className="font-medium text-sm mb-1">.windsurfrules (high priority)</p>
           <p className="text-muted-foreground text-sm leading-relaxed">
-            Stack declaration, core code style rules, naming conventions,
-            critical prohibitions, project structure summary, essential commands.
-            Everything the AI needs on every interaction.
+            Stack declaration, core code style rules, naming conventions, critical prohibitions,
+            project structure summary, essential commands. Everything the AI needs on every
+            interaction.
           </p>
         </div>
         <div className="border rounded-lg p-4">
           <p className="font-medium text-sm mb-1">.windsurf/rules/rules.md (supplementary)</p>
           <p className="text-muted-foreground text-sm leading-relaxed">
-            Code examples, detailed patterns for specific areas (database
-            access, testing, error handling), elaborate architecture decisions,
-            and context that is useful but not critical for every interaction.
+            Code examples, detailed patterns for specific areas (database access, testing, error
+            handling), elaborate architecture decisions, and context that is useful but not critical
+            for every interaction.
           </p>
         </div>
       </div>
 
       {/* ── Comparison with Other Agents ──────────────────────── */}
-      <h2 className="text-xl font-semibold mt-10 mb-4">
-        Comparison with Other Agents
-      </h2>
+      <h2 className="text-xl font-semibold mt-10 mb-4">Comparison with Other Agents</h2>
       <ul className="list-disc list-inside space-y-2 text-muted-foreground leading-relaxed">
         <li>
-          Unlike Cursor, Windsurf does not support glob-scoped rules. All rules
-          apply globally.
+          Unlike Cursor, Windsurf does not support glob-scoped rules. All rules apply globally.
+        </li>
+        <li>Unlike Claude Code, Windsurf does not support MCP servers, skills, or permissions.</li>
+        <li>
+          The 6,000 character limit on .windsurfrules is unique to Windsurf. Other agents have no
+          such constraint on their primary instructions file.
         </li>
         <li>
-          Unlike Claude Code, Windsurf does not support MCP servers, skills, or
-          permissions.
-        </li>
-        <li>
-          The 6,000 character limit on .windsurfrules is unique to Windsurf.
-          Other agents have no such constraint on their primary instructions file.
-        </li>
-        <li>
-          The .windsurf/rules/rules.md overflow mechanism is the closest
-          equivalent to Cursor&apos;s MDC files, but without scoping.
+          The .windsurf/rules/rules.md overflow mechanism is the closest equivalent to Cursor&apos;s
+          MDC files, but without scoping.
         </li>
       </ul>
 
@@ -280,14 +258,15 @@ export const DataTable = <T,>({
       <h2 className="text-xl font-semibold mt-10 mb-4">Best Practices</h2>
       <ul className="list-disc list-inside space-y-3 text-muted-foreground leading-relaxed">
         <li>
-          <span className="text-foreground font-medium">Draft in a text editor with character counting.</span>{" "}
-          The Actant builder shows your character count in real time. Keep a
-          buffer of at least 200 characters for future additions.
+          <span className="text-foreground font-medium">
+            Draft in a text editor with character counting.
+          </span>{" "}
+          The Actant builder shows your character count in real time. Keep a buffer of at least 200
+          characters for future additions.
         </li>
         <li>
           <span className="text-foreground font-medium">Front-load the most important rules.</span>{" "}
-          If the file is somehow truncated, the most critical information
-          should be at the top.
+          If the file is somehow truncated, the most critical information should be at the top.
         </li>
         <li>
           <span className="text-foreground font-medium">Use markdown headers for structure.</span>{" "}
@@ -295,13 +274,15 @@ export const DataTable = <T,>({
         </li>
         <li>
           <span className="text-foreground font-medium">Test with Windsurf before publishing.</span>{" "}
-          Open your project in Windsurf, ask the AI about your conventions,
-          and verify it follows your rules correctly.
+          Open your project in Windsurf, ask the AI about your conventions, and verify it follows
+          your rules correctly.
         </li>
         <li>
-          <span className="text-foreground font-medium">Reference the rules directory in .windsurfrules.</span>{" "}
-          Add a note like &ldquo;See .windsurf/rules/rules.md for detailed
-          examples&rdquo; to ensure the AI knows extended content is available.
+          <span className="text-foreground font-medium">
+            Reference the rules directory in .windsurfrules.
+          </span>{" "}
+          Add a note like &ldquo;See .windsurf/rules/rules.md for detailed examples&rdquo; to ensure
+          the AI knows extended content is available.
         </li>
       </ul>
 

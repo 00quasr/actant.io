@@ -8,9 +8,7 @@ interface ReviewListProps {
 
 export function ReviewList({ reviews }: ReviewListProps) {
   if (reviews.length === 0) {
-    return (
-      <p className="text-sm text-muted-foreground">No reviews yet</p>
-    );
+    return <p className="text-sm text-muted-foreground">No reviews yet</p>;
   }
 
   return (
@@ -20,7 +18,10 @@ export function ReviewList({ reviews }: ReviewListProps) {
           <div className="flex items-center gap-3">
             <Avatar size="sm">
               {review.author?.avatar_url && (
-                <AvatarImage src={review.author.avatar_url} alt={review.author.display_name ?? ""} />
+                <AvatarImage
+                  src={review.author.avatar_url}
+                  alt={review.author.display_name ?? ""}
+                />
               )}
               <AvatarFallback>
                 {(review.author?.display_name ?? "U")[0].toUpperCase()}
@@ -38,9 +39,7 @@ export function ReviewList({ reviews }: ReviewListProps) {
               </div>
             </div>
           </div>
-          {review.comment && (
-            <p className="text-sm text-muted-foreground pl-9">{review.comment}</p>
-          )}
+          {review.comment && <p className="text-sm text-muted-foreground pl-9">{review.comment}</p>}
         </div>
       ))}
     </div>

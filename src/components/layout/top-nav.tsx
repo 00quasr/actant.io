@@ -5,13 +5,7 @@ import Link from "next/link";
 import { HamburgerMenuIcon } from "@radix-ui/react-icons";
 import { NAV_ITEMS, SITE_NAME } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/hooks/use-auth";
 
 function UserAvatar({ name }: { name: string }) {
@@ -73,16 +67,19 @@ export function TopNav() {
 
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="md:hidden" aria-label="Toggle navigation menu">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden"
+              aria-label="Toggle navigation menu"
+            >
               <HamburgerMenuIcon className="size-5" />
               <span className="sr-only">Toggle menu</span>
             </Button>
           </SheetTrigger>
           <SheetContent side="right" className="w-[280px]">
             <SheetHeader>
-              <SheetTitle className="text-left text-lg font-bold">
-                {SITE_NAME}
-              </SheetTitle>
+              <SheetTitle className="text-left text-lg font-bold">{SITE_NAME}</SheetTitle>
             </SheetHeader>
             <nav className="flex flex-col gap-4 px-4">
               {NAV_ITEMS.marketing.map((item) => (

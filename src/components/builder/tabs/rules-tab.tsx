@@ -60,10 +60,7 @@ export function RulesTab({ rules, addRule, removeRule, updateRule, onApplyPreset
       {rules.length > 0 && (
         <div className="space-y-2">
           {rules.map((rule, index) => (
-            <div
-              key={index}
-              className="flex items-start justify-between rounded-lg border p-3"
-            >
+            <div key={index} className="flex items-start justify-between rounded-lg border p-3">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <span className="font-medium text-sm">{rule.title}</span>
@@ -78,23 +75,13 @@ export function RulesTab({ rules, addRule, removeRule, updateRule, onApplyPreset
                     </Badge>
                   )}
                 </div>
-                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                  {rule.content}
-                </p>
+                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{rule.content}</p>
               </div>
               <div className="flex items-center gap-1 ml-2 shrink-0">
-                <Button
-                  variant="ghost"
-                  size="icon-xs"
-                  onClick={() => handleEdit(index)}
-                >
+                <Button variant="ghost" size="icon-xs" onClick={() => handleEdit(index)}>
                   <Pencil1Icon />
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="icon-xs"
-                  onClick={() => removeRule(index)}
-                >
+                <Button variant="ghost" size="icon-xs" onClick={() => removeRule(index)}>
                   <TrashIcon />
                 </Button>
               </div>

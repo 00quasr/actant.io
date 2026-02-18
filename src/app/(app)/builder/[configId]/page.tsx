@@ -16,11 +16,7 @@ export default async function EditBuilderPage({
   const { configId } = await params;
   const supabase = await createClient();
 
-  const { data, error } = await supabase
-    .from("configs")
-    .select("*")
-    .eq("id", configId)
-    .single();
+  const { data, error } = await supabase.from("configs").select("*").eq("id", configId).single();
 
   if (error || !data) {
     notFound();

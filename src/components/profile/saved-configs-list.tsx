@@ -7,11 +7,7 @@ interface SavedConfigsListProps {
 
 export function SavedConfigsList({ listings }: SavedConfigsListProps) {
   if (listings.length === 0) {
-    return (
-      <p className="py-8 text-center text-sm text-muted-foreground">
-        No saved configs yet
-      </p>
-    );
+    return <p className="py-8 text-center text-sm text-muted-foreground">No saved configs yet</p>;
   }
 
   return (

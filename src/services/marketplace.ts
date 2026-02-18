@@ -11,7 +11,9 @@ export interface SearchParams {
   limit?: number;
 }
 
-export async function searchListings(params: SearchParams): Promise<{ data: Listing[]; count: number }> {
+export async function searchListings(
+  params: SearchParams,
+): Promise<{ data: Listing[]; count: number }> {
   const supabase = createClient();
   const { q, agent, use_case, document_type, sort, page = 1, limit = 12 } = params;
   const from = (page - 1) * limit;
@@ -76,7 +78,7 @@ export async function getListing(id: string): Promise<Listing | null> {
 
 export async function publishConfig(
   configId: string,
-  metadata: { title: string; description: string; use_case: string; tags: string[] }
+  metadata: { title: string; description: string; use_case: string; tags: string[] },
 ): Promise<Listing> {
   const supabase = createClient();
 
@@ -88,7 +90,9 @@ export async function publishConfig(
 
   if (configError || !config) throw new Error("Config not found");
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Not authenticated");
 
   const { data, error } = await supabase

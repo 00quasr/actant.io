@@ -54,11 +54,7 @@ export function FaqSection() {
           </h2>
         </FadeIn>
         <FadeIn delay={100}>
-          <Accordion
-            type="single"
-            collapsible
-            className="mx-auto mt-12 max-w-2xl"
-          >
+          <Accordion type="single" collapsible className="mx-auto mt-12 max-w-2xl">
             {FAQ_ITEMS.map((item, i) => (
               <AccordionItem key={i} value={`item-${i}`}>
                 <AccordionTrigger className="text-sm font-medium text-left">

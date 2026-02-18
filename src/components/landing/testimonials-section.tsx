@@ -42,9 +42,7 @@ export function TestimonialsSection() {
                 </p>
                 <div className="mt-4">
                   <p className="text-sm font-semibold">{testimonial.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {testimonial.role}
-                  </p>
+                  <p className="text-xs text-muted-foreground">{testimonial.role}</p>
                 </div>
               </div>
             </FadeIn>

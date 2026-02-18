@@ -35,10 +35,7 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (profileError) {
-    return NextResponse.json(
-      { error: "Failed to fetch profile" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to fetch profile" }, { status: 500 });
   }
 
   let customerId = profile.stripe_customer_id;
@@ -64,14 +61,10 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  const priceId =
-    result.data.priceId || process.env.STRIPE_PRICE_ID_PRO_MONTHLY;
+  const priceId = result.data.priceId || process.env.STRIPE_PRICE_ID_PRO_MONTHLY;
 
   if (!priceId) {
-    return NextResponse.json(
-      { error: "No price ID configured" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "No price ID configured" }, { status: 500 });
   }
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL;
@@ -86,10 +79,7 @@ export async function POST(request: NextRequest) {
   });
 
   if (!session.url) {
-    return NextResponse.json(
-      { error: "Failed to create checkout session" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to create checkout session" }, { status: 500 });
   }
 
   return NextResponse.json({ url: session.url });

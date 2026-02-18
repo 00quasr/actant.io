@@ -21,12 +21,8 @@ interface RadialOrbitalTimelineProps {
   timelineData: TimelineItem[];
 }
 
-export default function RadialOrbitalTimeline({
-  timelineData,
-}: RadialOrbitalTimelineProps) {
-  const [expandedItems, setExpandedItems] = useState<Record<number, boolean>>(
-    {}
-  );
+export default function RadialOrbitalTimeline({ timelineData }: RadialOrbitalTimelineProps) {
+  const [expandedItems, setExpandedItems] = useState<Record<number, boolean>>({});
   const [viewMode] = useState<"orbital">("orbital");
   const [rotationAngle, setRotationAngle] = useState<number>(0);
   const [autoRotate, setAutoRotate] = useState<boolean>(true);
@@ -120,10 +116,7 @@ export default function RadialOrbitalTimeline({
     const y = radius * Math.sin(radian) + centerOffset.y;
 
     const zIndex = Math.round(100 + 50 * Math.cos(radian));
-    const opacity = Math.max(
-      0.65,
-      Math.min(1, 0.65 + 0.35 * ((1 + Math.sin(radian)) / 2))
-    );
+    const opacity = Math.max(0.65, Math.min(1, 0.65 + 0.35 * ((1 + Math.sin(radian)) / 2)));
 
     return { x, y, angle, zIndex, opacity };
   };
@@ -259,24 +252,16 @@ export default function RadialOrbitalTimeline({
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-px h-3 bg-border"></div>
                     <CardHeader className="pb-2">
                       <div className="flex justify-between items-center">
-                        <Badge
-                          className={`px-2 text-xs ${getStatusStyles(
-                            item.status
-                          )}`}
-                        >
+                        <Badge className={`px-2 text-xs ${getStatusStyles(item.status)}`}>
                           {item.status === "completed"
                             ? "COMPLETE"
                             : item.status === "in-progress"
                               ? "IN PROGRESS"
                               : "PENDING"}
                         </Badge>
-                        <span className="text-xs font-mono text-muted-foreground">
-                          {item.date}
-                        </span>
+                        <span className="text-xs font-mono text-muted-foreground">{item.date}</span>
                       </div>
-                      <CardTitle className="text-sm mt-2 text-foreground">
-                        {item.title}
-                      </CardTitle>
+                      <CardTitle className="text-sm mt-2 text-foreground">{item.title}</CardTitle>
                     </CardHeader>
                     <CardContent className="text-xs text-muted-foreground">
                       <p>{item.content}</p>
@@ -287,9 +272,7 @@ export default function RadialOrbitalTimeline({
                             <Zap size={10} className="mr-1" />
                             Progress
                           </span>
-                          <span className="font-mono text-foreground">
-                            {item.energy}%
-                          </span>
+                          <span className="font-mono text-foreground">{item.energy}%</span>
                         </div>
                         <div className="w-full h-1 bg-secondary rounded-full overflow-hidden">
                           <div
@@ -302,19 +285,14 @@ export default function RadialOrbitalTimeline({
                       {item.relatedIds.length > 0 && (
                         <div className="mt-4 pt-3 border-t border-border">
                           <div className="flex items-center mb-2">
-                            <Link
-                              size={10}
-                              className="text-muted-foreground mr-1"
-                            />
+                            <Link size={10} className="text-muted-foreground mr-1" />
                             <h4 className="text-xs uppercase tracking-wider font-medium text-muted-foreground">
                               Connected Steps
                             </h4>
                           </div>
                           <div className="flex flex-wrap gap-1">
                             {item.relatedIds.map((relatedId) => {
-                              const relatedItem = timelineData.find(
-                                (i) => i.id === relatedId
-                              );
+                              const relatedItem = timelineData.find((i) => i.id === relatedId);
                               return (
                                 <Button
                                   key={relatedId}

@@ -22,9 +22,7 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
         <h1 className="text-xl font-semibold">
           {profile.display_name || profile.username || "Unknown"}
         </h1>
-        {profile.bio && (
-          <p className="text-sm text-muted-foreground">{profile.bio}</p>
-        )}
+        {profile.bio && <p className="text-sm text-muted-foreground">{profile.bio}</p>}
         {profile.github_username && (
           <Link
             href={`https://github.com/${profile.github_username}`}

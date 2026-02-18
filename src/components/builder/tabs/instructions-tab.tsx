@@ -11,9 +11,7 @@ import type { Template } from "@/types/marketplace";
 
 const CodeMirror = dynamic(() => import("@uiw/react-codemirror"), {
   ssr: false,
-  loading: () => (
-    <div className="h-96 rounded-md border bg-muted animate-pulse" />
-  ),
+  loading: () => <div className="h-96 rounded-md border bg-muted animate-pulse" />,
 });
 
 interface InstructionsTabProps {

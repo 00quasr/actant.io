@@ -21,20 +21,16 @@ export function OpenSourceSection() {
             Built in the open
           </h2>
           <p className="mx-auto mt-3 max-w-lg text-center text-sm text-muted-foreground">
-            Actant is open source at its core. The CLI, exporters, and templates
-            are all community-driven.
+            Actant is open source at its core. The CLI, exporters, and templates are all
+            community-driven.
           </p>
         </FadeIn>
         <div className="mt-12 flex items-center justify-center gap-12">
           {STATS.map((stat, i) => (
             <FadeIn key={stat.label} delay={i * 80}>
               <div className="text-center">
-                <p className="text-3xl font-bold tracking-tight">
-                  {stat.value}
-                </p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {stat.label}
-                </p>
+                <p className="text-3xl font-bold tracking-tight">{stat.value}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{stat.label}</p>
               </div>
             </FadeIn>
           ))}

@@ -68,7 +68,10 @@ export function McpServerForm({ initial, onSubmit, onCancel }: McpServerFormProp
       ...(data.type === "stdio" && {
         command: data.command,
         args: data.args
-          ? data.args.split(",").map((a) => a.trim()).filter(Boolean)
+          ? data.args
+              .split(",")
+              .map((a) => a.trim())
+              .filter(Boolean)
           : undefined,
       }),
       ...(data.type !== "stdio" && { url: data.url }),
@@ -79,26 +82,19 @@ export function McpServerForm({ initial, onSubmit, onCancel }: McpServerFormProp
   };
 
   return (
-    <form
-      onSubmit={handleSubmit(handleFormSubmit)}
-      className="rounded-lg border p-4 space-y-4"
-    >
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="rounded-lg border p-4 space-y-4">
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="server-name">Name</Label>
           <Input id="server-name" {...register("name")} placeholder="my-server" />
-          {errors.name && (
-            <p className="text-xs text-destructive">{errors.name.message}</p>
-          )}
+          {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="server-type">Type</Label>
           <Select
             value={serverType}
-            onValueChange={(v) =>
-              setValue("type", v as McpServerFormValues["type"])
-            }
+            onValueChange={(v) => setValue("type", v as McpServerFormValues["type"])}
           >
             <SelectTrigger id="server-type">
               <SelectValue />
@@ -116,14 +112,8 @@ export function McpServerForm({ initial, onSubmit, onCancel }: McpServerFormProp
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="server-command">Command</Label>
-            <Input
-              id="server-command"
-              {...register("command")}
-              placeholder="npx"
-            />
-            {errors.command && (
-              <p className="text-xs text-destructive">{errors.command.message}</p>
-            )}
+            <Input id="server-command" {...register("command")} placeholder="npx" />
+            {errors.command && <p className="text-xs text-destructive">{errors.command.message}</p>}
           </div>
           <div className="space-y-2">
             <Label htmlFor="server-args">Args (comma-separated)</Label>
@@ -137,14 +127,8 @@ export function McpServerForm({ initial, onSubmit, onCancel }: McpServerFormProp
       ) : (
         <div className="space-y-2">
           <Label htmlFor="server-url">URL</Label>
-          <Input
-            id="server-url"
-            {...register("url")}
-            placeholder="https://example.com/mcp"
-          />
-          {errors.url && (
-            <p className="text-xs text-destructive">{errors.url.message}</p>
-          )}
+          <Input id="server-url" {...register("url")} placeholder="https://example.com/mcp" />
+          {errors.url && <p className="text-xs text-destructive">{errors.url.message}</p>}
         </div>
       )}
 
@@ -163,22 +147,9 @@ export function McpServerForm({ initial, onSubmit, onCancel }: McpServerFormProp
         </div>
         {fields.map((field, index) => (
           <div key={field.id} className="flex items-center gap-2">
-            <Input
-              {...register(`env.${index}.key`)}
-              placeholder="KEY"
-              className="flex-1"
-            />
-            <Input
-              {...register(`env.${index}.value`)}
-              placeholder="value"
-              className="flex-1"
-            />
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-xs"
-              onClick={() => remove(index)}
-            >
+            <Input {...register(`env.${index}.key`)} placeholder="KEY" className="flex-1" />
+            <Input {...register(`env.${index}.value`)} placeholder="value" className="flex-1" />
+            <Button type="button" variant="ghost" size="icon-xs" onClick={() => remove(index)}>
               <Cross2Icon />
             </Button>
           </div>

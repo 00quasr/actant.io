@@ -7,13 +7,7 @@ import { AGENT_TYPES } from "@/types/config";
 import { z } from "zod";
 
 const exportBodySchema = z.object({
-  targetAgent: z.enum([
-    "claude-code",
-    "cursor",
-    "windsurf",
-    "cline",
-    "opencode",
-  ]),
+  targetAgent: z.enum(["claude-code", "cursor", "windsurf", "cline", "opencode"]),
 });
 
 async function getUser(request: NextRequest) {
@@ -23,7 +17,7 @@ async function getUser(request: NextRequest) {
     const token = authHeader.slice(7);
     const supabase = createBrowserClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     );
     const {
       data: { user },
@@ -43,20 +37,14 @@ async function getUser(request: NextRequest) {
   return { user, supabase };
 }
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
   let body: unknown;
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json(
-      { error: "Invalid request body" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
   const parsed = exportBodySchema.safeParse(body);
@@ -65,7 +53,7 @@ export async function POST(
       {
         error: `Invalid targetAgent. Must be one of: ${AGENT_TYPES.join(", ")}`,
       },
-      { status: 400 }
+      { status: 400 },
     );
   }
 

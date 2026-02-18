@@ -21,7 +21,13 @@ interface McpTabProps {
   techStack?: string[];
 }
 
-export function McpTab({ servers, addServer, removeServer, updateServer, techStack = [] }: McpTabProps) {
+export function McpTab({
+  servers,
+  addServer,
+  removeServer,
+  updateServer,
+  techStack = [],
+}: McpTabProps) {
   const [mode, setMode] = useState<Mode>("idle");
   const [editingServer, setEditingServer] = useState<McpServer | null>(null);
   const [prefilledServer, setPrefilledServer] = useState<McpServer | undefined>(undefined);
@@ -33,12 +39,16 @@ export function McpTab({ servers, addServer, removeServer, updateServer, techSta
   useEffect(() => {
     if (techStack.length === 0) return;
     let cancelled = false;
-    getRecommendedProviders(techStack).then((data) => {
-      if (!cancelled) setRecommended(data);
-    }).catch(() => {
-      if (!cancelled) setRecommended([]);
-    });
-    return () => { cancelled = true; };
+    getRecommendedProviders(techStack)
+      .then((data) => {
+        if (!cancelled) setRecommended(data);
+      })
+      .catch(() => {
+        if (!cancelled) setRecommended([]);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [techStack]);
 
   const handleSubmit = (server: McpServer) => {
@@ -94,9 +104,13 @@ export function McpTab({ servers, addServer, removeServer, updateServer, techSta
       command: provider.default_command ?? undefined,
       args: provider.default_args.length > 0 ? provider.default_args : undefined,
       url: provider.default_url ?? undefined,
-      env: provider.required_env_keys.length > 0
-        ? provider.required_env_keys.reduce<Record<string, string>>((acc, key) => ({ ...acc, [key]: "" }), {})
-        : undefined,
+      env:
+        provider.required_env_keys.length > 0
+          ? provider.required_env_keys.reduce<Record<string, string>>(
+              (acc, key) => ({ ...acc, [key]: "" }),
+              {},
+            )
+          : undefined,
       enabled: true,
     };
     addServer(server);
@@ -122,11 +136,7 @@ export function McpTab({ servers, addServer, removeServer, updateServer, techSta
     return (
       <div className="space-y-6">
         {servers.length > 0 && (
-          <McpServerList
-            servers={servers}
-            onEdit={handleEdit}
-            onRemove={removeServer}
-          />
+          <McpServerList servers={servers} onEdit={handleEdit} onRemove={removeServer} />
         )}
         <McpServerForm
           initial={editingServer ?? prefilledServer}
@@ -142,11 +152,7 @@ export function McpTab({ servers, addServer, removeServer, updateServer, techSta
   return (
     <div className="space-y-6">
       {servers.length > 0 && (
-        <McpServerList
-          servers={servers}
-          onEdit={handleEdit}
-          onRemove={removeServer}
-        />
+        <McpServerList servers={servers} onEdit={handleEdit} onRemove={removeServer} />
       )}
 
       {filteredRecommended.length > 0 && (

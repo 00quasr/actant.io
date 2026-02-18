@@ -1,12 +1,6 @@
 export type AgentType = "claude-code" | "cursor" | "windsurf" | "cline" | "opencode";
 
-export const AGENT_TYPES: AgentType[] = [
-  "claude-code",
-  "cursor",
-  "windsurf",
-  "cline",
-  "opencode",
-];
+export const AGENT_TYPES: AgentType[] = ["claude-code", "cursor", "windsurf", "cline", "opencode"];
 
 export const AGENT_LABELS: Record<AgentType, string> = {
   "claude-code": "Claude Code",

@@ -23,9 +23,7 @@ function CliAuthContent() {
       } = await supabase.auth.getSession();
 
       if (!session) {
-        router.push(
-          `/login?redirect=${encodeURIComponent(`/auth/cli?port=${port}`)}`
-        );
+        router.push(`/login?redirect=${encodeURIComponent(`/auth/cli?port=${port}`)}`);
         return;
       }
 
@@ -50,11 +48,7 @@ function CliAuthContent() {
 export default function CliAuthPage() {
   return (
     <div className="flex min-h-screen items-center justify-center">
-      <Suspense
-        fallback={
-          <p className="text-sm text-muted-foreground">Loading...</p>
-        }
-      >
+      <Suspense fallback={<p className="text-sm text-muted-foreground">Loading...</p>}>
         <CliAuthContent />
       </Suspense>
     </div>

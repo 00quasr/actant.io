@@ -14,13 +14,7 @@ interface PushBody {
   files: PushFile[];
 }
 
-const VALID_AGENTS = new Set([
-  "claude-code",
-  "cursor",
-  "windsurf",
-  "cline",
-  "opencode",
-]);
+const VALID_AGENTS = new Set(["claude-code", "cursor", "windsurf", "cline", "opencode"]);
 
 interface McpJsonEntry {
   command?: string;
@@ -86,9 +80,7 @@ function extractMcpServers(files: PushFile[]): Array<{
       url: typeof entry.url === "string" ? entry.url : undefined,
       env:
         entry.env && typeof entry.env === "object"
-          ? Object.fromEntries(
-              Object.entries(entry.env).map(([k, v]) => [k, String(v)])
-            )
+          ? Object.fromEntries(Object.entries(entry.env).map(([k, v]) => [k, String(v)]))
           : undefined,
       enabled: true,
     });
@@ -103,7 +95,7 @@ interface PermissionEntry {
 
 function extractPermissions(
   files: PushFile[],
-  targetAgent: string
+  targetAgent: string,
 ): Record<string, "allow" | "ask" | "deny"> {
   if (targetAgent === "claude-code") {
     const settings = findFile(files, "settings.json");
@@ -130,10 +122,7 @@ function extractPermissions(
   return {};
 }
 
-function extractInstructions(
-  files: PushFile[],
-  targetAgent: string
-): string {
+function extractInstructions(files: PushFile[], targetAgent: string): string {
   const mainFiles: Record<string, string[]> = {
     "claude-code": ["CLAUDE.md"],
     cursor: [".cursorrules"],
@@ -156,7 +145,9 @@ function extractInstructions(
   if (targetAgent === "opencode") {
     const file = findFile(files, "opencode.json");
     if (file) {
-      interface OcJson { instructions?: string | { content?: string } }
+      interface OcJson {
+        instructions?: string | { content?: string };
+      }
       const parsed = safeJsonParse(file.content) as OcJson | null;
       if (parsed) {
         if (typeof parsed.instructions === "string") return parsed.instructions;
@@ -170,7 +161,7 @@ function extractInstructions(
 
 function extractRules(
   files: PushFile[],
-  targetAgent: string
+  targetAgent: string,
 ): Array<{ title: string; content: string; glob?: string; alwaysApply?: boolean }> {
   const rules: Array<{ title: string; content: string; glob?: string; alwaysApply?: boolean }> = [];
 
@@ -192,7 +183,8 @@ function extractRules(
           const line = lines[i]?.trim() ?? "";
           if (line.startsWith("description:")) title = line.slice("description:".length).trim();
           if (line.startsWith("globs:")) glob = line.slice("globs:".length).trim();
-          if (line.startsWith("alwaysApply:")) alwaysApply = line.slice("alwaysApply:".length).trim() === "true";
+          if (line.startsWith("alwaysApply:"))
+            alwaysApply = line.slice("alwaysApply:".length).trim() === "true";
         }
       }
 
@@ -222,7 +214,7 @@ function extractRules(
 }
 
 function extractSkills(
-  files: PushFile[]
+  files: PushFile[],
 ): Array<{ skillId: string; enabled: boolean; params: Record<string, unknown> }> {
   return files
     .filter((f) => f.path.includes(".claude/skills/") && f.path.endsWith("SKILL.md"))
@@ -300,6 +292,6 @@ export async function POST(request: NextRequest) {
       id: data.id,
       url: `${SITE_URL}/builder?id=${data.id}`,
     },
-    { status: 201 }
+    { status: 201 },
   );
 }

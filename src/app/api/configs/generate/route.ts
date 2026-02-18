@@ -28,10 +28,7 @@ export async function POST(request: Request) {
     .single();
 
   if (profileError || !profile) {
-    return NextResponse.json(
-      { error: "Profile not found" },
-      { status: 404 }
-    );
+    return NextResponse.json({ error: "Profile not found" }, { status: 404 });
   }
 
   const creditsUsed = (profile.generation_credits_used as number) ?? 0;
@@ -42,7 +39,7 @@ export async function POST(request: Request) {
         error: "Generation limit reached",
         message: `Free plan allows ${FREE_TIER_LIMIT} generations. Upgrade to continue.`,
       },
-      { status: 403 }
+      { status: 403 },
     );
   }
 
@@ -51,17 +48,14 @@ export async function POST(request: Request) {
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json(
-      { error: "Invalid request body" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
   const parseResult = generationInputSchema.safeParse(body);
   if (!parseResult.success) {
     return NextResponse.json(
       { error: "Validation failed", details: parseResult.error.flatten() },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -119,19 +113,14 @@ export async function POST(request: Request) {
     });
     generatedConfig = result.object;
   } catch (err) {
-    const message =
-      err instanceof Error ? err.message : "AI generation failed";
-    return NextResponse.json(
-      { error: "Generation failed", message },
-      { status: 500 }
-    );
+    const message = err instanceof Error ? err.message : "AI generation failed";
+    return NextResponse.json({ error: "Generation failed", message }, { status: 500 });
   }
 
   // Increment generation credits
-  const { error: rpcError } = await supabase.rpc(
-    "increment_generation_credits",
-    { p_user_id: user.id }
-  );
+  const { error: rpcError } = await supabase.rpc("increment_generation_credits", {
+    p_user_id: user.id,
+  });
 
   if (rpcError) {
     console.error("Failed to increment generation credits:", rpcError);
@@ -182,9 +171,7 @@ export async function POST(request: Request) {
       ...selectedSkills.map((s) => ({
         skillId: s.id,
         enabled: true,
-        params: recommendedSkillContent[s.id]
-          ? { content: recommendedSkillContent[s.id] }
-          : {},
+        params: recommendedSkillContent[s.id] ? { content: recommendedSkillContent[s.id] } : {},
       })),
     ],
     mcpServers: generatedConfig.mcpServers.map((s) => ({
@@ -201,12 +188,13 @@ export async function POST(request: Request) {
         : undefined,
       enabled: s.enabled,
     })),
-    permissions: generatedConfig.permissionEntries.reduce<
-      Record<string, "allow" | "ask" | "deny">
-    >((acc, { tool, value }) => {
-      acc[tool] = value;
-      return acc;
-    }, {}),
+    permissions: generatedConfig.permissionEntries.reduce<Record<string, "allow" | "ask" | "deny">>(
+      (acc, { tool, value }) => {
+        acc[tool] = value;
+        return acc;
+      },
+      {},
+    ),
     rules: generatedConfig.rules.map((r) => ({
       ...r,
       glob: r.glob ?? undefined,
@@ -217,7 +205,7 @@ export async function POST(request: Request) {
         acc[filename] = content;
         return acc;
       },
-      {}
+      {},
     ),
     recommendedSkillIds: generatedConfig.recommendedSkillIds ?? [],
   };

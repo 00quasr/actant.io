@@ -37,13 +37,7 @@ const MENU_CYCLE_SPEED = 600;
 const PAUSE_BEFORE_SELECT = 800;
 const PAUSE_AFTER_OUTPUT = 3000;
 
-type Phase =
-  | "typing"
-  | "logo"
-  | "menu-cycle"
-  | "menu-pause"
-  | "output"
-  | "output-done";
+type Phase = "typing" | "logo" | "menu-cycle" | "menu-pause" | "output" | "output-done";
 
 export function CliShowcaseSection() {
   const [phase, setPhase] = useState<Phase>("typing");
@@ -65,7 +59,7 @@ export function CliShowcaseSection() {
           observer.unobserve(el);
         }
       },
-      { threshold: 0.3 }
+      { threshold: 0.3 },
     );
     observer.observe(el);
     return () => observer.disconnect();
@@ -85,10 +79,7 @@ export function CliShowcaseSection() {
       const timeout = setTimeout(() => setPhase("logo"), 400);
       return () => clearTimeout(timeout);
     }
-    const timeout = setTimeout(
-      () => setTypedChars((c) => c + 1),
-      TYPE_SPEED + Math.random() * 40
-    );
+    const timeout = setTimeout(() => setTypedChars((c) => c + 1), TYPE_SPEED + Math.random() * 40);
     return () => clearTimeout(timeout);
   }, [visible, phase, typedChars, command.length]);
 
@@ -110,10 +101,7 @@ export function CliShowcaseSection() {
       }, MENU_CYCLE_SPEED);
       return () => clearTimeout(timeout);
     }
-    const timeout = setTimeout(
-      () => setActiveItem((i) => i + 1),
-      MENU_CYCLE_SPEED
-    );
+    const timeout = setTimeout(() => setActiveItem((i) => i + 1), MENU_CYCLE_SPEED);
     return () => clearTimeout(timeout);
   }, [phase, activeItem]);
 
@@ -131,10 +119,7 @@ export function CliShowcaseSection() {
       const timeout = setTimeout(() => setPhase("output-done"), PAUSE_AFTER_OUTPUT);
       return () => clearTimeout(timeout);
     }
-    const timeout = setTimeout(
-      () => setOutputLines((l) => l + 1),
-      LINE_DELAY
-    );
+    const timeout = setTimeout(() => setOutputLines((l) => l + 1), LINE_DELAY);
     return () => clearTimeout(timeout);
   }, [phase, outputLines]);
 
@@ -161,8 +146,7 @@ export function CliShowcaseSection() {
             One command to get started
           </h2>
           <p className="mx-auto mt-3 max-w-lg text-center text-sm text-muted-foreground">
-            Analyze your project, generate docs, and manage configs — all from
-            the terminal.
+            Analyze your project, generate docs, and manage configs — all from the terminal.
           </p>
         </FadeIn>
 
@@ -175,9 +159,7 @@ export function CliShowcaseSection() {
                 <div className="h-3 w-3 rounded-full bg-white/20" />
                 <div className="h-3 w-3 rounded-full bg-white/20" />
               </div>
-              <span className="ml-2 text-xs text-white/40 font-mono">
-                terminal
-              </span>
+              <span className="ml-2 text-xs text-white/40 font-mono">terminal</span>
               <span className="ml-auto text-xs text-white/30 font-mono">
                 {showLogo ? "authenticated" : ""}
               </span>
@@ -200,12 +182,8 @@ export function CliShowcaseSection() {
                   className="transition-opacity duration-300"
                   style={{ opacity: showLogo ? 1 : 0 }}
                 >
-                  <pre className="text-white/60 text-xs leading-tight mb-1">
-                    {ASCII_LOGO}
-                  </pre>
-                  <p className="text-white/40 text-xs mb-5">
-                    Configure AI coding agents
-                  </p>
+                  <pre className="text-white/60 text-xs leading-tight mb-1">{ASCII_LOGO}</pre>
+                  <p className="text-white/40 text-xs mb-5">Configure AI coding agents</p>
                 </div>
               )}
 
@@ -221,9 +199,7 @@ export function CliShowcaseSection() {
                           isActive ? "bg-white/10" : ""
                         }`}
                       >
-                        <span
-                          className={`mr-2 ${isActive ? "text-white/90" : "text-transparent"}`}
-                        >
+                        <span className={`mr-2 ${isActive ? "text-white/90" : "text-transparent"}`}>
                           &gt;
                         </span>
                         <span
@@ -231,9 +207,7 @@ export function CliShowcaseSection() {
                         >
                           {item.label}
                         </span>
-                        <span
-                          className={isActive ? "text-white/40" : "text-white/25"}
-                        >
+                        <span className={isActive ? "text-white/40" : "text-white/25"}>
                           {item.description}
                         </span>
                       </div>

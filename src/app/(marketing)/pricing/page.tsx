@@ -41,8 +41,7 @@ export default function PricingPage() {
           Simple pricing
         </h1>
         <p className="mx-auto mt-4 max-w-md text-center text-muted-foreground">
-          Free to start. Upgrade when you need unlimited configs and AI
-          generations.
+          Free to start. Upgrade when you need unlimited configs and AI generations.
         </p>
 
         {/* Plan cards */}
@@ -64,7 +63,9 @@ export default function PricingPage() {
 
           {/* Pro plan */}
           <div className="rounded-lg border border-foreground/20 p-6 flex flex-col relative overflow-hidden">
-            <span className="absolute top-3 right-3 rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium text-foreground">Popular</span>
+            <span className="absolute top-3 right-3 rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium text-foreground">
+              Popular
+            </span>
             <h2 className="text-lg font-semibold">Pro</h2>
             <div className="mt-2">
               <span className="text-3xl font-bold tracking-tight">$10</span>
@@ -101,9 +102,7 @@ export default function PricingPage() {
                   key={feature.label}
                   className="border-b last:border-0 transition-colors hover:bg-muted/30"
                 >
-                  <td className="px-4 py-3 text-sm font-medium">
-                    {feature.label}
-                  </td>
+                  <td className="px-4 py-3 text-sm font-medium">{feature.label}</td>
                   <td className="px-4 py-3">
                     <div className="flex justify-center">
                       <FeatureValue value={feature.free} />

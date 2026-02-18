@@ -106,10 +106,7 @@ export function BuilderHeader({
           className="max-w-xs font-medium"
         />
 
-        <Select
-          value={state.targetAgent}
-          onValueChange={(v) => setTargetAgent(v as AgentType)}
-        >
+        <Select value={state.targetAgent} onValueChange={(v) => setTargetAgent(v as AgentType)}>
           <SelectTrigger className="w-44">
             <SelectValue />
           </SelectTrigger>
@@ -165,11 +162,7 @@ export function BuilderHeader({
         )}
       </div>
 
-      <ExportDialog
-        open={exportOpen}
-        onOpenChange={setExportOpen}
-        state={state}
-      />
+      <ExportDialog open={exportOpen} onOpenChange={setExportOpen} state={state} />
 
       <RepoImportDialog
         open={importOpen}

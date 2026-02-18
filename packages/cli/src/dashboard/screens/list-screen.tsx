@@ -72,14 +72,15 @@ export function ListScreen({ onBack }: ListScreenProps) {
           <Text bold>Updated</Text>
         </Text>
         {configs.map((config) => {
-          const name = config.name.length > 24
-            ? config.name.slice(0, 21) + "..."
-            : config.name;
+          const name = config.name.length > 24 ? config.name.slice(0, 21) + "..." : config.name;
           const date = new Date(config.updated_at).toLocaleDateString();
 
           return (
             <Text key={config.id}>
-              <Text>{"  "}{name.padEnd(26)}</Text>
+              <Text>
+                {"  "}
+                {name.padEnd(26)}
+              </Text>
               <Text dimColor>{config.target_agent.padEnd(16)}</Text>
               <Text dimColor>{date}</Text>
             </Text>

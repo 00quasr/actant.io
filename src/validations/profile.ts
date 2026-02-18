@@ -7,7 +7,7 @@ export const profileSchema = z.object({
     .max(39, "Username must be 39 characters or less")
     .regex(
       /^[a-zA-Z0-9][a-zA-Z0-9-]*$/,
-      "Username must start with alphanumeric and contain only letters, numbers, and hyphens"
+      "Username must start with alphanumeric and contain only letters, numbers, and hyphens",
     )
     .optional(),
   display_name: z.string().min(1, "Display name is required").max(100),

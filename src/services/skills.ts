@@ -14,11 +14,7 @@ export async function listSkills(): Promise<Skill[]> {
 
 export async function getSkill(id: string): Promise<Skill> {
   const supabase = createClient();
-  const { data, error } = await supabase
-    .from("skills")
-    .select("*")
-    .eq("id", id)
-    .single();
+  const { data, error } = await supabase.from("skills").select("*").eq("id", id).single();
 
   if (error) throw error;
   return data;

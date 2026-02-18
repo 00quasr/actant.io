@@ -5,7 +5,15 @@ import { getConfigs, exportConfig } from "../../lib/api.js";
 import { writeExportFiles, getExistingFiles } from "../../lib/writer.js";
 import type { ConfigListItem, AgentType, ExportResult } from "../../types.js";
 
-type Step = "loading" | "select-config" | "select-agent" | "exporting" | "preview" | "writing" | "done" | "error";
+type Step =
+  | "loading"
+  | "select-config"
+  | "select-agent"
+  | "exporting"
+  | "preview"
+  | "writing"
+  | "done"
+  | "error";
 
 const AGENT_OPTIONS: { id: AgentType; label: string }[] = [
   { id: "claude-code", label: "Claude Code" },
@@ -135,14 +143,10 @@ export function InitScreen({ onBack }: InitScreenProps) {
         <Box marginTop={1} flexDirection="column">
           {configs.map((config, i) => {
             const selected = i === configCursor;
-            const name = config.name.length > 30
-              ? config.name.slice(0, 27) + "..."
-              : config.name;
+            const name = config.name.length > 30 ? config.name.slice(0, 27) + "..." : config.name;
             return (
               <Box key={config.id}>
-                <Text color={selected ? "cyan" : undefined}>
-                  {selected ? " > " : "   "}
-                </Text>
+                <Text color={selected ? "cyan" : undefined}>{selected ? " > " : "   "}</Text>
                 <Text bold={selected} color={selected ? "cyan" : undefined}>
                   {name}
                 </Text>
@@ -152,7 +156,7 @@ export function InitScreen({ onBack }: InitScreenProps) {
           })}
         </Box>
         <Box marginTop={1}>
-          <Text dimColor>↑↓ select  ↵ confirm  ESC back</Text>
+          <Text dimColor>↑↓ select ↵ confirm ESC back</Text>
         </Box>
       </Box>
     );
@@ -168,9 +172,7 @@ export function InitScreen({ onBack }: InitScreenProps) {
             const selected = i === agentCursor;
             return (
               <Box key={agent.id}>
-                <Text color={selected ? "cyan" : undefined}>
-                  {selected ? " > " : "   "}
-                </Text>
+                <Text color={selected ? "cyan" : undefined}>{selected ? " > " : "   "}</Text>
                 <Text bold={selected} color={selected ? "cyan" : undefined}>
                   {agent.label}
                 </Text>
@@ -179,7 +181,7 @@ export function InitScreen({ onBack }: InitScreenProps) {
           })}
         </Box>
         <Box marginTop={1}>
-          <Text dimColor>↑↓ select  ↵ confirm  ESC back</Text>
+          <Text dimColor>↑↓ select ↵ confirm ESC back</Text>
         </Box>
       </Box>
     );
@@ -202,7 +204,7 @@ export function InitScreen({ onBack }: InitScreenProps) {
             const isConflict = conflicts.includes(file.path);
             return (
               <Text key={file.path}>
-                <Text dimColor>  {file.path}</Text>
+                <Text dimColor> {file.path}</Text>
                 {isConflict && <Text color="yellow"> (overwrite)</Text>}
               </Text>
             );
@@ -211,7 +213,10 @@ export function InitScreen({ onBack }: InitScreenProps) {
         {exportResult.warnings.length > 0 && (
           <Box marginTop={1} flexDirection="column">
             {exportResult.warnings.map((w, i) => (
-              <Text key={i} color="yellow">  {w}</Text>
+              <Text key={i} color="yellow">
+                {" "}
+                {w}
+              </Text>
             ))}
           </Box>
         )}
@@ -234,7 +239,8 @@ export function InitScreen({ onBack }: InitScreenProps) {
     return (
       <Box flexDirection="column" padding={1}>
         <Text color="green">
-          Wrote {exportResult.files.length} file{exportResult.files.length !== 1 ? "s" : ""} successfully.
+          Wrote {exportResult.files.length} file{exportResult.files.length !== 1 ? "s" : ""}{" "}
+          successfully.
         </Text>
         <Box marginTop={1}>
           <Text dimColor>Press ESC to go back</Text>

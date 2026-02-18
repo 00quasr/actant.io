@@ -13,9 +13,7 @@ export function ExportPreview({ files }: ExportPreviewProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   if (files.length === 0) {
-    return (
-      <p className="text-sm text-muted-foreground">No files to preview.</p>
-    );
+    return <p className="text-sm text-muted-foreground">No files to preview.</p>;
   }
 
   return (

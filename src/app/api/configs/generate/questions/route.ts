@@ -26,17 +26,14 @@ export async function POST(request: Request) {
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json(
-      { error: "Invalid request body" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
   const parseResult = questionsInputSchema.safeParse(body);
   if (!parseResult.success) {
     return NextResponse.json(
       { error: "Validation failed", details: parseResult.error.flatten() },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -56,11 +53,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ questions: result.object.questions });
   } catch (err) {
-    const message =
-      err instanceof Error ? err.message : "Failed to generate questions";
-    return NextResponse.json(
-      { error: "Generation failed", message },
-      { status: 500 }
-    );
+    const message = err instanceof Error ? err.message : "Failed to generate questions";
+    return NextResponse.json({ error: "Generation failed", message }, { status: 500 });
   }
 }

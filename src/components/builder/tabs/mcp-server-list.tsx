@@ -15,10 +15,7 @@ export function McpServerList({ servers, onEdit, onRemove }: McpServerListProps)
   return (
     <div className="space-y-2">
       {servers.map((server) => (
-        <div
-          key={server.name}
-          className="flex items-center justify-between rounded-lg border p-3"
-        >
+        <div key={server.name} className="flex items-center justify-between rounded-lg border p-3">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
               <span className="font-medium text-sm">{server.name}</span>
@@ -33,18 +30,10 @@ export function McpServerList({ servers, onEdit, onRemove }: McpServerListProps)
             </p>
           </div>
           <div className="flex items-center gap-1 ml-2 shrink-0">
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              onClick={() => onEdit(server)}
-            >
+            <Button variant="ghost" size="icon-xs" onClick={() => onEdit(server)}>
               <Pencil1Icon />
             </Button>
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              onClick={() => onRemove(server.name)}
-            >
+            <Button variant="ghost" size="icon-xs" onClick={() => onRemove(server.name)}>
               <TrashIcon />
             </Button>
           </div>

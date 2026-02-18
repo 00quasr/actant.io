@@ -7,31 +7,28 @@ progressive_disclosure:
     when_to_use: "When working with supabase-backend-platform or related functionality."
     quick_start: "1. Review the core concepts below. 2. Apply patterns to your use case. 3. Follow best practices for implementation."
 ---
+
 # Supabase Backend Platform Skill
 
 ---
+
 progressive_disclosure:
-  entry_point:
-    summary: "Open-source Firebase alternative with Postgres, authentication, storage, and realtime"
-    when_to_use:
-      - "When building full-stack applications"
-      - "When auth, database, and storage are required"
-      - "When realtime subscriptions are needed"
-      - "When using Next.js, React, or Vue"
-    quick_start:
-      - "Create project on Supabase console"
-      - "npm install @supabase/supabase-js"
-      - "Initialize client with URL and anon key"
-      - "Use auth, database, storage, realtime"
-  token_estimate:
-    entry: 80-95
-    full: 5000-6000
+entry_point:
+summary: "Open-source Firebase alternative with Postgres, authentication, storage, and realtime"
+when_to_use: - "When building full-stack applications" - "When auth, database, and storage are required" - "When realtime subscriptions are needed" - "When using Next.js, React, or Vue"
+quick_start: - "Create project on Supabase console" - "npm install @supabase/supabase-js" - "Initialize client with URL and anon key" - "Use auth, database, storage, realtime"
+token_estimate:
+entry: 80-95
+full: 5000-6000
+
 ---
 
 ## Supabase Fundamentals
 
 ### What is Supabase?
+
 Open-source Firebase alternative built on:
+
 - **Postgres Database**: Full SQL database with PostgREST API
 - **Authentication**: Built-in auth with multiple providers
 - **Storage**: File storage with image transformations
@@ -40,6 +37,7 @@ Open-source Firebase alternative built on:
 - **Row Level Security**: Postgres RLS for data access control
 
 ### Project Setup
+
 ```bash
 # Install Supabase client
 npm install @supabase/supabase-js
@@ -52,131 +50,113 @@ npm install -D @supabase/supabase-js
 ```
 
 ### Client Initialization
+
 ```typescript
 // lib/supabase.ts
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // With TypeScript types
-import { Database } from '@/types/supabase'
+import { Database } from "@/types/supabase";
 
-export const supabase = createClient<Database>(
-  supabaseUrl,
-  supabaseAnonKey
-)
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
 ```
 
 ## Database Operations
 
 ### PostgREST API Basics
+
 Supabase auto-generates REST API from Postgres schema:
 
 ```typescript
 // SELECT * FROM posts
-const { data, error } = await supabase
-  .from('posts')
-  .select('*')
+const { data, error } = await supabase.from("posts").select("*");
 
 // SELECT with filters
 const { data } = await supabase
-  .from('posts')
-  .select('*')
-  .eq('status', 'published')
-  .order('created_at', { ascending: false })
-  .limit(10)
+  .from("posts")
+  .select("*")
+  .eq("status", "published")
+  .order("created_at", { ascending: false })
+  .limit(10);
 
 // SELECT with joins
-const { data } = await supabase
-  .from('posts')
-  .select(`
+const { data } = await supabase.from("posts").select(`
     *,
     author:profiles(name, avatar),
     comments(count)
-  `)
+  `);
 
 // INSERT
 const { data, error } = await supabase
-  .from('posts')
-  .insert({ title: 'Hello', content: 'World' })
+  .from("posts")
+  .insert({ title: "Hello", content: "World" })
   .select()
-  .single()
+  .single();
 
 // UPDATE
 const { data } = await supabase
-  .from('posts')
-  .update({ status: 'published' })
-  .eq('id', postId)
-  .select()
+  .from("posts")
+  .update({ status: "published" })
+  .eq("id", postId)
+  .select();
 
 // DELETE
-const { error } = await supabase
-  .from('posts')
-  .delete()
-  .eq('id', postId)
+const { error } = await supabase.from("posts").delete().eq("id", postId);
 
 // UPSERT
-const { data } = await supabase
-  .from('posts')
-  .upsert({ id: 1, title: 'Updated' })
-  .select()
+const { data } = await supabase.from("posts").upsert({ id: 1, title: "Updated" }).select();
 ```
 
 ### Advanced Queries
+
 ```typescript
 // Full-text search
-const { data } = await supabase
-  .from('posts')
-  .select('*')
-  .textSearch('title', 'postgresql', {
-    type: 'websearch',
-    config: 'english'
-  })
+const { data } = await supabase.from("posts").select("*").textSearch("title", "postgresql", {
+  type: "websearch",
+  config: "english",
+});
 
 // Range queries
 const { data } = await supabase
-  .from('posts')
-  .select('*')
-  .gte('created_at', '2024-01-01')
-  .lte('created_at', '2024-12-31')
+  .from("posts")
+  .select("*")
+  .gte("created_at", "2024-01-01")
+  .lte("created_at", "2024-12-31");
 
 // Array contains
 const { data } = await supabase
-  .from('posts')
-  .select('*')
-  .contains('tags', ['postgres', 'supabase'])
+  .from("posts")
+  .select("*")
+  .contains("tags", ["postgres", "supabase"]);
 
 // JSON operations
-const { data } = await supabase
-  .from('users')
-  .select('*')
-  .eq('metadata->theme', 'dark')
+const { data } = await supabase.from("users").select("*").eq("metadata->theme", "dark");
 
 // Count without data
-const { count } = await supabase
-  .from('posts')
-  .select('*', { count: 'exact', head: true })
+const { count } = await supabase.from("posts").select("*", { count: "exact", head: true });
 
 // Pagination
-const pageSize = 10
-const page = 2
+const pageSize = 10;
+const page = 2;
 const { data } = await supabase
-  .from('posts')
-  .select('*')
-  .range(page * pageSize, (page + 1) * pageSize - 1)
+  .from("posts")
+  .select("*")
+  .range(page * pageSize, (page + 1) * pageSize - 1);
 ```
 
 ### Database Functions and RPC
+
 ```typescript
 // Call Postgres function
-const { data, error } = await supabase
-  .rpc('get_trending_posts', {
-    days: 7,
-    min_score: 10
-  })
+const { data, error } = await supabase.rpc("get_trending_posts", {
+  days: 7,
+  min_score: 10,
+});
 
 // Example function in SQL
 /*
@@ -206,45 +186,51 @@ $$ LANGUAGE plpgsql;
 ## Authentication
 
 ### Email/Password Authentication
+
 ```typescript
 // Sign up
 const { data, error } = await supabase.auth.signUp({
-  email: 'user@example.com',
-  password: 'secure-password',
+  email: "user@example.com",
+  password: "secure-password",
   options: {
     data: {
-      name: 'John Doe',
-      avatar_url: 'https://...'
-    }
-  }
-})
+      name: "John Doe",
+      avatar_url: "https://...",
+    },
+  },
+});
 
 // Sign in
 const { data, error } = await supabase.auth.signInWithPassword({
-  email: 'user@example.com',
-  password: 'secure-password'
-})
+  email: "user@example.com",
+  password: "secure-password",
+});
 
 // Sign out
-const { error } = await supabase.auth.signOut()
+const { error } = await supabase.auth.signOut();
 
 // Get current user
-const { data: { user } } = await supabase.auth.getUser()
+const {
+  data: { user },
+} = await supabase.auth.getUser();
 
 // Get session
-const { data: { session } } = await supabase.auth.getSession()
+const {
+  data: { session },
+} = await supabase.auth.getSession();
 ```
 
 ### OAuth Providers
+
 ```typescript
 // Sign in with OAuth
 const { data, error } = await supabase.auth.signInWithOAuth({
-  provider: 'github',
+  provider: "github",
   options: {
-    redirectTo: 'http://localhost:3000/auth/callback',
-    scopes: 'repo user'
-  }
-})
+    redirectTo: "http://localhost:3000/auth/callback",
+    scopes: "repo user",
+  },
+});
 
 // Available providers
 // github, google, gitlab, bitbucket, azure, discord, facebook,
@@ -252,67 +238,71 @@ const { data, error } = await supabase.auth.signInWithOAuth({
 ```
 
 ### Magic Links
+
 ```typescript
 // Send magic link
 const { data, error } = await supabase.auth.signInWithOtp({
-  email: 'user@example.com',
+  email: "user@example.com",
   options: {
-    emailRedirectTo: 'http://localhost:3000/auth/callback'
-  }
-})
+    emailRedirectTo: "http://localhost:3000/auth/callback",
+  },
+});
 
 // Verify OTP
 const { data, error } = await supabase.auth.verifyOtp({
-  email: 'user@example.com',
-  token: '123456',
-  type: 'email'
-})
+  email: "user@example.com",
+  token: "123456",
+  type: "email",
+});
 ```
 
 ### Phone Authentication
+
 ```typescript
 // Sign in with phone
 const { data, error } = await supabase.auth.signInWithOtp({
-  phone: '+1234567890'
-})
+  phone: "+1234567890",
+});
 
 // Verify phone OTP
 const { data, error } = await supabase.auth.verifyOtp({
-  phone: '+1234567890',
-  token: '123456',
-  type: 'sms'
-})
+  phone: "+1234567890",
+  token: "123456",
+  type: "sms",
+});
 ```
 
 ### Auth State Management
+
 ```typescript
 // Listen to auth changes
 supabase.auth.onAuthStateChange((event, session) => {
-  if (event === 'SIGNED_IN') {
-    console.log('User signed in:', session?.user)
+  if (event === "SIGNED_IN") {
+    console.log("User signed in:", session?.user);
   }
-  if (event === 'SIGNED_OUT') {
-    console.log('User signed out')
+  if (event === "SIGNED_OUT") {
+    console.log("User signed out");
   }
-  if (event === 'TOKEN_REFRESHED') {
-    console.log('Token refreshed')
+  if (event === "TOKEN_REFRESHED") {
+    console.log("Token refreshed");
   }
-})
+});
 
 // Update user metadata
 const { data, error } = await supabase.auth.updateUser({
-  data: { theme: 'dark' }
-})
+  data: { theme: "dark" },
+});
 
 // Change password
 const { data, error } = await supabase.auth.updateUser({
-  password: 'new-password'
-})
+  password: "new-password",
+});
 ```
 
 ## Row Level Security (RLS)
 
 ### RLS Fundamentals
+
 Postgres Row Level Security controls data access at the database level:
 
 ```sql
@@ -341,6 +331,7 @@ USING (auth.uid() = author_id);
 ```
 
 ### Common RLS Patterns
+
 ```sql
 -- Public read, authenticated write
 CREATE POLICY "Anyone can view posts"
@@ -383,6 +374,7 @@ USING (
 ```
 
 ### RLS Helper Functions
+
 ```sql
 -- Get current user ID
 SELECT auth.uid();
@@ -400,80 +392,69 @@ SELECT auth.jwt()->'app_metadata'->>'role';
 ## Storage
 
 ### File Upload
+
 ```typescript
 // Upload file
-const { data, error } = await supabase.storage
-  .from('avatars')
-  .upload('public/avatar1.png', file, {
-    cacheControl: '3600',
-    upsert: false
-  })
+const { data, error } = await supabase.storage.from("avatars").upload("public/avatar1.png", file, {
+  cacheControl: "3600",
+  upsert: false,
+});
 
 // Upload with progress
-const { data, error } = await supabase.storage
-  .from('avatars')
-  .upload('public/avatar1.png', file, {
-    onUploadProgress: (progress) => {
-      console.log(`${progress.loaded}/${progress.total}`)
-    }
-  })
+const { data, error } = await supabase.storage.from("avatars").upload("public/avatar1.png", file, {
+  onUploadProgress: (progress) => {
+    console.log(`${progress.loaded}/${progress.total}`);
+  },
+});
 
 // Upload from URL
 const { data, error } = await supabase.storage
-  .from('avatars')
-  .uploadToSignedUrl('path', token, file)
+  .from("avatars")
+  .uploadToSignedUrl("path", token, file);
 ```
 
 ### File Operations
+
 ```typescript
 // Download file
-const { data, error } = await supabase.storage
-  .from('avatars')
-  .download('public/avatar1.png')
+const { data, error } = await supabase.storage.from("avatars").download("public/avatar1.png");
 
 // Get public URL
-const { data } = supabase.storage
-  .from('avatars')
-  .getPublicUrl('public/avatar1.png')
+const { data } = supabase.storage.from("avatars").getPublicUrl("public/avatar1.png");
 
 // Create signed URL (temporary access)
 const { data, error } = await supabase.storage
-  .from('avatars')
-  .createSignedUrl('private/document.pdf', 3600) // 1 hour
+  .from("avatars")
+  .createSignedUrl("private/document.pdf", 3600); // 1 hour
 
 // List files
-const { data, error } = await supabase.storage
-  .from('avatars')
-  .list('public', {
-    limit: 100,
-    offset: 0,
-    sortBy: { column: 'name', order: 'asc' }
-  })
+const { data, error } = await supabase.storage.from("avatars").list("public", {
+  limit: 100,
+  offset: 0,
+  sortBy: { column: "name", order: "asc" },
+});
 
 // Delete file
-const { data, error } = await supabase.storage
-  .from('avatars')
-  .remove(['public/avatar1.png'])
+const { data, error } = await supabase.storage.from("avatars").remove(["public/avatar1.png"]);
 
 // Move file
 const { data, error } = await supabase.storage
-  .from('avatars')
-  .move('public/avatar1.png', 'public/avatar2.png')
+  .from("avatars")
+  .move("public/avatar1.png", "public/avatar2.png");
 ```
 
 ### Image Transformations
+
 ```typescript
 // Transform image
-const { data } = supabase.storage
-  .from('avatars')
-  .getPublicUrl('avatar1.png', {
-    transform: {
-      width: 200,
-      height: 200,
-      resize: 'cover',
-      quality: 80
-    }
-  })
+const { data } = supabase.storage.from("avatars").getPublicUrl("avatar1.png", {
+  transform: {
+    width: 200,
+    height: 200,
+    resize: "cover",
+    quality: 80,
+  },
+});
 
 // Available transformations
 // width, height, resize (cover|contain|fill),
@@ -481,6 +462,7 @@ const { data } = supabase.storage
 ```
 
 ### Storage RLS
+
 ```sql
 -- Enable RLS on storage
 CREATE POLICY "Avatar images are publicly accessible"
@@ -505,113 +487,117 @@ USING (
 ## Realtime Subscriptions
 
 ### Database Changes
+
 ```typescript
 // Subscribe to inserts
 const channel = supabase
-  .channel('posts-insert')
+  .channel("posts-insert")
   .on(
-    'postgres_changes',
+    "postgres_changes",
     {
-      event: 'INSERT',
-      schema: 'public',
-      table: 'posts'
+      event: "INSERT",
+      schema: "public",
+      table: "posts",
     },
     (payload) => {
-      console.log('New post:', payload.new)
-    }
+      console.log("New post:", payload.new);
+    },
   )
-  .subscribe()
+  .subscribe();
 
 // Subscribe to updates
 const channel = supabase
-  .channel('posts-update')
+  .channel("posts-update")
   .on(
-    'postgres_changes',
+    "postgres_changes",
     {
-      event: 'UPDATE',
-      schema: 'public',
-      table: 'posts',
-      filter: 'id=eq.1'
+      event: "UPDATE",
+      schema: "public",
+      table: "posts",
+      filter: "id=eq.1",
     },
     (payload) => {
-      console.log('Updated:', payload.new)
-      console.log('Previous:', payload.old)
-    }
+      console.log("Updated:", payload.new);
+      console.log("Previous:", payload.old);
+    },
   )
-  .subscribe()
+  .subscribe();
 
 // Subscribe to all changes
 const channel = supabase
-  .channel('posts-all')
+  .channel("posts-all")
   .on(
-    'postgres_changes',
+    "postgres_changes",
     {
-      event: '*',
-      schema: 'public',
-      table: 'posts'
+      event: "*",
+      schema: "public",
+      table: "posts",
     },
     (payload) => {
-      console.log('Change:', payload)
-    }
+      console.log("Change:", payload);
+    },
   )
-  .subscribe()
+  .subscribe();
 
 // Unsubscribe
-supabase.removeChannel(channel)
+supabase.removeChannel(channel);
 ```
 
 ### Presence (Track Online Users)
+
 ```typescript
 // Track presence
-const channel = supabase.channel('room-1')
+const channel = supabase.channel("room-1");
 
 // Track current user
 channel
-  .on('presence', { event: 'sync' }, () => {
-    const state = channel.presenceState()
-    console.log('Online users:', state)
+  .on("presence", { event: "sync" }, () => {
+    const state = channel.presenceState();
+    console.log("Online users:", state);
   })
-  .on('presence', { event: 'join' }, ({ key, newPresences }) => {
-    console.log('User joined:', newPresences)
+  .on("presence", { event: "join" }, ({ key, newPresences }) => {
+    console.log("User joined:", newPresences);
   })
-  .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
-    console.log('User left:', leftPresences)
+  .on("presence", { event: "leave" }, ({ key, leftPresences }) => {
+    console.log("User left:", leftPresences);
   })
   .subscribe(async (status) => {
-    if (status === 'SUBSCRIBED') {
+    if (status === "SUBSCRIBED") {
       await channel.track({
         user_id: userId,
-        online_at: new Date().toISOString()
-      })
+        online_at: new Date().toISOString(),
+      });
     }
-  })
+  });
 
 // Untrack
-await channel.untrack()
+await channel.untrack();
 ```
 
 ### Broadcast (Send Messages)
+
 ```typescript
 // Broadcast messages
-const channel = supabase.channel('chat-room')
+const channel = supabase.channel("chat-room");
 
 channel
-  .on('broadcast', { event: 'message' }, (payload) => {
-    console.log('Message:', payload)
+  .on("broadcast", { event: "message" }, (payload) => {
+    console.log("Message:", payload);
   })
-  .subscribe()
+  .subscribe();
 
 // Send message
 await channel.send({
-  type: 'broadcast',
-  event: 'message',
-  payload: { text: 'Hello', user: 'John' }
-})
+  type: "broadcast",
+  event: "message",
+  payload: { text: "Hello", user: "John" },
+});
 ```
 
 ## Edge Functions
 
 ### Edge Function Basics
+
 Serverless functions on Deno runtime:
 
 ```bash
@@ -626,82 +612,84 @@ supabase functions deploy my-function
 ```
 
 ### Edge Function Example
+
 ```typescript
 // supabase/functions/my-function/index.ts
-import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 serve(async (req) => {
   try {
     // Get auth header
-    const authHeader = req.headers.get('Authorization')!
+    const authHeader = req.headers.get("Authorization")!;
 
     // Create Supabase client
     const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: authHeader } } }
-    )
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      { global: { headers: { Authorization: authHeader } } },
+    );
 
     // Verify user
-    const { data: { user }, error } = await supabase.auth.getUser()
-    if (error) throw error
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
+    if (error) throw error;
 
     // Process request
-    const { data } = await supabase
-      .from('posts')
-      .select('*')
-      .eq('author_id', user.id)
+    const { data } = await supabase.from("posts").select("*").eq("author_id", user.id);
 
-    return new Response(
-      JSON.stringify({ data }),
-      { headers: { 'Content-Type': 'application/json' } }
-    )
+    return new Response(JSON.stringify({ data }), {
+      headers: { "Content-Type": "application/json" },
+    });
   } catch (error) {
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 400, headers: { 'Content-Type': 'application/json' } }
-    )
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
   }
-})
+});
 ```
 
 ### Invoke Edge Function
+
 ```typescript
 // From client
-const { data, error } = await supabase.functions.invoke('my-function', {
-  body: { name: 'John' }
-})
+const { data, error } = await supabase.functions.invoke("my-function", {
+  body: { name: "John" },
+});
 
 // With auth
-const { data, error } = await supabase.functions.invoke('my-function', {
+const { data, error } = await supabase.functions.invoke("my-function", {
   headers: {
-    Authorization: `Bearer ${session.access_token}`
+    Authorization: `Bearer ${session.access_token}`,
   },
-  body: { name: 'John' }
-})
+  body: { name: "John" },
+});
 ```
 
 ## Next.js Integration
 
 ### App Router Setup
+
 ```typescript
 // lib/supabase/client.ts (Client Component)
-import { createBrowserClient } from '@supabase/ssr'
+import { createBrowserClient } from "@supabase/ssr";
 
 export function createClient() {
   return createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  );
 }
 
 // lib/supabase/server.ts (Server Component)
-import { createServerClient, type CookieOptions } from '@supabase/ssr'
-import { cookies } from 'next/headers'
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { cookies } from "next/headers";
 
 export async function createClient() {
-  const cookieStore = await cookies()
+  const cookieStore = await cookies();
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -709,29 +697,29 @@ export async function createClient() {
     {
       cookies: {
         get(name: string) {
-          return cookieStore.get(name)?.value
+          return cookieStore.get(name)?.value;
         },
         set(name: string, value: string, options: CookieOptions) {
-          cookieStore.set({ name, value, ...options })
+          cookieStore.set({ name, value, ...options });
         },
         remove(name: string, options: CookieOptions) {
-          cookieStore.set({ name, value: '', ...options })
+          cookieStore.set({ name, value: "", ...options });
         },
       },
-    }
-  )
+    },
+  );
 }
 
 // lib/supabase/middleware.ts (Middleware)
-import { createServerClient, type CookieOptions } from '@supabase/ssr'
-import { NextResponse, type NextRequest } from 'next/server'
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server";
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({
     request: {
       headers: request.headers,
     },
-  })
+  });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -739,48 +727,48 @@ export async function updateSession(request: NextRequest) {
     {
       cookies: {
         get(name: string) {
-          return request.cookies.get(name)?.value
+          return request.cookies.get(name)?.value;
         },
         set(name: string, value: string, options: CookieOptions) {
-          request.cookies.set({ name, value, ...options })
+          request.cookies.set({ name, value, ...options });
           response = NextResponse.next({
             request: { headers: request.headers },
-          })
-          response.cookies.set({ name, value, ...options })
+          });
+          response.cookies.set({ name, value, ...options });
         },
         remove(name: string, options: CookieOptions) {
-          request.cookies.set({ name, value: '', ...options })
+          request.cookies.set({ name, value: "", ...options });
           response = NextResponse.next({
             request: { headers: request.headers },
-          })
-          response.cookies.set({ name, value: '', ...options })
+          });
+          response.cookies.set({ name, value: "", ...options });
         },
       },
-    }
-  )
+    },
+  );
 
-  await supabase.auth.getUser()
-  return response
+  await supabase.auth.getUser();
+  return response;
 }
 ```
 
 ### Middleware
+
 ```typescript
 // middleware.ts
-import { updateSession } from '@/lib/supabase/middleware'
+import { updateSession } from "@/lib/supabase/middleware";
 
 export async function middleware(request: NextRequest) {
-  return await updateSession(request)
+  return await updateSession(request);
 }
 
 export const config = {
-  matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
-  ],
-}
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
+};
 ```
 
 ### Server Component
+
 ```typescript
 // app/posts/page.tsx
 import { createClient } from '@/lib/supabase/server'
@@ -807,6 +795,7 @@ export default async function PostsPage() {
 ```
 
 ### Client Component
+
 ```typescript
 // app/components/new-post.tsx
 'use client'
@@ -847,39 +836,41 @@ export function NewPost() {
 ```
 
 ### Server Actions
+
 ```typescript
 // app/actions/posts.ts
-'use server'
+"use server";
 
-import { revalidatePath } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
+import { revalidatePath } from "next/cache";
+import { createClient } from "@/lib/supabase/server";
 
 export async function createPost(formData: FormData) {
-  const supabase = await createClient()
+  const supabase = await createClient();
 
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) {
-    return { error: 'Not authenticated' }
+    return { error: "Not authenticated" };
   }
 
-  const title = formData.get('title') as string
+  const title = formData.get("title") as string;
 
-  const { error } = await supabase
-    .from('posts')
-    .insert({ title, author_id: user.id })
+  const { error } = await supabase.from("posts").insert({ title, author_id: user.id });
 
   if (error) {
-    return { error: error.message }
+    return { error: error.message };
   }
 
-  revalidatePath('/posts')
-  return { success: true }
+  revalidatePath("/posts");
+  return { success: true };
 }
 ```
 
 ## TypeScript Type Generation
 
 ### Generate Types from Database
+
 ```bash
 # Install CLI
 npm install -D supabase
@@ -898,6 +889,7 @@ npx supabase gen types typescript --local > types/supabase.ts
 ```
 
 ### Use Generated Types
+
 ```typescript
 // types/supabase.ts (generated)
 export type Database = {
@@ -905,42 +897,42 @@ export type Database = {
     Tables: {
       posts: {
         Row: {
-          id: string
-          title: string
-          content: string | null
-          author_id: string
-          created_at: string
-        }
+          id: string;
+          title: string;
+          content: string | null;
+          author_id: string;
+          created_at: string;
+        };
         Insert: {
-          id?: string
-          title: string
-          content?: string | null
-          author_id: string
-          created_at?: string
-        }
+          id?: string;
+          title: string;
+          content?: string | null;
+          author_id: string;
+          created_at?: string;
+        };
         Update: {
-          id?: string
-          title?: string
-          content?: string | null
-          author_id?: string
-          created_at?: string
-        }
-      }
-    }
-  }
-}
+          id?: string;
+          title?: string;
+          content?: string | null;
+          author_id?: string;
+          created_at?: string;
+        };
+      };
+    };
+  };
+};
 
 // Usage
-import { createClient } from '@supabase/supabase-js'
-import { Database } from '@/types/supabase'
+import { createClient } from "@supabase/supabase-js";
+import { Database } from "@/types/supabase";
 
-const supabase = createClient<Database>(url, key)
+const supabase = createClient<Database>(url, key);
 
 // Type-safe queries
 const { data } = await supabase
-  .from('posts') // TypeScript knows this table exists
-  .select('title, content') // Autocomplete for columns
-  .single()
+  .from("posts") // TypeScript knows this table exists
+  .select("title, content") // Autocomplete for columns
+  .single();
 
 // data is typed as { title: string; content: string | null }
 ```
@@ -948,6 +940,7 @@ const { data } = await supabase
 ## Supabase CLI and Local Development
 
 ### Setup Local Development
+
 ```bash
 # Initialize Supabase
 npx supabase init
@@ -966,6 +959,7 @@ npx supabase status
 ```
 
 ### Database Migrations
+
 ```bash
 # Create migration
 npx supabase migration new create_posts_table
@@ -984,6 +978,7 @@ npx supabase db diff
 ```
 
 ### Migration Example
+
 ```sql
 -- supabase/migrations/20240101000000_create_posts_table.sql
 CREATE TABLE posts (
@@ -1026,23 +1021,25 @@ EXECUTE FUNCTION moddatetime(updated_at);
 ## Security Best Practices
 
 ### API Key Management
+
 ```typescript
 // NEVER expose service_role key in client
 // Use anon key for client-side
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY! // Public
-)
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, // Public
+);
 
 // Service role key only on server
 const supabaseAdmin = createClient(
   process.env.SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!, // Secret, bypasses RLS
-  { auth: { persistSession: false } }
-)
+  { auth: { persistSession: false } },
+);
 ```
 
 ### RLS Best Practices
+
 ```sql
 -- Always enable RLS
 ALTER TABLE posts ENABLE ROW LEVEL SECURITY;
@@ -1059,34 +1056,33 @@ SELECT * FROM posts; -- Test as this user
 ```
 
 ### Input Validation
+
 ```typescript
 // Validate on client and server
 function validatePost(data: unknown) {
   const schema = z.object({
     title: z.string().min(1).max(200),
-    content: z.string().max(10000).optional()
-  })
+    content: z.string().max(10000).optional(),
+  });
 
-  return schema.parse(data)
+  return schema.parse(data);
 }
 
 // Server-side validation in Edge Function
 serve(async (req) => {
-  const body = await req.json()
+  const body = await req.json();
 
   try {
-    const validated = validatePost(body)
+    const validated = validatePost(body);
     // Process validated data
   } catch (error) {
-    return new Response(
-      JSON.stringify({ error: 'Invalid input' }),
-      { status: 400 }
-    )
+    return new Response(JSON.stringify({ error: "Invalid input" }), { status: 400 });
   }
-})
+});
 ```
 
 ### Environment Variables
+
 ```bash
 # .env.local
 NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
@@ -1100,6 +1096,7 @@ SUPABASE_SERVICE_ROLE_KEY=eyJ... # Secret, server-only
 ## Production Deployment
 
 ### Database Optimization
+
 ```sql
 -- Add indexes for common queries
 CREATE INDEX posts_created_at_idx ON posts(created_at DESC);
@@ -1118,38 +1115,40 @@ VACUUM ANALYZE posts;
 ```
 
 ### Connection Pooling
+
 ```typescript
 // Use connection pooling for serverless
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(url, key, {
   db: {
-    schema: 'public',
+    schema: "public",
   },
   auth: {
     persistSession: true,
     autoRefreshToken: true,
   },
   global: {
-    headers: { 'x-my-custom-header': 'my-value' },
+    headers: { "x-my-custom-header": "my-value" },
   },
-})
+});
 
 // Configure pool in Supabase dashboard
 // Settings > Database > Connection pooling
 ```
 
 ### Monitoring
+
 ```typescript
 // Enable query logging
 const supabase = createClient(url, key, {
   global: {
     fetch: async (url, options) => {
-      console.log('Query:', url)
-      return fetch(url, options)
-    }
-  }
-})
+      console.log("Query:", url);
+      return fetch(url, options);
+    },
+  },
+});
 
 // Monitor in Supabase Dashboard
 // - Database performance
@@ -1159,6 +1158,7 @@ const supabase = createClient(url, key, {
 ```
 
 ### Backup Strategy
+
 ```bash
 # Automatic backups (Pro plan+)
 # Daily backups with point-in-time recovery
@@ -1173,6 +1173,7 @@ psql -h db.xxx.supabase.co -U postgres -d postgres < backup.sql
 ## Supabase vs Firebase
 
 ### Similarities
+
 - Backend-as-a-Service platform
 - Authentication with multiple providers
 - Realtime data synchronization
@@ -1183,64 +1184,74 @@ psql -h db.xxx.supabase.co -U postgres -d postgres < backup.sql
 ### Key Differences
 
 **Database**
+
 - Supabase: PostgreSQL (SQL, full control)
 - Firebase: Firestore (NoSQL, limited queries)
 
 **Queries**
+
 - Supabase: Full SQL, joins, aggregations
 - Firebase: Limited filtering, no joins
 
 **Security**
+
 - Supabase: Row Level Security (Postgres native)
 - Firebase: Security Rules (custom syntax)
 
 **Open Source**
+
 - Supabase: Fully open source, self-hostable
 - Firebase: Proprietary, Google-hosted only
 
 **Pricing**
+
 - Supabase: Compute-based, predictable
 - Firebase: Usage-based, can spike
 
 **Ecosystem**
+
 - Supabase: Postgres ecosystem (extensions, tools)
 - Firebase: Google Cloud Platform integration
 
 ### Migration Considerations
+
 ```typescript
 // Firestore collection query
 const snapshot = await db
-  .collection('posts')
-  .where('status', '==', 'published')
-  .orderBy('createdAt', 'desc')
+  .collection("posts")
+  .where("status", "==", "published")
+  .orderBy("createdAt", "desc")
   .limit(10)
-  .get()
+  .get();
 
 // Equivalent Supabase query
 const { data } = await supabase
-  .from('posts')
-  .select('*')
-  .eq('status', 'published')
-  .order('created_at', { ascending: false })
-  .limit(10)
+  .from("posts")
+  .select("*")
+  .eq("status", "published")
+  .order("created_at", { ascending: false })
+  .limit(10);
 
 // Complex queries easier in Supabase
 const { data } = await supabase
-  .from('posts')
-  .select(`
+  .from("posts")
+  .select(
+    `
     *,
     author:profiles!inner(name),
     comments(count)
-  `)
-  .gte('created_at', startDate)
-  .lte('created_at', endDate)
-  .order('created_at', { ascending: false })
+  `,
+  )
+  .gte("created_at", startDate)
+  .lte("created_at", endDate)
+  .order("created_at", { ascending: false });
 // Firebase would require multiple queries + client-side joins
 ```
 
 ## Advanced Patterns
 
 ### Optimistic Updates
+
 ```typescript
 'use client'
 
@@ -1287,6 +1298,7 @@ export function PostList({ initialPosts }: { initialPosts: Post[] }) {
 ```
 
 ### Infinite Scroll
+
 ```typescript
 'use client'
 
@@ -1335,6 +1347,7 @@ export function InfinitePostList() {
 ```
 
 ### Debounced Search
+
 ```typescript
 'use client'
 
@@ -1388,6 +1401,7 @@ export function SearchPosts() {
 ## Summary
 
 Supabase provides a complete backend platform with:
+
 - **Postgres Database** with REST and GraphQL APIs
 - **Built-in Authentication** with multiple providers
 - **Row Level Security** for granular access control

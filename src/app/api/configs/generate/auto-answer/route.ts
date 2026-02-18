@@ -13,7 +13,7 @@ const autoAnswerInputSchema = z.object({
       question: z.string(),
       type: z.enum(["multiple_choice", "freeform"]),
       options: z.array(z.string()).nullable(),
-    })
+    }),
   ),
 });
 
@@ -22,7 +22,7 @@ const autoAnswerOutputSchema = z.object({
     z.object({
       questionId: z.string(),
       answer: z.string(),
-    })
+    }),
   ),
 });
 
@@ -41,17 +41,14 @@ export async function POST(request: Request) {
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json(
-      { error: "Invalid request body" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
   const parseResult = autoAnswerInputSchema.safeParse(body);
   if (!parseResult.success) {
     return NextResponse.json(
       { error: "Validation failed", details: parseResult.error.flatten() },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -62,9 +59,7 @@ export async function POST(request: Request) {
   const questionsText = questions
     .map((q, i) => {
       const optionsHint =
-        q.type === "multiple_choice" && q.options
-          ? ` (choose from: ${q.options.join(", ")})`
-          : "";
+        q.type === "multiple_choice" && q.options ? ` (choose from: ${q.options.join(", ")})` : "";
       return `${i + 1}. [${q.id}] ${q.question}${optionsHint}`;
     })
     .join("\n");
@@ -96,11 +91,7 @@ Provide an answer for every question. Each answer should be concise but informat
 
     return NextResponse.json({ answers: answersMap });
   } catch (err) {
-    const message =
-      err instanceof Error ? err.message : "Failed to auto-answer";
-    return NextResponse.json(
-      { error: "Auto-answer failed", message },
-      { status: 500 }
-    );
+    const message = err instanceof Error ? err.message : "Failed to auto-answer";
+    return NextResponse.json({ error: "Auto-answer failed", message }, { status: 500 });
   }
 }

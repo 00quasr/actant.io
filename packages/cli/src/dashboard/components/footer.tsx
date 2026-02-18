@@ -6,7 +6,7 @@ export function Footer() {
   return (
     <Box flexDirection="row" justifyContent="space-between">
       <Text dimColor>v{VERSION} · actant.io</Text>
-      <Text dimColor>↑↓ navigate  ↵ select  q quit</Text>
+      <Text dimColor>↑↓ navigate ↵ select q quit</Text>
     </Box>
   );
 }

@@ -30,11 +30,13 @@ const QUICK_STACK_OPTIONS = [
 
 const AGENT_DESCRIPTIONS: Record<AgentType, { tagline: string; features: string[] }> = {
   "claude-code": {
-    tagline: "Anthropic's CLI coding agent. Supports instructions, rules, MCP servers, permissions, and skills.",
+    tagline:
+      "Anthropic's CLI coding agent. Supports instructions, rules, MCP servers, permissions, and skills.",
     features: ["Instructions", "Rules", "MCP", "Permissions", "Skills"],
   },
   cursor: {
-    tagline: "AI code editor with rules and MCP support. Supports instructions, rules, and MCP servers.",
+    tagline:
+      "AI code editor with rules and MCP support. Supports instructions, rules, and MCP servers.",
     features: ["Instructions", "Rules", "MCP"],
   },
   windsurf: {
@@ -87,10 +89,8 @@ export function OnboardingWizard({
     return getSuggestions(techStack, selectedAgent);
   }, [techStack, selectedAgent]);
 
-  const hasSuggestions = suggestions && (
-    suggestions.mcpServers.length > 0 ||
-    suggestions.rulePresetIds.length > 0
-  );
+  const hasSuggestions =
+    suggestions && (suggestions.mcpServers.length > 0 || suggestions.rulePresetIds.length > 0);
 
   // Steps: 0=agent, 1=describe, 2=suggestions (conditional), 3=start
   const describeStep = 1;
@@ -100,7 +100,7 @@ export function OnboardingWizard({
 
   const toggleStackItem = (item: string) => {
     setTechStack((prev) =>
-      prev.includes(item) ? prev.filter((t) => t !== item) : [...prev, item]
+      prev.includes(item) ? prev.filter((t) => t !== item) : [...prev, item],
     );
     setSuggestionsInitialized(false);
   };
@@ -151,8 +151,8 @@ export function OnboardingWizard({
     };
 
     if (hasSuggestions && suggestions && suggestionsInitialized) {
-      config.suggestedMcpServers = suggestions.mcpServers.filter(
-        (s) => selectedMcpSlugs.has(s.name)
+      config.suggestedMcpServers = suggestions.mcpServers.filter((s) =>
+        selectedMcpSlugs.has(s.name),
       );
       config.suggestedRulePresetIds = Array.from(selectedRulePresetIds);
       config.suggestedPermissionPresetId = selectedPermissionPresetId;
@@ -224,22 +224,14 @@ export function OnboardingWizard({
                     key={agent}
                     onClick={() => setSelectedAgent(agent)}
                     className={`text-left rounded-lg border p-4 transition-colors ${
-                      isSelected
-                        ? "border-foreground"
-                        : "border-border hover:border-foreground/30"
+                      isSelected ? "border-foreground" : "border-border hover:border-foreground/30"
                     }`}
                   >
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-sm font-medium">
-                        {AGENT_LABELS[agent]}
-                      </span>
-                      {isSelected && (
-                        <CheckCircledIcon className="size-4 text-foreground" />
-                      )}
+                      <span className="text-sm font-medium">{AGENT_LABELS[agent]}</span>
+                      {isSelected && <CheckCircledIcon className="size-4 text-foreground" />}
                     </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      {info.tagline}
-                    </p>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{info.tagline}</p>
                     <div className="flex flex-wrap gap-1 mt-3">
                       {info.features.map((f) => (
                         <Badge key={f} variant="secondary" className="text-[10px]">
@@ -253,10 +245,7 @@ export function OnboardingWizard({
             </div>
 
             <div className="flex justify-end">
-              <Button
-                onClick={handleNext}
-                disabled={!selectedAgent}
-              >
+              <Button onClick={handleNext} disabled={!selectedAgent}>
                 Next
                 <ArrowRightIcon />
               </Button>
@@ -319,7 +308,8 @@ export function OnboardingWizard({
             <div className="text-center space-y-1">
               <h2 className="text-lg font-medium">Recommended for your stack</h2>
               <p className="text-sm text-muted-foreground">
-                Based on your tech stack, we suggest these configurations. Uncheck anything you don&apos;t need.
+                Based on your tech stack, we suggest these configurations. Uncheck anything you
+                don&apos;t need.
               </p>
             </div>
 
@@ -339,9 +329,13 @@ export function OnboardingWizard({
                             : "border-border opacity-60"
                         }`}
                       >
-                        <div className={`size-4 rounded border flex items-center justify-center shrink-0 ${
-                          isChecked ? "border-foreground bg-foreground" : "border-muted-foreground/30"
-                        }`}>
+                        <div
+                          className={`size-4 rounded border flex items-center justify-center shrink-0 ${
+                            isChecked
+                              ? "border-foreground bg-foreground"
+                              : "border-muted-foreground/30"
+                          }`}
+                        >
                           {isChecked && <CheckIcon className="size-3 text-background" />}
                         </div>
                         <div className="min-w-0">
@@ -375,9 +369,13 @@ export function OnboardingWizard({
                             : "border-border opacity-60"
                         }`}
                       >
-                        <div className={`size-4 rounded border flex items-center justify-center shrink-0 ${
-                          isChecked ? "border-foreground bg-foreground" : "border-muted-foreground/30"
-                        }`}>
+                        <div
+                          className={`size-4 rounded border flex items-center justify-center shrink-0 ${
+                            isChecked
+                              ? "border-foreground bg-foreground"
+                              : "border-muted-foreground/30"
+                          }`}
+                        >
                           {isChecked && <CheckIcon className="size-3 text-background" />}
                         </div>
                         <div className="min-w-0">
@@ -444,10 +442,13 @@ export function OnboardingWizard({
                 <div className="flex items-center gap-2">
                   <MagicWandIcon className="size-4" />
                   <span className="text-sm font-medium">Generate with AI</span>
-                  <Badge variant="secondary" className="text-[10px]">Recommended</Badge>
+                  <Badge variant="secondary" className="text-[10px]">
+                    Recommended
+                  </Badge>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  AI generates a complete config with instructions, rules, MCP servers, permissions, and documentation — all in one shot.
+                  AI generates a complete config with instructions, rules, MCP servers, permissions,
+                  and documentation — all in one shot.
                 </p>
               </button>
 

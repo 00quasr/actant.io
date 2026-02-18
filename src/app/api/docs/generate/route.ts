@@ -20,16 +20,22 @@ async function getAuthenticatedUser(request: Request) {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         global: { headers: { Authorization: `Bearer ${token}` } },
-      }
+      },
     );
-    const { data: { user }, error } = await supabase.auth.getUser(token);
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser(token);
     if (error || !user) return null;
     return { user, supabase };
   }
 
   // Fall back to cookie-based session
   const supabase = await createClient();
-  const { data: { user }, error } = await supabase.auth.getUser();
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
   if (error || !user) return null;
   return { user, supabase };
 }
@@ -47,10 +53,7 @@ export async function POST(request: Request) {
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json(
-      { error: "Invalid request body" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
   // Validate input
@@ -58,7 +61,7 @@ export async function POST(request: Request) {
   if (!parseResult.success) {
     return NextResponse.json(
       { error: "Validation failed", details: parseResult.error.flatten() },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -72,10 +75,7 @@ export async function POST(request: Request) {
     .single();
 
   if (profileError || !profile) {
-    return NextResponse.json(
-      { error: "Profile not found" },
-      { status: 404 }
-    );
+    return NextResponse.json({ error: "Profile not found" }, { status: 404 });
   }
 
   const creditsUsed = (profile.generation_credits_used as number) ?? 0;
@@ -86,7 +86,7 @@ export async function POST(request: Request) {
         error: "Generation limit reached",
         message: `Free plan allows ${FREE_TIER_LIMIT} generations. Upgrade to continue.`,
       },
-      { status: 403 }
+      { status: 403 },
     );
   }
 
@@ -110,12 +110,8 @@ export async function POST(request: Request) {
     });
     generatedDocs = result.object;
   } catch (err) {
-    const message =
-      err instanceof Error ? err.message : "AI generation failed";
-    return NextResponse.json(
-      { error: "Generation failed", message },
-      { status: 500 }
-    );
+    const message = err instanceof Error ? err.message : "AI generation failed";
+    return NextResponse.json({ error: "Generation failed", message }, { status: 500 });
   }
 
   // Convert array to Record<filename, content>
@@ -125,10 +121,9 @@ export async function POST(request: Request) {
   }
 
   // Increment generation credits
-  const { error: rpcError } = await supabase.rpc(
-    "increment_generation_credits",
-    { p_user_id: user.id }
-  );
+  const { error: rpcError } = await supabase.rpc("increment_generation_credits", {
+    p_user_id: user.id,
+  });
 
   if (rpcError) {
     console.error("Failed to increment generation credits:", rpcError);

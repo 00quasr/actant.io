@@ -31,9 +31,7 @@ export default async function ConfigsPage() {
       <div className="flex items-center justify-between">
         <div className="space-y-1">
           <h1 className="text-2xl font-semibold tracking-tight">My Library</h1>
-          <p className="text-sm text-muted-foreground">
-            Manage your configurations
-          </p>
+          <p className="text-sm text-muted-foreground">Manage your configurations</p>
         </div>
         <Button asChild size="sm">
           <Link href="/builder">
@@ -45,9 +43,7 @@ export default async function ConfigsPage() {
 
       {configs.length === 0 ? (
         <div className="mt-16 text-center">
-          <p className="text-muted-foreground">
-            No configs yet. Create your first one.
-          </p>
+          <p className="text-muted-foreground">No configs yet. Create your first one.</p>
           <Button asChild variant="outline" className="mt-4">
             <Link href="/builder">Create Config</Link>
           </Button>

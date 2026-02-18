@@ -30,8 +30,7 @@ const FEATURES = [
   {
     icon: Share2Icon,
     title: "Marketplace",
-    description:
-      "Publish your configs and discover community-curated setups for every stack.",
+    description: "Publish your configs and discover community-curated setups for every stack.",
   },
   {
     icon: StackIcon,
@@ -42,8 +41,7 @@ const FEATURES = [
   {
     icon: DownloadIcon,
     title: "CLI Deploy",
-    description:
-      "Pull any config into your project with a single command: npx actant init.",
+    description: "Pull any config into your project with a single command: npx actant init.",
   },
 ];
 

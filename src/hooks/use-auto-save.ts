@@ -10,8 +10,13 @@ export type SaveStatus = "idle" | "saving" | "saved" | "error";
 export function useAutoSave(
   state: ConfigState,
   configId: string | undefined,
-  dispatch: (action: { type: "SET_SAVING"; payload: boolean } | { type: "SET_SAVED" } | { type: "SET_ID"; payload: string }) => void,
-  onCreate?: () => Promise<string | undefined>
+  dispatch: (
+    action:
+      | { type: "SET_SAVING"; payload: boolean }
+      | { type: "SET_SAVED" }
+      | { type: "SET_ID"; payload: string },
+  ) => void,
+  onCreate?: () => Promise<string | undefined>,
 ) {
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -99,7 +104,22 @@ export function useAutoSave(
         clearTimeout(timerRef.current);
       }
     };
-  }, [state.isDirty, state.name, state.description, state.targetAgent, state.instructions, state.skills, state.mcpServers, state.permissions, state.rules, state.documentType, state.content, state.docs, configId, save]);
+  }, [
+    state.isDirty,
+    state.name,
+    state.description,
+    state.targetAgent,
+    state.instructions,
+    state.skills,
+    state.mcpServers,
+    state.permissions,
+    state.rules,
+    state.documentType,
+    state.content,
+    state.docs,
+    configId,
+    save,
+  ]);
 
   // Clean up saved timer on unmount
   useEffect(() => {

@@ -23,8 +23,7 @@ import { Label } from "@/components/ui/label";
 import { useRepoImport } from "@/hooks/use-repo-import";
 import type { AgentConfig, AgentType } from "@/types/config";
 
-const GITHUB_URL_REGEX =
-  /^https?:\/\/(www\.)?github\.com\/[\w.-]+\/[\w.-]+\/?$/;
+const GITHUB_URL_REGEX = /^https?:\/\/(www\.)?github\.com\/[\w.-]+\/[\w.-]+\/?$/;
 
 type RepoVisibility = "public" | "private";
 
@@ -165,9 +164,7 @@ export function RepoImportDialog({
                 onChange={(e) => setRepoUrl(e.target.value)}
               />
               {repoUrl && !isValidUrl ? (
-                <p className="text-xs text-muted-foreground">
-                  Enter a valid GitHub repository URL
-                </p>
+                <p className="text-xs text-muted-foreground">Enter a valid GitHub repository URL</p>
               ) : (
                 <p className="text-xs text-muted-foreground">
                   Enter a GitHub repository URL to analyze
@@ -183,10 +180,7 @@ export function RepoImportDialog({
 
             <Button
               onClick={handleImport}
-              disabled={
-                !isValidUrl ||
-                (visibility === "private" && !accessToken.trim())
-              }
+              disabled={!isValidUrl || (visibility === "private" && !accessToken.trim())}
               className="w-full"
             >
               Analyze Repository
@@ -196,20 +190,14 @@ export function RepoImportDialog({
           <div className="flex flex-col items-center justify-center py-12 gap-4">
             <ReloadIcon className="size-6 animate-spin text-muted-foreground" />
             <div className="text-center space-y-1">
-              <p className="text-sm font-medium">
-                Analyzing repository...
-              </p>
+              <p className="text-sm font-medium">Analyzing repository...</p>
               <p className="text-xs text-muted-foreground">
                 Fetching README, dependencies, and project structure.
               </p>
             </div>
           </div>
         ) : status === "done" && result ? (
-          <ImportPreview
-            result={result}
-            onAccept={handleAccept}
-            onRegenerate={handleRegenerate}
-          />
+          <ImportPreview result={result} onAccept={handleAccept} onRegenerate={handleRegenerate} />
         ) : null}
       </DialogContent>
     </Dialog>
@@ -236,24 +224,14 @@ function VisibilityCard({
       type="button"
       onClick={onSelect}
       className={`flex flex-col items-center gap-2 rounded-lg border-2 p-4 text-center transition-colors ${
-        selected
-          ? "border-foreground bg-muted/50"
-          : "border-border hover:border-foreground/30"
+        selected ? "border-foreground bg-muted/50" : "border-border hover:border-foreground/30"
       }`}
     >
-      {isPublic ? (
-        <GlobeIcon className="size-5" />
-      ) : (
-        <LockClosedIcon className="size-5" />
-      )}
+      {isPublic ? <GlobeIcon className="size-5" /> : <LockClosedIcon className="size-5" />}
       <div>
-        <p className="text-sm font-medium">
-          {isPublic ? "Public" : "Private"}
-        </p>
+        <p className="text-sm font-medium">{isPublic ? "Public" : "Private"}</p>
         <p className="text-xs text-muted-foreground">
-          {isPublic
-            ? "No access token required"
-            : "Access token required"}
+          {isPublic ? "No access token required" : "Access token required"}
         </p>
       </div>
     </button>
@@ -270,19 +248,13 @@ interface ImportPreviewProps {
   onRegenerate: () => void;
 }
 
-function ImportPreview({
-  result,
-  onAccept,
-  onRegenerate,
-}: ImportPreviewProps) {
+function ImportPreview({ result, onAccept, onRegenerate }: ImportPreviewProps) {
   return (
     <div className="space-y-4 flex-1 min-h-0 overflow-y-auto">
       <div className="space-y-3">
         <div className="space-y-1">
           <p className="text-sm font-medium">{result.name}</p>
-          <p className="text-xs text-muted-foreground">
-            {result.description}
-          </p>
+          <p className="text-xs text-muted-foreground">{result.description}</p>
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -290,31 +262,20 @@ function ImportPreview({
             label="Instructions"
             value={`${result.instructions.content.length} chars`}
           />
-          <SummaryBadge
-            label="Rules"
-            value={String(result.rules.length)}
-          />
-          <SummaryBadge
-            label="MCP Servers"
-            value={String(result.mcpServers.length)}
-          />
+          <SummaryBadge label="Rules" value={String(result.rules.length)} />
+          <SummaryBadge label="MCP Servers" value={String(result.mcpServers.length)} />
           <SummaryBadge
             label="Permissions"
             value={String(Object.keys(result.permissions).length)}
           />
           {result.docs && Object.keys(result.docs).length > 0 && (
-            <SummaryBadge
-              label="Docs"
-              value={`${Object.keys(result.docs).length} files`}
-            />
+            <SummaryBadge label="Docs" value={`${Object.keys(result.docs).length} files`} />
           )}
         </div>
 
         {result.instructions.content && (
           <div className="space-y-1">
-            <p className="text-xs font-medium text-muted-foreground">
-              Instructions preview
-            </p>
+            <p className="text-xs font-medium text-muted-foreground">Instructions preview</p>
             <div className="rounded-md border bg-muted/30 p-3 max-h-40 overflow-y-auto">
               <pre className="text-xs whitespace-pre-wrap font-mono leading-relaxed">
                 {result.instructions.content.slice(0, 800)}
@@ -329,16 +290,11 @@ function ImportPreview({
             <p className="text-xs font-medium text-muted-foreground">Rules</p>
             <div className="space-y-1">
               {result.rules.map((rule, i) => (
-                <div
-                  key={i}
-                  className="flex items-center gap-2 text-xs text-foreground/80"
-                >
+                <div key={i} className="flex items-center gap-2 text-xs text-foreground/80">
                   <span className="size-1 rounded-full bg-foreground/30 shrink-0" />
                   <span>{rule.title}</span>
                   {rule.glob && (
-                    <span className="text-muted-foreground font-mono">
-                      {rule.glob}
-                    </span>
+                    <span className="text-muted-foreground font-mono">{rule.glob}</span>
                   )}
                 </div>
               ))}
@@ -348,20 +304,13 @@ function ImportPreview({
 
         {result.mcpServers.length > 0 && (
           <div className="space-y-1">
-            <p className="text-xs font-medium text-muted-foreground">
-              MCP Servers
-            </p>
+            <p className="text-xs font-medium text-muted-foreground">MCP Servers</p>
             <div className="space-y-1">
               {result.mcpServers.map((server, i) => (
-                <div
-                  key={i}
-                  className="flex items-center gap-2 text-xs text-foreground/80"
-                >
+                <div key={i} className="flex items-center gap-2 text-xs text-foreground/80">
                   <span className="size-1 rounded-full bg-foreground/30 shrink-0" />
                   <span className="font-medium">{server.name}</span>
-                  <span className="text-muted-foreground">
-                    ({server.type})
-                  </span>
+                  <span className="text-muted-foreground">({server.type})</span>
                 </div>
               ))}
             </div>
@@ -373,7 +322,10 @@ function ImportPreview({
             <p className="text-xs font-medium text-muted-foreground">Documentation</p>
             <div className="space-y-1">
               {Object.entries(result.docs).map(([filename, content]) => (
-                <div key={filename} className="flex items-center justify-between text-xs text-foreground/80">
+                <div
+                  key={filename}
+                  className="flex items-center justify-between text-xs text-foreground/80"
+                >
                   <div className="flex items-center gap-2">
                     <span className="size-1 rounded-full bg-foreground/30 shrink-0" />
                     <span className="font-medium">{filename}</span>

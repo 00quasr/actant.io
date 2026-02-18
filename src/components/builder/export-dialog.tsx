@@ -105,10 +105,7 @@ export function ExportDialog({ open, onOpenChange, state }: ExportDialogProps) {
         <div className="space-y-4 flex-1 min-h-0 overflow-y-auto">
           <div className="space-y-2">
             <Label>Target Agent</Label>
-            <Select
-              value={targetAgent}
-              onValueChange={(v) => setTargetAgent(v as AgentType)}
-            >
+            <Select value={targetAgent} onValueChange={(v) => setTargetAgent(v as AgentType)}>
               <SelectTrigger className="w-48">
                 <SelectValue />
               </SelectTrigger>
@@ -126,7 +123,9 @@ export function ExportDialog({ open, onOpenChange, state }: ExportDialogProps) {
             <div className="rounded-md border border-destructive/20 bg-destructive/5 p-3">
               <p className="text-xs font-medium text-destructive mb-1">Warnings</p>
               {result.warnings.map((w, i) => (
-                <p key={i} className="text-xs text-destructive/80">{w}</p>
+                <p key={i} className="text-xs text-destructive/80">
+                  {w}
+                </p>
               ))}
             </div>
           )}
@@ -135,12 +134,13 @@ export function ExportDialog({ open, onOpenChange, state }: ExportDialogProps) {
         </div>
 
         <DialogFooter>
-          <Button
-            onClick={handleDownload}
-            disabled={!result || downloading}
-          >
+          <Button onClick={handleDownload} disabled={!result || downloading}>
             <DownloadIcon />
-            {downloading ? "Downloading..." : result && result.files.length === 1 ? "Download" : "Download ZIP"}
+            {downloading
+              ? "Downloading..."
+              : result && result.files.length === 1
+                ? "Download"
+                : "Download ZIP"}
           </Button>
         </DialogFooter>
       </DialogContent>

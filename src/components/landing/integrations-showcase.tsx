@@ -35,8 +35,7 @@ export function IntegrationsShowcase() {
             One config, five agents
           </h2>
           <p className="mx-auto mt-3 max-w-lg text-center text-sm text-muted-foreground">
-            Build your configuration once and export native files for every
-            major AI coding agent.
+            Build your configuration once and export native files for every major AI coding agent.
           </p>
         </FadeIn>
         <div className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
@@ -46,10 +45,7 @@ export function IntegrationsShowcase() {
                 <h3 className="text-sm font-semibold mb-3">{agent.name}</h3>
                 <ul className="space-y-1">
                   {agent.files.map((file) => (
-                    <li
-                      key={file}
-                      className="text-xs font-mono text-muted-foreground"
-                    >
+                    <li key={file} className="text-xs font-mono text-muted-foreground">
                       {file}
                     </li>
                   ))}

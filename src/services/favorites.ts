@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/client";
-import type { Favorite, Listing } from "@/types/marketplace";
+import type { Listing } from "@/types/marketplace";
 
 export async function getFavorites(userId: string): Promise<Listing[]> {
   const supabase = createClient();
@@ -18,7 +18,9 @@ export async function getFavorites(userId: string): Promise<Listing[]> {
 export async function toggleFavorite(listingId: string): Promise<boolean> {
   const supabase = createClient();
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Not authenticated");
 
   const { data: existing } = await supabase

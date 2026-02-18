@@ -21,7 +21,7 @@ export function exportWindsurf(config: AgentConfig): ExportResult {
     files.push({ path: ".windsurfrules", content: combined });
     if (combined.length > WINDSURF_CHAR_LIMIT) {
       warnings.push(
-        `.windsurfrules exceeds ${WINDSURF_CHAR_LIMIT} characters (${combined.length}). Windsurf may truncate it.`
+        `.windsurfrules exceeds ${WINDSURF_CHAR_LIMIT} characters (${combined.length}). Windsurf may truncate it.`,
       );
     }
   }

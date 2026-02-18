@@ -35,15 +35,9 @@ export function SkillCard({ skill, enabled, onToggle }: SkillCardProps) {
             )}
           </div>
           <p className="font-medium text-sm truncate mb-0.5">{skill.name}</p>
-          <p className="text-xs text-muted-foreground line-clamp-2">
-            {skill.description}
-          </p>
+          <p className="text-xs text-muted-foreground line-clamp-2">{skill.description}</p>
         </div>
-        <Switch
-          checked={enabled}
-          onCheckedChange={onToggle}
-          className="shrink-0"
-        />
+        <Switch checked={enabled} onCheckedChange={onToggle} className="shrink-0" />
       </CardContent>
     </Card>
   );

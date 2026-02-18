@@ -15,9 +15,7 @@ interface UserConfigCardProps {
 }
 
 function timeAgo(dateString: string): string {
-  const seconds = Math.floor(
-    (Date.now() - new Date(dateString).getTime()) / 1000
-  );
+  const seconds = Math.floor((Date.now() - new Date(dateString).getTime()) / 1000);
   if (seconds < 60) return "just now";
   const minutes = Math.floor(seconds / 60);
   if (minutes < 60) return `${minutes}m ago`;
@@ -56,16 +54,12 @@ export function UserConfigCard({ config }: UserConfigCardProps) {
             <AgentBadge agent={config.target_agent} />
           </div>
           {config.description && (
-            <CardDescription className="line-clamp-2">
-              {config.description}
-            </CardDescription>
+            <CardDescription className="line-clamp-2">{config.description}</CardDescription>
           )}
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">
-              {timeAgo(config.updated_at)}
-            </span>
+            <span className="text-xs text-muted-foreground">{timeAgo(config.updated_at)}</span>
             <Button
               variant="ghost"
               size="icon"

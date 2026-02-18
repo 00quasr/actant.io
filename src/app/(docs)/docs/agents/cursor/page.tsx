@@ -12,10 +12,9 @@ export default function CursorPage() {
     <article>
       <h1 className="text-3xl font-bold tracking-tight">Cursor</h1>
       <p className="mt-4 text-muted-foreground leading-relaxed">
-        Cursor is an AI-powered code editor built on VS Code. It reads
-        project-level configuration files to tailor its behavior to your
-        codebase. Cursor supports a global rules file for broad instructions
-        and granular rule files in MDC format for scoped, file-pattern-specific
+        Cursor is an AI-powered code editor built on VS Code. It reads project-level configuration
+        files to tailor its behavior to your codebase. Cursor supports a global rules file for broad
+        instructions and granular rule files in MDC format for scoped, file-pattern-specific
         guidelines.
       </p>
 
@@ -50,18 +49,15 @@ export default function CursorPage() {
       <h2 className="text-xl font-semibold mt-10 mb-4">.cursorrules</h2>
       <p className="text-muted-foreground mb-3 leading-relaxed">
         The{" "}
-        <code className="bg-muted px-1.5 py-0.5 rounded text-sm text-foreground">
-          .cursorrules
-        </code>{" "}
-        file is placed at your project root and contains your primary
-        instructions. Cursor loads this file automatically when you open the
-        project. The content is plain text or Markdown. It is always active
-        and applies to every interaction with the AI.
+        <code className="bg-muted px-1.5 py-0.5 rounded text-sm text-foreground">.cursorrules</code>{" "}
+        file is placed at your project root and contains your primary instructions. Cursor loads
+        this file automatically when you open the project. The content is plain text or Markdown. It
+        is always active and applies to every interaction with the AI.
       </p>
       <p className="text-muted-foreground mb-3 leading-relaxed">
-        Write this file as if you are briefing a new developer joining your
-        team. Cover the technology stack, project conventions, directory layout,
-        and any patterns the agent should follow or avoid.
+        Write this file as if you are briefing a new developer joining your team. Cover the
+        technology stack, project conventions, directory layout, and any patterns the agent should
+        follow or avoid.
       </p>
       <pre className="bg-muted rounded-lg p-4 text-sm overflow-x-auto">
         <code>{`You are an expert in TypeScript, React, Next.js 14, and Tailwind CSS.
@@ -99,17 +95,15 @@ interactivity is required (forms, modals, state).
       </pre>
 
       {/* ── MDC Rules ────────────────────────────────────────── */}
-      <h2 className="text-xl font-semibold mt-10 mb-4">
-        MDC Rule Files: .cursor/rules/*.mdc
-      </h2>
+      <h2 className="text-xl font-semibold mt-10 mb-4">MDC Rule Files: .cursor/rules/*.mdc</h2>
       <p className="text-muted-foreground mb-3 leading-relaxed">
-        MDC (Markdown Components) files provide scoped rules that target
-        specific file patterns. They live in the{" "}
+        MDC (Markdown Components) files provide scoped rules that target specific file patterns.
+        They live in the{" "}
         <code className="bg-muted px-1.5 py-0.5 rounded text-sm text-foreground">
           .cursor/rules/
         </code>{" "}
-        directory and are loaded automatically based on their configuration.
-        Each MDC file has a YAML frontmatter block followed by Markdown content.
+        directory and are loaded automatically based on their configuration. Each MDC file has a
+        YAML frontmatter block followed by Markdown content.
       </p>
 
       <h3 className="text-base font-semibold mt-6 mb-2">Frontmatter Fields</h3>
@@ -126,7 +120,9 @@ interactivity is required (forms, modals, state).
             <tr className="border-b">
               <td className="p-3 font-mono text-xs">description</td>
               <td className="p-3">string</td>
-              <td className="p-3">Short summary of what this rule covers. Used by the AI to decide relevance.</td>
+              <td className="p-3">
+                Short summary of what this rule covers. Used by the AI to decide relevance.
+              </td>
             </tr>
             <tr className="border-b">
               <td className="p-3 font-mono text-xs">globs</td>
@@ -136,7 +132,9 @@ interactivity is required (forms, modals, state).
             <tr>
               <td className="p-3 font-mono text-xs">alwaysApply</td>
               <td className="p-3">boolean</td>
-              <td className="p-3">If true, the rule is always active regardless of which file is open.</td>
+              <td className="p-3">
+                If true, the rule is always active regardless of which file is open.
+              </td>
             </tr>
           </tbody>
         </table>
@@ -145,26 +143,22 @@ interactivity is required (forms, modals, state).
       <h3 className="text-base font-semibold mt-6 mb-2">How Rule Loading Works</h3>
       <p className="text-muted-foreground mb-3 leading-relaxed">
         Cursor decides which rules to load based on the combination of{" "}
-        <code className="bg-muted px-1.5 py-0.5 rounded text-sm text-foreground">
-          alwaysApply
-        </code>{" "}
-        and{" "}
-        <code className="bg-muted px-1.5 py-0.5 rounded text-sm text-foreground">
-          globs
-        </code>:
+        <code className="bg-muted px-1.5 py-0.5 rounded text-sm text-foreground">alwaysApply</code>{" "}
+        and <code className="bg-muted px-1.5 py-0.5 rounded text-sm text-foreground">globs</code>:
       </p>
       <ul className="list-disc list-inside space-y-2 text-muted-foreground leading-relaxed">
         <li>
-          <span className="text-foreground font-medium">alwaysApply: true</span>{" "}
-          &mdash; Rule is loaded on every request. Use for universal guidelines. Globs are ignored.
+          <span className="text-foreground font-medium">alwaysApply: true</span> &mdash; Rule is
+          loaded on every request. Use for universal guidelines. Globs are ignored.
         </li>
         <li>
           <span className="text-foreground font-medium">alwaysApply: false + globs set</span>{" "}
           &mdash; Rule is loaded only when the user is working on files matching the glob patterns.
         </li>
         <li>
-          <span className="text-foreground font-medium">alwaysApply: false + no globs</span>{" "}
-          &mdash; Rule is available but only loaded if the AI determines it is relevant based on the description.
+          <span className="text-foreground font-medium">alwaysApply: false + no globs</span> &mdash;
+          Rule is available but only loaded if the AI determines it is relevant based on the
+          description.
         </li>
       </ul>
 
@@ -246,11 +240,8 @@ alwaysApply: false
       <h2 className="text-xl font-semibold mt-10 mb-4">MCP Configuration</h2>
       <p className="text-muted-foreground mb-3 leading-relaxed">
         Cursor supports MCP servers using the same{" "}
-        <code className="bg-muted px-1.5 py-0.5 rounded text-sm text-foreground">
-          .mcp.json
-        </code>{" "}
-        format as Claude Code. The file is placed at your project root. See
-        the{" "}
+        <code className="bg-muted px-1.5 py-0.5 rounded text-sm text-foreground">.mcp.json</code>{" "}
+        format as Claude Code. The file is placed at your project root. See the{" "}
         <Link
           href="/docs/agents/claude-code"
           className="font-medium text-foreground hover:underline underline-offset-4"
@@ -261,9 +252,7 @@ alwaysApply: false
       </p>
 
       {/* ── Differences from Claude Code ─────────────────────── */}
-      <h2 className="text-xl font-semibold mt-10 mb-4">
-        Differences from Claude Code
-      </h2>
+      <h2 className="text-xl font-semibold mt-10 mb-4">Differences from Claude Code</h2>
       <div className="border rounded-lg overflow-hidden">
         <table className="w-full text-sm">
           <thead>
@@ -307,41 +296,45 @@ alwaysApply: false
       <h2 className="text-xl font-semibold mt-10 mb-4">Best Practices</h2>
       <ul className="list-disc list-inside space-y-3 text-muted-foreground leading-relaxed">
         <li>
-          <span className="text-foreground font-medium">Keep .cursorrules focused on universal conventions.</span>{" "}
-          Put broad guidelines (naming, imports, TypeScript rules) in the global
-          file. Use MDC files for area-specific rules.
+          <span className="text-foreground font-medium">
+            Keep .cursorrules focused on universal conventions.
+          </span>{" "}
+          Put broad guidelines (naming, imports, TypeScript rules) in the global file. Use MDC files
+          for area-specific rules.
         </li>
         <li>
-          <span className="text-foreground font-medium">Use precise glob patterns.</span>{" "}
-          A rule scoped to{" "}
+          <span className="text-foreground font-medium">Use precise glob patterns.</span> A rule
+          scoped to{" "}
           <code className="bg-muted px-1.5 py-0.5 rounded text-sm text-foreground">
             src/components/**/*.tsx
           </code>{" "}
-          is more effective than one that applies to all .tsx files. Specific
-          scoping reduces noise and improves rule relevance.
+          is more effective than one that applies to all .tsx files. Specific scoping reduces noise
+          and improves rule relevance.
         </li>
         <li>
-          <span className="text-foreground font-medium">Write descriptive frontmatter descriptions.</span>{" "}
-          When alwaysApply is false and no globs are set, Cursor uses the
-          description field to decide if the rule is relevant. A vague
-          description like &ldquo;code rules&rdquo; will rarely be loaded.
+          <span className="text-foreground font-medium">
+            Write descriptive frontmatter descriptions.
+          </span>{" "}
+          When alwaysApply is false and no globs are set, Cursor uses the description field to
+          decide if the rule is relevant. A vague description like &ldquo;code rules&rdquo; will
+          rarely be loaded.
         </li>
         <li>
           <span className="text-foreground font-medium">Include code examples in rules.</span>{" "}
-          Cursor&apos;s AI benefits from seeing the pattern you want. A short
-          example component, test case, or function signature communicates more
-          than a paragraph of text.
+          Cursor&apos;s AI benefits from seeing the pattern you want. A short example component,
+          test case, or function signature communicates more than a paragraph of text.
         </li>
         <li>
-          <span className="text-foreground font-medium">Avoid duplication between .cursorrules and MDC files.</span>{" "}
-          If a rule appears in both places, the AI sees it twice, which wastes
-          context. Put it in one place only.
+          <span className="text-foreground font-medium">
+            Avoid duplication between .cursorrules and MDC files.
+          </span>{" "}
+          If a rule appears in both places, the AI sees it twice, which wastes context. Put it in
+          one place only.
         </li>
         <li>
-          <span className="text-foreground font-medium">Use alwaysApply sparingly.</span>{" "}
-          Rules that always load consume context window space. Reserve
-          alwaysApply for critical universal guidelines. Use glob-scoped
-          rules for everything else.
+          <span className="text-foreground font-medium">Use alwaysApply sparingly.</span> Rules that
+          always load consume context window space. Reserve alwaysApply for critical universal
+          guidelines. Use glob-scoped rules for everything else.
         </li>
       </ul>
 
@@ -352,8 +345,7 @@ alwaysApply: false
         <li>Extract the downloaded zip into your project root directory.</li>
         <li>Open the project in Cursor. Rules are detected and loaded automatically.</li>
         <li>
-          Verify by opening Cursor Settings and checking the Rules section to
-          see your loaded rules.
+          Verify by opening Cursor Settings and checking the Rules section to see your loaded rules.
         </li>
       </ol>
       <pre className="bg-muted rounded-lg p-4 text-sm overflow-x-auto mt-4">

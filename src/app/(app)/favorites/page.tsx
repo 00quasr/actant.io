@@ -22,11 +22,9 @@ export default async function FavoritesPage() {
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
-  const favorites = (
-    favoriteData
-      ?.map((f: Record<string, unknown>) => f.listing)
-      .filter(Boolean) as Listing[]
-  ) ?? [];
+  const favorites =
+    (favoriteData?.map((f: Record<string, unknown>) => f.listing).filter(Boolean) as Listing[]) ??
+    [];
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-8">

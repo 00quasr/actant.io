@@ -4,19 +4,17 @@ CLI agent configuration platform. Build, share, and export configurations for AI
 
 Actant provides a visual builder for creating configuration files that AI coding agents read to understand your project. Instead of manually writing rules files, permission configs, and MCP server definitions, you use the builder to assemble everything and export a ready-to-use set of files.
 
-
 https://github.com/user-attachments/assets/078cc9be-4312-4060-894c-f8b81a702aa9
-
 
 ## Supported Agents
 
-| Agent | Config Files | MCP Support |
-|-------|-------------|-------------|
-| Claude Code | `CLAUDE.md`, `.claude/settings.json`, `.mcp.json`, `.claude/skills/*/SKILL.md` | Yes |
-| Cursor | `.cursorrules`, `.cursor/rules/*.mdc`, `.mcp.json` | Yes |
-| Windsurf | `.windsurfrules`, `.windsurf/rules/rules.md` | No |
-| Cline | `.clinerules/*.md` (numbered) | No |
-| OpenCode | `opencode.json` | Yes |
+| Agent       | Config Files                                                                   | MCP Support |
+| ----------- | ------------------------------------------------------------------------------ | ----------- |
+| Claude Code | `CLAUDE.md`, `.claude/settings.json`, `.mcp.json`, `.claude/skills/*/SKILL.md` | Yes         |
+| Cursor      | `.cursorrules`, `.cursor/rules/*.mdc`, `.mcp.json`                             | Yes         |
+| Windsurf    | `.windsurfrules`, `.windsurf/rules/rules.md`                                   | No          |
+| Cline       | `.clinerules/*.md` (numbered)                                                  | No          |
+| OpenCode    | `opencode.json`                                                                | Yes         |
 
 ## Quick Start
 
@@ -87,29 +85,29 @@ src/
 
 ## Scripts
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start Next.js development server |
-| `npm run build` | Create production build |
-| `npm run start` | Start production server |
-| `npm run lint` | Run ESLint |
-| `npm run lint:fix` | Run ESLint with auto-fix |
-| `npm run typecheck` | Run TypeScript type checking |
+| Command             | Description                      |
+| ------------------- | -------------------------------- |
+| `npm run dev`       | Start Next.js development server |
+| `npm run build`     | Create production build          |
+| `npm run start`     | Start production server          |
+| `npm run lint`      | Run ESLint                       |
+| `npm run lint:fix`  | Run ESLint with auto-fix         |
+| `npm run typecheck` | Run TypeScript type checking     |
 
 ## Environment Variables
 
 Copy `.env.example` to `.env.local` and fill in the values:
 
-| Variable | Description |
-|----------|-------------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous/public key |
-| `NEXT_PUBLIC_APP_URL` | Application URL (http://localhost:3000 for dev) |
-| `ANTHROPIC_API_KEY` | Anthropic API key (for AI features) |
-| `STRIPE_SECRET_KEY` | Stripe secret key (for payments) |
-| `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret |
-| `STRIPE_PRICE_ID_PRO_MONTHLY` | Stripe price ID for Pro plan |
-| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripe publishable key |
+| Variable                             | Description                                     |
+| ------------------------------------ | ----------------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`           | Supabase project URL                            |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY`      | Supabase anonymous/public key                   |
+| `NEXT_PUBLIC_APP_URL`                | Application URL (http://localhost:3000 for dev) |
+| `ANTHROPIC_API_KEY`                  | Anthropic API key (for AI features)             |
+| `STRIPE_SECRET_KEY`                  | Stripe secret key (for payments)                |
+| `STRIPE_WEBHOOK_SECRET`              | Stripe webhook signing secret                   |
+| `STRIPE_PRICE_ID_PRO_MONTHLY`        | Stripe price ID for Pro plan                    |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripe publishable key                          |
 
 ## Contributing
 

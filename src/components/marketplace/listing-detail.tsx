@@ -44,7 +44,10 @@ export function ListingDetail({ listing, config, initialFavorited }: ListingDeta
             <div className="flex items-center gap-3">
               <Avatar size="sm">
                 {listing.author?.avatar_url && (
-                  <AvatarImage src={listing.author.avatar_url} alt={listing.author.display_name ?? ""} />
+                  <AvatarImage
+                    src={listing.author.avatar_url}
+                    alt={listing.author.display_name ?? ""}
+                  />
                 )}
                 <AvatarFallback>
                   {(listing.author?.display_name ?? "U")[0].toUpperCase()}
@@ -95,9 +98,7 @@ export function ListingDetail({ listing, config, initialFavorited }: ListingDeta
                   {config.rules.slice(0, 3).map((rule, i) => (
                     <li key={i}>{(rule as Record<string, string>).title}</li>
                   ))}
-                  {config.rules.length > 3 && (
-                    <li>+ {config.rules.length - 3} more</li>
-                  )}
+                  {config.rules.length > 3 && <li>+ {config.rules.length - 3} more</li>}
                 </ul>
               </div>
             )}
@@ -108,11 +109,7 @@ export function ListingDetail({ listing, config, initialFavorited }: ListingDeta
       <div className="space-y-4">
         <h2 className="text-lg font-medium">Reviews ({reviews.length})</h2>
         {user && <ReviewForm listingId={listing.id} onSubmit={handleNewReview} />}
-        {reviewsError && (
-          <p className="text-sm text-muted-foreground">
-            Failed to load reviews.
-          </p>
-        )}
+        {reviewsError && <p className="text-sm text-muted-foreground">Failed to load reviews.</p>}
         <ReviewList reviews={reviews} />
       </div>
     </div>

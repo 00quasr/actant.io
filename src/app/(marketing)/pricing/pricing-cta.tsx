@@ -24,7 +24,11 @@ export function PricingCta({ plan }: PricingCtaProps) {
   // Not logged in
   if (!user) {
     return (
-      <Button variant={plan === "pro" ? "default" : "outline"} className={`w-full ${plan === "pro" ? "bg-foreground hover:bg-foreground/90 text-background" : ""}`} asChild>
+      <Button
+        variant={plan === "pro" ? "default" : "outline"}
+        className={`w-full ${plan === "pro" ? "bg-foreground hover:bg-foreground/90 text-background" : ""}`}
+        asChild
+      >
         <Link href="/signup">Get Started</Link>
       </Button>
     );

@@ -78,24 +78,126 @@ Documentation quality:
 - Each doc should feel self-contained and useful to a developer seeing the project for the first time.
 - Cross-reference: docs should reference each other (e.g., README links to DEVELOPMENT.md for setup, CONTRIBUTING.md references TESTING.md for test requirements). Instructions should also mention the generated docs.`;
 
-export const KNOWN_MCP_SERVERS: Record<string, { name: string; command: string; args: string[]; env?: Record<string, string>; description: string }> = {
-  supabase: { name: "supabase", command: "npx", args: ["-y", "@supabase/mcp-server-supabase"], env: { SUPABASE_ACCESS_TOKEN: "" }, description: "Supabase database and auth management" },
-  context7: { name: "context7", command: "npx", args: ["-y", "@upstash/context7-mcp@latest"], description: "Up-to-date library documentation" },
-  github: { name: "github", command: "npx", args: ["-y", "@modelcontextprotocol/server-github"], env: { GITHUB_PERSONAL_ACCESS_TOKEN: "" }, description: "GitHub repo, issues, PRs" },
-  filesystem: { name: "filesystem", command: "npx", args: ["-y", "@modelcontextprotocol/server-filesystem", "."], description: "Local filesystem access" },
-  puppeteer: { name: "puppeteer", command: "npx", args: ["-y", "@modelcontextprotocol/server-puppeteer"], description: "Browser automation and testing" },
-  sentry: { name: "sentry", command: "npx", args: ["-y", "@sentry/mcp-server"], env: { SENTRY_AUTH_TOKEN: "" }, description: "Error tracking and monitoring" },
-  vercel: { name: "vercel", command: "npx", args: ["-y", "vercel-mcp-server"], description: "Vercel deployment management" },
-  shadcn: { name: "shadcn", command: "npx", args: ["-y", "@anthropic-ai/shadcn-mcp-server"], description: "shadcn/ui component installation" },
-  prisma: { name: "prisma", command: "npx", args: ["-y", "prisma-mcp-server"], description: "Prisma ORM management" },
-  cloudflare: { name: "cloudflare", command: "npx", args: ["-y", "@cloudflare/mcp-server-cloudflare"], description: "Cloudflare Workers, KV, R2" },
-  playwright: { name: "playwright", command: "npx", args: ["-y", "@anthropic-ai/mcp-server-playwright"], description: "Browser testing with Playwright" },
-  neon: { name: "neon", command: "npx", args: ["-y", "@neondatabase/mcp-server-neon"], env: { NEON_API_KEY: "" }, description: "Neon serverless Postgres" },
-  upstash: { name: "upstash", command: "npx", args: ["-y", "@upstash/mcp-server"], env: { UPSTASH_EMAIL: "", UPSTASH_API_KEY: "" }, description: "Upstash Redis and QStash" },
-  resend: { name: "resend", command: "npx", args: ["-y", "mcp-server-resend"], env: { RESEND_API_KEY: "" }, description: "Email sending via Resend" },
-  fetch: { name: "fetch", command: "npx", args: ["-y", "@modelcontextprotocol/server-fetch"], description: "Fetch and parse web content" },
-  turso: { name: "turso", command: "npx", args: ["-y", "@tursodatabase/mcp-server-turso"], env: { TURSO_AUTH_TOKEN: "" }, description: "Turso edge SQLite" },
-  tavily: { name: "tavily", command: "npx", args: ["-y", "tavily-mcp"], env: { TAVILY_API_KEY: "" }, description: "AI-powered web search" },
+export const KNOWN_MCP_SERVERS: Record<
+  string,
+  {
+    name: string;
+    command: string;
+    args: string[];
+    env?: Record<string, string>;
+    description: string;
+  }
+> = {
+  supabase: {
+    name: "supabase",
+    command: "npx",
+    args: ["-y", "@supabase/mcp-server-supabase"],
+    env: { SUPABASE_ACCESS_TOKEN: "" },
+    description: "Supabase database and auth management",
+  },
+  context7: {
+    name: "context7",
+    command: "npx",
+    args: ["-y", "@upstash/context7-mcp@latest"],
+    description: "Up-to-date library documentation",
+  },
+  github: {
+    name: "github",
+    command: "npx",
+    args: ["-y", "@modelcontextprotocol/server-github"],
+    env: { GITHUB_PERSONAL_ACCESS_TOKEN: "" },
+    description: "GitHub repo, issues, PRs",
+  },
+  filesystem: {
+    name: "filesystem",
+    command: "npx",
+    args: ["-y", "@modelcontextprotocol/server-filesystem", "."],
+    description: "Local filesystem access",
+  },
+  puppeteer: {
+    name: "puppeteer",
+    command: "npx",
+    args: ["-y", "@modelcontextprotocol/server-puppeteer"],
+    description: "Browser automation and testing",
+  },
+  sentry: {
+    name: "sentry",
+    command: "npx",
+    args: ["-y", "@sentry/mcp-server"],
+    env: { SENTRY_AUTH_TOKEN: "" },
+    description: "Error tracking and monitoring",
+  },
+  vercel: {
+    name: "vercel",
+    command: "npx",
+    args: ["-y", "vercel-mcp-server"],
+    description: "Vercel deployment management",
+  },
+  shadcn: {
+    name: "shadcn",
+    command: "npx",
+    args: ["-y", "@anthropic-ai/shadcn-mcp-server"],
+    description: "shadcn/ui component installation",
+  },
+  prisma: {
+    name: "prisma",
+    command: "npx",
+    args: ["-y", "prisma-mcp-server"],
+    description: "Prisma ORM management",
+  },
+  cloudflare: {
+    name: "cloudflare",
+    command: "npx",
+    args: ["-y", "@cloudflare/mcp-server-cloudflare"],
+    description: "Cloudflare Workers, KV, R2",
+  },
+  playwright: {
+    name: "playwright",
+    command: "npx",
+    args: ["-y", "@anthropic-ai/mcp-server-playwright"],
+    description: "Browser testing with Playwright",
+  },
+  neon: {
+    name: "neon",
+    command: "npx",
+    args: ["-y", "@neondatabase/mcp-server-neon"],
+    env: { NEON_API_KEY: "" },
+    description: "Neon serverless Postgres",
+  },
+  upstash: {
+    name: "upstash",
+    command: "npx",
+    args: ["-y", "@upstash/mcp-server"],
+    env: { UPSTASH_EMAIL: "", UPSTASH_API_KEY: "" },
+    description: "Upstash Redis and QStash",
+  },
+  resend: {
+    name: "resend",
+    command: "npx",
+    args: ["-y", "mcp-server-resend"],
+    env: { RESEND_API_KEY: "" },
+    description: "Email sending via Resend",
+  },
+  fetch: {
+    name: "fetch",
+    command: "npx",
+    args: ["-y", "@modelcontextprotocol/server-fetch"],
+    description: "Fetch and parse web content",
+  },
+  turso: {
+    name: "turso",
+    command: "npx",
+    args: ["-y", "@tursodatabase/mcp-server-turso"],
+    env: { TURSO_AUTH_TOKEN: "" },
+    description: "Turso edge SQLite",
+  },
+  tavily: {
+    name: "tavily",
+    command: "npx",
+    args: ["-y", "tavily-mcp"],
+    env: { TAVILY_API_KEY: "" },
+    description: "AI-powered web search",
+  },
 };
 
 const FRAMEWORK_TEMPLATES: Record<string, string> = {
@@ -137,8 +239,7 @@ const FRAMEWORK_TEMPLATES: Record<string, string> = {
 };
 
 export function buildSystemPrompt(targetAgent: string): string {
-  const agentKnowledge =
-    AGENT_FILE_KNOWLEDGE[targetAgent] ?? AGENT_FILE_KNOWLEDGE["claude-code"];
+  const agentKnowledge = AGENT_FILE_KNOWLEDGE[targetAgent] ?? AGENT_FILE_KNOWLEDGE["claude-code"];
 
   const knownServersList = Object.entries(KNOWN_MCP_SERVERS)
     .map(([key, s]) => `- ${key}: ${s.description} (${s.command} ${s.args.join(" ")})`)
@@ -199,7 +300,7 @@ export function buildRepoPrompt(ctx: RepoContext): string {
   if (ctx.readme) {
     const truncated = ctx.readme.slice(0, 4000);
     sections.push(
-      `README:\n\`\`\`\n${truncated}${ctx.readme.length > 4000 ? "\n[truncated]" : ""}\n\`\`\``
+      `README:\n\`\`\`\n${truncated}${ctx.readme.length > 4000 ? "\n[truncated]" : ""}\n\`\`\``,
     );
   }
 
@@ -224,7 +325,7 @@ export function buildRepoPrompt(ctx: RepoContext): string {
 
   if (ctx.tsconfigOptions) {
     sections.push(
-      `tsconfig.json compilerOptions:\n${JSON.stringify(ctx.tsconfigOptions, null, 2)}`
+      `tsconfig.json compilerOptions:\n${JSON.stringify(ctx.tsconfigOptions, null, 2)}`,
     );
   }
 
@@ -238,49 +339,46 @@ export function buildRepoPrompt(ctx: RepoContext): string {
   if (ctx.ciWorkflows) {
     const truncated = ctx.ciWorkflows.slice(0, 3000);
     sections.push(
-      `CI/CD workflows:\n\`\`\`yaml\n${truncated}${ctx.ciWorkflows.length > 3000 ? "\n[truncated]" : ""}\n\`\`\``
+      `CI/CD workflows:\n\`\`\`yaml\n${truncated}${ctx.ciWorkflows.length > 3000 ? "\n[truncated]" : ""}\n\`\`\``,
     );
   }
 
   if (ctx.dockerConfig) {
     const truncated = ctx.dockerConfig.slice(0, 2000);
     sections.push(
-      `Docker configuration:\n\`\`\`dockerfile\n${truncated}${ctx.dockerConfig.length > 2000 ? "\n[truncated]" : ""}\n\`\`\``
+      `Docker configuration:\n\`\`\`dockerfile\n${truncated}${ctx.dockerConfig.length > 2000 ? "\n[truncated]" : ""}\n\`\`\``,
     );
   }
 
   if (ctx.testConfig) {
     const truncated = ctx.testConfig.slice(0, 2000);
     sections.push(
-      `Test configuration:\n\`\`\`\n${truncated}${ctx.testConfig.length > 2000 ? "\n[truncated]" : ""}\n\`\`\``
+      `Test configuration:\n\`\`\`\n${truncated}${ctx.testConfig.length > 2000 ? "\n[truncated]" : ""}\n\`\`\``,
     );
   }
 
   if (ctx.envExample) {
     const truncated = ctx.envExample.slice(0, 2000);
     sections.push(
-      `Environment variables (.env.example):\n\`\`\`\n${truncated}${ctx.envExample.length > 2000 ? "\n[truncated]" : ""}\n\`\`\``
+      `Environment variables (.env.example):\n\`\`\`\n${truncated}${ctx.envExample.length > 2000 ? "\n[truncated]" : ""}\n\`\`\``,
     );
   }
 
   if (ctx.existingAgentConfig) {
     const truncated = ctx.existingAgentConfig.slice(0, 3000);
     sections.push(
-      `Existing agent config:\n\`\`\`\n${truncated}${ctx.existingAgentConfig.length > 3000 ? "\n[truncated]" : ""}\n\`\`\``
+      `Existing agent config:\n\`\`\`\n${truncated}${ctx.existingAgentConfig.length > 3000 ? "\n[truncated]" : ""}\n\`\`\``,
     );
   }
 
   sections.push(
-    "Generate a comprehensive agent configuration for this repository. Include detailed instructions, rules, MCP servers, and permissions that match the project's stack and conventions."
+    "Generate a comprehensive agent configuration for this repository. Include detailed instructions, rules, MCP servers, and permissions that match the project's stack and conventions.",
   );
 
   return sections.join("\n\n");
 }
 
-export function buildQuestionsPrompt(
-  projectDescription: string,
-  techStack: string[]
-): string {
+export function buildQuestionsPrompt(projectDescription: string, techStack: string[]): string {
   const frameworkHints = techStack
     .map((t) => FRAMEWORK_TEMPLATES[t.toLowerCase()])
     .filter(Boolean)
@@ -345,7 +443,8 @@ export function buildUserPrompt(input: UserPromptInput): string {
 
   sections.push(`Project description: ${input.projectDescription}`);
 
-  const techStackDisplay = input.techStack.length > 0 ? input.techStack.join(", ") : "Not specified";
+  const techStackDisplay =
+    input.techStack.length > 0 ? input.techStack.join(", ") : "Not specified";
   sections.push(`Tech stack: ${techStackDisplay}`);
 
   if (input.framework) {
@@ -364,47 +463,47 @@ export function buildUserPrompt(input: UserPromptInput): string {
   const inclusions: string[] = [];
   if (input.includeRules) {
     inclusions.push(
-      "rules (at least 8 specific, actionable coding rules scoped to relevant file patterns, each with 3-5 sentences of content)"
+      "rules (at least 8 specific, actionable coding rules scoped to relevant file patterns, each with 3-5 sentences of content)",
     );
   }
   if (input.includeMcp) {
     inclusions.push(
-      "mcpServers (all relevant MCP servers for this stack from the known catalog ONLY, using npx where possible)"
+      "mcpServers (all relevant MCP servers for this stack from the known catalog ONLY, using npx where possible)",
     );
   }
   if (input.includePermissions) {
-    inclusions.push(
-      "permissions (8-12 sensible tool permissions following least privilege)"
-    );
+    inclusions.push("permissions (8-12 sensible tool permissions following least privilege)");
   }
 
   if (inclusions.length > 0) {
     sections.push(`Include: ${inclusions.join("; ")}`);
   } else {
-    sections.push(
-      "Set rules, mcpServers, and permissions to empty arrays/objects."
-    );
+    sections.push("Set rules, mcpServers, and permissions to empty arrays/objects.");
   }
 
   if (input.answers && input.answers.length > 0) {
-    sections.push("User's answers to clarifying questions (use these to inform every relevant section of the config):");
+    sections.push(
+      "User's answers to clarifying questions (use these to inform every relevant section of the config):",
+    );
     for (const a of input.answers) {
       sections.push(`Q: ${a.question}\nA: ${a.answer}`);
     }
   }
 
   if (input.selectedSkills && input.selectedSkills.length > 0) {
-    const skillsList = input.selectedSkills
-      .map((s) => `- ${s.name}: ${s.description}`)
-      .join("\n");
-    sections.push(`The user has selected these skills to include:\n${skillsList}\n\nReference these skills in the instructions and mention how the agent should leverage them.`);
+    const skillsList = input.selectedSkills.map((s) => `- ${s.name}: ${s.description}`).join("\n");
+    sections.push(
+      `The user has selected these skills to include:\n${skillsList}\n\nReference these skills in the instructions and mention how the agent should leverage them.`,
+    );
   }
 
   if (input.skillsCatalog && input.skillsCatalog.length > 0) {
     const catalogList = input.skillsCatalog
       .map((s) => `- ID: ${s.id} | ${s.name}: ${s.description}`)
       .join("\n");
-    sections.push(`Available skills catalog (recommend relevant ones by adding their IDs to recommendedSkillIds):\n${catalogList}`);
+    sections.push(
+      `Available skills catalog (recommend relevant ones by adding their IDs to recommendedSkillIds):\n${catalogList}`,
+    );
   }
 
   sections.push(
@@ -420,7 +519,7 @@ Also generate documentation files:
 - API_REFERENCE.md (when project has API): endpoints, schemas, auth, rate limits, error codes
 - SECURITY.md (when security relevant): policies, auth flows, validation, secrets, vulnerability reporting
 
-Generate at minimum 5 documentation files for any non-trivial project. Each doc should be 500-2000 words, project-specific with real file paths and commands. Docs should cross-reference each other.`
+Generate at minimum 5 documentation files for any non-trivial project. Each doc should be 500-2000 words, project-specific with real file paths and commands. Docs should cross-reference each other.`,
   );
 
   return sections.join("\n\n");
@@ -475,16 +574,22 @@ export function buildDocsUserPrompt(input: DocsPromptInput): string {
   }
 
   if (input.existingDocs && Object.keys(input.existingDocs).length > 0) {
-    sections.push("The project already has these documentation files. Improve and update them rather than generating from scratch:");
+    sections.push(
+      "The project already has these documentation files. Improve and update them rather than generating from scratch:",
+    );
     for (const [filename, content] of Object.entries(input.existingDocs)) {
       const truncated = content.slice(0, 3000);
       sections.push(
-        `### ${filename}\n\`\`\`markdown\n${truncated}${content.length > 3000 ? "\n[truncated]" : ""}\n\`\`\``
+        `### ${filename}\n\`\`\`markdown\n${truncated}${content.length > 3000 ? "\n[truncated]" : ""}\n\`\`\``,
       );
     }
-    sections.push("Update and improve the existing docs. Fix any outdated information, fill in missing sections, and ensure consistency across all docs.");
+    sections.push(
+      "Update and improve the existing docs. Fix any outdated information, fill in missing sections, and ensure consistency across all docs.",
+    );
   } else {
-    sections.push("Generate comprehensive documentation for this project from scratch. Include at minimum README.md and DEVELOPMENT.md, plus any other relevant docs based on the project type.");
+    sections.push(
+      "Generate comprehensive documentation for this project from scratch. Include at minimum README.md and DEVELOPMENT.md, plus any other relevant docs based on the project type.",
+    );
   }
 
   return sections.join("\n\n");

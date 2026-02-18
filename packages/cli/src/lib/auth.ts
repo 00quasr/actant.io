@@ -49,21 +49,19 @@ export async function refreshTokens(): Promise<StoredAuth | null> {
   const auth = getStoredAuth();
   if (!auth) return null;
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://nyiibwqpkupzdgwqctlb.supabase.co";
+  const supabaseUrl =
+    process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://nyiibwqpkupzdgwqctlb.supabase.co";
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 
   try {
-    const response = await fetch(
-      `${supabaseUrl}/auth/v1/token?grant_type=refresh_token`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          apikey: supabaseAnonKey,
-        },
-        body: JSON.stringify({ refresh_token: auth.refresh_token }),
-      }
-    );
+    const response = await fetch(`${supabaseUrl}/auth/v1/token?grant_type=refresh_token`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: supabaseAnonKey,
+      },
+      body: JSON.stringify({ refresh_token: auth.refresh_token }),
+    });
 
     if (!response.ok) return null;
 

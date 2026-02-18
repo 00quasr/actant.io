@@ -1,13 +1,7 @@
 "use client";
 
 import { useReducer, useCallback } from "react";
-import type {
-  AgentConfig,
-  AgentType,
-  McpServer,
-  Rule,
-  SkillEntry,
-} from "@/types/config";
+import type { AgentConfig, AgentType, McpServer, Rule, SkillEntry } from "@/types/config";
 export interface ConfigState extends AgentConfig {
   id?: string;
   techStack: string[];
@@ -38,7 +32,15 @@ type ConfigAction =
   | { type: "UPDATE_RULE"; payload: { index: number; rule: Rule } }
   | { type: "LOAD_CONFIG"; payload: AgentConfig & { id?: string } }
   | { type: "LOAD_GENERATED_CONFIG"; payload: AgentConfig }
-  | { type: "LOAD_TEMPLATE"; payload: { instructions: AgentConfig["instructions"]; rules: Rule[]; mcpServers: McpServer[]; permissions: Record<string, "allow" | "ask" | "deny"> } }
+  | {
+      type: "LOAD_TEMPLATE";
+      payload: {
+        instructions: AgentConfig["instructions"];
+        rules: Rule[];
+        mcpServers: McpServer[];
+        permissions: Record<string, "allow" | "ask" | "deny">;
+      };
+    }
   | { type: "SET_ALL_PERMISSIONS"; payload: Record<string, "allow" | "ask" | "deny"> }
   | { type: "ADD_RULES_BATCH"; payload: Rule[] }
   | { type: "SET_TECH_STACK"; payload: string[] }
@@ -53,7 +55,14 @@ type ConfigAction =
   | { type: "SET_SAVING"; payload: boolean }
   | { type: "SET_SAVED" };
 
-function createInitialState(initial?: Partial<AgentConfig> & { id?: string; documentType?: string; content?: Record<string, unknown>; docs?: Record<string, string> }): ConfigState {
+function createInitialState(
+  initial?: Partial<AgentConfig> & {
+    id?: string;
+    documentType?: string;
+    content?: Record<string, unknown>;
+    docs?: Record<string, string>;
+  },
+): ConfigState {
   return {
     id: initial?.id,
     name: initial?.name ?? "",
@@ -109,9 +118,7 @@ function configReducer(state: ConfigState, action: ConfigAction): ConfigState {
       return {
         ...state,
         skills: state.skills.map((s) =>
-          s.skillId === action.payload.skillId
-            ? { ...s, params: action.payload.params }
-            : s
+          s.skillId === action.payload.skillId ? { ...s, params: action.payload.params } : s,
         ),
         isDirty: true,
       };
@@ -131,7 +138,7 @@ function configReducer(state: ConfigState, action: ConfigAction): ConfigState {
       return {
         ...state,
         mcpServers: state.mcpServers.map((s) =>
-          s.name === action.payload.name ? action.payload.server : s
+          s.name === action.payload.name ? action.payload.server : s,
         ),
         isDirty: true,
       };
@@ -160,9 +167,7 @@ function configReducer(state: ConfigState, action: ConfigAction): ConfigState {
     case "UPDATE_RULE":
       return {
         ...state,
-        rules: state.rules.map((r, i) =>
-          i === action.payload.index ? action.payload.rule : r
-        ),
+        rules: state.rules.map((r, i) => (i === action.payload.index ? action.payload.rule : r)),
         isDirty: true,
       };
     case "SET_ALL_PERMISSIONS":
@@ -231,129 +236,126 @@ function configReducer(state: ConfigState, action: ConfigAction): ConfigState {
   }
 }
 
-export function useConfig(initial?: Partial<AgentConfig> & { id?: string; documentType?: string; content?: Record<string, unknown> }) {
-  const [state, dispatch] = useReducer(
-    configReducer,
-    initial,
-    (init) => createInitialState(init)
-  );
+export function useConfig(
+  initial?: Partial<AgentConfig> & {
+    id?: string;
+    documentType?: string;
+    content?: Record<string, unknown>;
+  },
+) {
+  const [state, dispatch] = useReducer(configReducer, initial, (init) => createInitialState(init));
 
-  const setName = useCallback(
-    (name: string) => dispatch({ type: "SET_NAME", payload: name }),
-    []
-  );
+  const setName = useCallback((name: string) => dispatch({ type: "SET_NAME", payload: name }), []);
   const setDescription = useCallback(
     (description: string) => dispatch({ type: "SET_DESCRIPTION", payload: description }),
-    []
+    [],
   );
   const setTargetAgent = useCallback(
     (agent: AgentType) => dispatch({ type: "SET_TARGET_AGENT", payload: agent }),
-    []
+    [],
   );
   const setInstructions = useCallback(
     (content: string) => dispatch({ type: "SET_INSTRUCTIONS", payload: content }),
-    []
+    [],
   );
   const setTemplateId = useCallback(
     (id: string | undefined) => dispatch({ type: "SET_TEMPLATE_ID", payload: id }),
-    []
+    [],
   );
   const addSkill = useCallback(
     (skill: SkillEntry) => dispatch({ type: "ADD_SKILL", payload: skill }),
-    []
+    [],
   );
   const removeSkill = useCallback(
     (skillId: string) => dispatch({ type: "REMOVE_SKILL", payload: skillId }),
-    []
+    [],
   );
   const addMcpServer = useCallback(
     (server: McpServer) => dispatch({ type: "ADD_MCP_SERVER", payload: server }),
-    []
+    [],
   );
   const removeMcpServer = useCallback(
     (name: string) => dispatch({ type: "REMOVE_MCP_SERVER", payload: name }),
-    []
+    [],
   );
   const updateMcpServer = useCallback(
     (name: string, server: McpServer) =>
       dispatch({ type: "UPDATE_MCP_SERVER", payload: { name, server } }),
-    []
+    [],
   );
   const setPermission = useCallback(
     (tool: string, value: "allow" | "ask" | "deny") =>
       dispatch({ type: "SET_PERMISSION", payload: { tool, value } }),
-    []
+    [],
   );
   const removePermission = useCallback(
     (tool: string) => dispatch({ type: "REMOVE_PERMISSION", payload: tool }),
-    []
+    [],
   );
-  const addRule = useCallback(
-    (rule: Rule) => dispatch({ type: "ADD_RULE", payload: rule }),
-    []
-  );
+  const addRule = useCallback((rule: Rule) => dispatch({ type: "ADD_RULE", payload: rule }), []);
   const removeRule = useCallback(
     (index: number) => dispatch({ type: "REMOVE_RULE", payload: index }),
-    []
+    [],
   );
   const updateRule = useCallback(
-    (index: number, rule: Rule) =>
-      dispatch({ type: "UPDATE_RULE", payload: { index, rule } }),
-    []
+    (index: number, rule: Rule) => dispatch({ type: "UPDATE_RULE", payload: { index, rule } }),
+    [],
   );
   const loadConfig = useCallback(
-    (config: AgentConfig & { id?: string }) =>
-      dispatch({ type: "LOAD_CONFIG", payload: config }),
-    []
+    (config: AgentConfig & { id?: string }) => dispatch({ type: "LOAD_CONFIG", payload: config }),
+    [],
   );
   const loadGeneratedConfig = useCallback(
-    (config: AgentConfig) =>
-      dispatch({ type: "LOAD_GENERATED_CONFIG", payload: config }),
-    []
+    (config: AgentConfig) => dispatch({ type: "LOAD_GENERATED_CONFIG", payload: config }),
+    [],
   );
   const loadTemplate = useCallback(
-    (template: { instructions: AgentConfig["instructions"]; rules: Rule[]; mcpServers: McpServer[]; permissions: Record<string, "allow" | "ask" | "deny"> }) =>
-      dispatch({ type: "LOAD_TEMPLATE", payload: template }),
-    []
+    (template: {
+      instructions: AgentConfig["instructions"];
+      rules: Rule[];
+      mcpServers: McpServer[];
+      permissions: Record<string, "allow" | "ask" | "deny">;
+    }) => dispatch({ type: "LOAD_TEMPLATE", payload: template }),
+    [],
   );
   const setAllPermissions = useCallback(
     (permissions: Record<string, "allow" | "ask" | "deny">) =>
       dispatch({ type: "SET_ALL_PERMISSIONS", payload: permissions }),
-    []
+    [],
   );
   const addRulesBatch = useCallback(
     (rules: Rule[]) => dispatch({ type: "ADD_RULES_BATCH", payload: rules }),
-    []
+    [],
   );
   const setTechStack = useCallback(
     (techStack: string[]) => dispatch({ type: "SET_TECH_STACK", payload: techStack }),
-    []
+    [],
   );
   const setstring = useCallback(
     (documentType: string) => dispatch({ type: "SET_DOCUMENT_TYPE", payload: documentType }),
-    []
+    [],
   );
   const setContent = useCallback(
     (content: Record<string, unknown>) => dispatch({ type: "SET_CONTENT", payload: content }),
-    []
+    [],
   );
   const setContentField = useCallback(
     (key: string, value: unknown) =>
       dispatch({ type: "SET_CONTENT_FIELD", payload: { key, value } }),
-    []
+    [],
   );
   const setDocs = useCallback(
     (docs: Record<string, string>) => dispatch({ type: "SET_DOCS", payload: docs }),
-    []
+    [],
   );
   const setDoc = useCallback(
     (filename: string, content: string) =>
       dispatch({ type: "SET_DOC", payload: { filename, content } }),
-    []
+    [],
   );
   const removeDoc = useCallback(
     (filename: string) => dispatch({ type: "REMOVE_DOC", payload: filename }),
-    []
+    [],
   );
   const reset = useCallback(() => dispatch({ type: "RESET" }), []);
 

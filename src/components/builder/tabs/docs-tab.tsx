@@ -46,10 +46,15 @@ interface DocsTabProps {
   techStack?: string[];
 }
 
-export function DocsTab({ docs, setDoc, removeDoc, configName, configDescription, techStack }: DocsTabProps) {
-  const [expandedDoc, setExpandedDoc] = useState<string | null>(
-    Object.keys(docs)[0] ?? null
-  );
+export function DocsTab({
+  docs,
+  setDoc,
+  removeDoc,
+  configName,
+  configDescription,
+  techStack,
+}: DocsTabProps) {
+  const [expandedDoc, setExpandedDoc] = useState<string | null>(Object.keys(docs)[0] ?? null);
   const [newFilename, setNewFilename] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
   const { status: genStatus, error: genError, generateDocs } = useDocsGeneration();
@@ -71,9 +76,7 @@ export function DocsTab({ docs, setDoc, removeDoc, configName, configDescription
   const docEntries = Object.entries(docs);
   const existingFilenames = new Set(Object.keys(docs));
 
-  const suggestedFiles = COMMON_DOC_FILES.filter(
-    (f) => !existingFilenames.has(f)
-  );
+  const suggestedFiles = COMMON_DOC_FILES.filter((f) => !existingFilenames.has(f));
 
   function handleAddDoc() {
     const trimmed = newFilename.trim();
@@ -100,9 +103,7 @@ export function DocsTab({ docs, setDoc, removeDoc, configName, configDescription
       <div className="space-y-6">
         <div className="text-center py-12 space-y-3">
           <FileTextIcon className="size-8 text-muted-foreground/50 mx-auto" />
-          <p className="text-sm text-muted-foreground">
-            No documentation files yet.
-          </p>
+          <p className="text-sm text-muted-foreground">No documentation files yet.</p>
           {genStatus === "generating" ? (
             <div className="flex items-center justify-center gap-2 pt-2">
               <ReloadIcon className="size-4 animate-spin text-muted-foreground" />
@@ -113,9 +114,7 @@ export function DocsTab({ docs, setDoc, removeDoc, configName, configDescription
               Generate Docs with AI
             </Button>
           )}
-          {genError && (
-            <p className="text-xs text-destructive/80">{genError}</p>
-          )}
+          {genError && <p className="text-xs text-destructive/80">{genError}</p>}
           <div className="space-y-1.5 pt-2">
             <p className="text-xs text-muted-foreground">Or add manually:</p>
             <div className="flex flex-wrap gap-2 justify-center">
@@ -157,7 +156,9 @@ export function DocsTab({ docs, setDoc, removeDoc, configName, configDescription
                 <FileTextIcon className="size-3.5 text-muted-foreground" />
                 <span>{filename}</span>
                 {DOC_TYPE_BADGES[filename] && (
-                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${DOC_TYPE_BADGES[filename].className}`}>
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${DOC_TYPE_BADGES[filename].className}`}
+                  >
                     {DOC_TYPE_BADGES[filename].label}
                   </span>
                 )}
@@ -228,11 +229,7 @@ export function DocsTab({ docs, setDoc, removeDoc, configName, configDescription
         </div>
       ) : (
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowAddForm(true)}
-          >
+          <Button variant="outline" size="sm" onClick={() => setShowAddForm(true)}>
             <PlusIcon className="size-3.5" />
             Add Document
           </Button>
@@ -259,11 +256,7 @@ export function DocsTab({ docs, setDoc, removeDoc, configName, configDescription
                 <span className="text-xs text-muted-foreground">Generating...</span>
               </div>
             ) : (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleGenerate}
-              >
+              <Button variant="outline" size="sm" onClick={handleGenerate}>
                 <ReloadIcon className="size-3.5" />
                 Regenerate All Docs
               </Button>
@@ -271,9 +264,7 @@ export function DocsTab({ docs, setDoc, removeDoc, configName, configDescription
           </div>
         </div>
       )}
-      {genError && (
-        <p className="text-xs text-destructive/80">{genError}</p>
-      )}
+      {genError && <p className="text-xs text-destructive/80">{genError}</p>}
     </div>
   );
 }

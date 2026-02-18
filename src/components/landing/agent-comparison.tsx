@@ -1,13 +1,7 @@
 import { CheckIcon, Cross2Icon } from "@radix-ui/react-icons";
 import { FadeIn } from "./fade-in";
 
-const AGENTS = [
-  "Claude Code",
-  "Cursor",
-  "Windsurf",
-  "Cline",
-  "OpenCode",
-] as const;
+const AGENTS = ["Claude Code", "Cursor", "Windsurf", "Cline", "OpenCode"] as const;
 
 const FEATURES: Record<string, Record<(typeof AGENTS)[number], boolean>> = {
   Instructions: {
@@ -59,8 +53,8 @@ export function AgentComparison() {
             Feature support by agent
           </h2>
           <p className="mx-auto mt-3 max-w-lg text-center text-sm text-muted-foreground">
-            Not every agent supports every feature. Actant handles the
-            differences so you don&apos;t have to.
+            Not every agent supports every feature. Actant handles the differences so you don&apos;t
+            have to.
           </p>
         </FadeIn>
 
@@ -89,9 +83,7 @@ export function AgentComparison() {
                       key={feature}
                       className="border-b last:border-0 transition-colors hover:bg-muted/30"
                     >
-                      <td className="px-4 py-3 text-sm font-medium">
-                        {feature}
-                      </td>
+                      <td className="px-4 py-3 text-sm font-medium">{feature}</td>
                       {AGENTS.map((agent) => (
                         <td key={agent} className="px-2 py-3 text-center">
                           {support[agent] ? (

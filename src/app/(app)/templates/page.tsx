@@ -19,9 +19,7 @@ function TemplateCard({ template }: { template: Template }) {
           <CardTitle className="text-sm">{template.name}</CardTitle>
           <AgentBadge agent={template.target_agent} />
         </div>
-        <CardDescription className="line-clamp-2">
-          {template.description}
-        </CardDescription>
+        <CardDescription className="line-clamp-2">{template.description}</CardDescription>
       </CardHeader>
       <CardContent className="mt-auto flex items-center justify-between">
         <div className="flex items-center gap-2">

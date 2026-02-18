@@ -13,27 +13,11 @@ export interface ScanResult {
 }
 
 const AGENT_FILE_PATTERNS: Record<AgentType, string[]> = {
-  "claude-code": [
-    "CLAUDE.md",
-    ".claude/settings.json",
-    ".mcp.json",
-    ".claude/skills/*/SKILL.md",
-  ],
-  cursor: [
-    ".cursorrules",
-    ".cursor/rules/*.mdc",
-    ".mcp.json",
-  ],
-  windsurf: [
-    ".windsurfrules",
-    ".windsurf/rules/rules.md",
-  ],
-  cline: [
-    ".clinerules/*.md",
-  ],
-  opencode: [
-    "opencode.json",
-  ],
+  "claude-code": ["CLAUDE.md", ".claude/settings.json", ".mcp.json", ".claude/skills/*/SKILL.md"],
+  cursor: [".cursorrules", ".cursor/rules/*.mdc", ".mcp.json"],
+  windsurf: [".windsurfrules", ".windsurf/rules/rules.md"],
+  cline: [".clinerules/*.md"],
+  opencode: ["opencode.json"],
 };
 
 function resolvePattern(cwd: string, pattern: string): ScannedFile[] {
@@ -51,7 +35,11 @@ function resolvePattern(cwd: string, pattern: string): ScannedFile[] {
       if (fs.existsSync(parentDir) && fs.statSync(parentDir).isDirectory()) {
         const entries = fs.readdirSync(parentDir);
         for (const entry of entries) {
-          const candidate = path.join(parentDir, entry, suffix.startsWith("/") ? suffix.slice(1) : suffix);
+          const candidate = path.join(
+            parentDir,
+            entry,
+            suffix.startsWith("/") ? suffix.slice(1) : suffix,
+          );
           if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
             const relativePath = path.relative(cwd, candidate);
             results.push({

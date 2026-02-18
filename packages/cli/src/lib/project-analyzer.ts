@@ -87,7 +87,7 @@ function safeReadFile(filePath: string): string | null {
 function detectFramework(
   deps: Record<string, string> | null,
   devDeps: Record<string, string> | null,
-  cwd: string
+  cwd: string,
 ): string | null {
   const allDeps = { ...deps, ...devDeps };
 
@@ -134,7 +134,7 @@ function detectLanguage(cwd: string): string | null {
 function detectTestFramework(
   deps: Record<string, string> | null,
   devDeps: Record<string, string> | null,
-  cwd: string
+  cwd: string,
 ): string | null {
   const allDeps = { ...deps, ...devDeps };
 
@@ -179,7 +179,9 @@ function collectCIWorkflows(cwd: string): Array<{ path: string; content: string 
   if (!fs.existsSync(workflowDir)) return [];
 
   try {
-    const entries = fs.readdirSync(workflowDir).filter((f) => f.endsWith(".yml") || f.endsWith(".yaml"));
+    const entries = fs
+      .readdirSync(workflowDir)
+      .filter((f) => f.endsWith(".yml") || f.endsWith(".yaml"));
     return entries.slice(0, 2).map((name) => {
       const filePath = path.join(workflowDir, name);
       const content = safeReadFile(filePath) ?? "";

@@ -45,12 +45,8 @@ export function PricingPreview() {
               <div className="h-full rounded-lg border bg-background p-6 transition-all duration-200 hover:border-foreground/20 hover:shadow-sm">
                 <h3 className="text-sm font-semibold">{plan.name}</h3>
                 <div className="mt-2 flex items-baseline gap-1">
-                  <span className="text-3xl font-bold tracking-tight">
-                    {plan.price}
-                  </span>
-                  <span className="text-sm text-muted-foreground">
-                    {plan.period}
-                  </span>
+                  <span className="text-3xl font-bold tracking-tight">{plan.price}</span>
+                  <span className="text-sm text-muted-foreground">{plan.period}</span>
                 </div>
                 <ul className="mt-5 space-y-2.5">
                   {plan.features.map((feature) => (

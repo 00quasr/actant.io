@@ -7,19 +7,11 @@ export interface WriteResult {
   skipped: string[];
 }
 
-export function getExistingFiles(
-  files: ExportFile[],
-  cwd: string
-): string[] {
-  return files
-    .map((f) => f.path)
-    .filter((p) => fs.existsSync(path.resolve(cwd, p)));
+export function getExistingFiles(files: ExportFile[], cwd: string): string[] {
+  return files.map((f) => f.path).filter((p) => fs.existsSync(path.resolve(cwd, p)));
 }
 
-export function writeExportFiles(
-  files: ExportFile[],
-  cwd: string
-): WriteResult {
+export function writeExportFiles(files: ExportFile[], cwd: string): WriteResult {
   const written: string[] = [];
   const skipped: string[] = [];
 

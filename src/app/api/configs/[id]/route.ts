@@ -2,10 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { agentConfigSchema } from "@/validations/config";
 
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
   const {
@@ -30,10 +27,7 @@ export async function GET(
   return NextResponse.json(data);
 }
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
   const {
@@ -55,7 +49,7 @@ export async function PUT(
   if (!result.success) {
     return NextResponse.json(
       { error: "Validation failed", details: result.error.flatten() },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -87,7 +81,7 @@ export async function PUT(
 
 export async function DELETE(
   _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
   const supabase = await createClient();
@@ -99,11 +93,7 @@ export async function DELETE(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { error } = await supabase
-    .from("configs")
-    .delete()
-    .eq("id", id)
-    .eq("owner_id", user.id);
+  const { error } = await supabase.from("configs").delete().eq("id", id).eq("owner_id", user.id);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

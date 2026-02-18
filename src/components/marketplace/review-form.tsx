@@ -87,7 +87,7 @@ export function ReviewForm({ listingId, onSubmit }: ReviewFormProps) {
                         <Icon
                           className={cn(
                             "size-5",
-                            filled ? "text-foreground" : "text-muted-foreground/40"
+                            filled ? "text-foreground" : "text-muted-foreground/40",
                           )}
                         />
                       </button>
@@ -107,11 +107,7 @@ export function ReviewForm({ listingId, onSubmit }: ReviewFormProps) {
             <FormItem>
               <FormLabel>Comment</FormLabel>
               <FormControl>
-                <Textarea
-                  {...field}
-                  placeholder="Share your experience..."
-                  className="min-h-20"
-                />
+                <Textarea {...field} placeholder="Share your experience..." className="min-h-20" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -121,9 +117,7 @@ export function ReviewForm({ listingId, onSubmit }: ReviewFormProps) {
         <Button type="submit" size="sm" disabled={submitting || selectedRating === 0}>
           {submitting ? "Submitting..." : "Submit Review"}
         </Button>
-        {error && (
-          <p className="text-sm text-destructive">{error}</p>
-        )}
+        {error && <p className="text-sm text-destructive">{error}</p>}
       </form>
     </Form>
   );

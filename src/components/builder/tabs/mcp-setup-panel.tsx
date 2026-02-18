@@ -4,11 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDownIcon } from "@radix-ui/react-icons";
 import type { McpProvider } from "@/types/marketplace";
 import type { McpServer } from "@/types/config";
@@ -23,8 +19,8 @@ export function McpSetupPanel({ provider, onConfirm, onCancel }: McpSetupPanelPr
   const [envValues, setEnvValues] = useState<Record<string, string>>(
     provider.required_env_keys.reduce<Record<string, string>>(
       (acc, key) => ({ ...acc, [key]: "" }),
-      {}
-    )
+      {},
+    ),
   );
   const [guideOpen, setGuideOpen] = useState(false);
 
@@ -58,15 +54,11 @@ export function McpSetupPanel({ provider, onConfirm, onCancel }: McpSetupPanelPr
             type="password"
             placeholder={`Enter ${key}`}
             value={envValues[key] ?? ""}
-            onChange={(e) =>
-              setEnvValues((prev) => ({ ...prev, [key]: e.target.value }))
-            }
+            onChange={(e) => setEnvValues((prev) => ({ ...prev, [key]: e.target.value }))}
             className="text-sm h-8"
           />
           {descriptions[key] && (
-            <p className="text-[11px] text-muted-foreground leading-relaxed">
-              {descriptions[key]}
-            </p>
+            <p className="text-[11px] text-muted-foreground leading-relaxed">{descriptions[key]}</p>
           )}
         </div>
       ))}

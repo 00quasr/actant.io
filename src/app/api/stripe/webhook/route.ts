@@ -23,9 +23,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   }
 
   const subscriptionId =
-    typeof session.subscription === "string"
-      ? session.subscription
-      : session.subscription?.id;
+    typeof session.subscription === "string" ? session.subscription : session.subscription?.id;
 
   const { error } = await supabase
     .from("profiles")
@@ -40,19 +38,13 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   }
 }
 
-async function handleSubscriptionUpdated(
-  subscription: Stripe.Subscription,
-) {
+async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   const supabase = getSupabaseAdmin();
   const customerId =
-    typeof subscription.customer === "string"
-      ? subscription.customer
-      : subscription.customer.id;
+    typeof subscription.customer === "string" ? subscription.customer : subscription.customer.id;
 
   const plan =
-    subscription.status === "active" || subscription.status === "trialing"
-      ? "pro"
-      : "free";
+    subscription.status === "active" || subscription.status === "trialing" ? "pro" : "free";
 
   const { error } = await supabase
     .from("profiles")
@@ -60,21 +52,14 @@ async function handleSubscriptionUpdated(
     .eq("stripe_customer_id", customerId);
 
   if (error) {
-    console.error(
-      "Failed to update profile on subscription update:",
-      error.message,
-    );
+    console.error("Failed to update profile on subscription update:", error.message);
   }
 }
 
-async function handleSubscriptionDeleted(
-  subscription: Stripe.Subscription,
-) {
+async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   const supabase = getSupabaseAdmin();
   const customerId =
-    typeof subscription.customer === "string"
-      ? subscription.customer
-      : subscription.customer.id;
+    typeof subscription.customer === "string" ? subscription.customer : subscription.customer.id;
 
   const { error } = await supabase
     .from("profiles")
@@ -85,10 +70,7 @@ async function handleSubscriptionDeleted(
     .eq("stripe_customer_id", customerId);
 
   if (error) {
-    console.error(
-      "Failed to update profile on subscription deletion:",
-      error.message,
-    );
+    console.error("Failed to update profile on subscription deletion:", error.message);
   }
 }
 
@@ -97,10 +79,7 @@ export async function POST(request: NextRequest) {
   const signature = request.headers.get("stripe-signature");
 
   if (!signature) {
-    return NextResponse.json(
-      { error: "Missing stripe-signature header" },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: "Missing stripe-signature header" }, { status: 400 });
   }
 
   let event: Stripe.Event;
@@ -112,13 +91,9 @@ export async function POST(request: NextRequest) {
       process.env.STRIPE_WEBHOOK_SECRET!,
     );
   } catch (err) {
-    const message =
-      err instanceof Error ? err.message : "Unknown verification error";
+    const message = err instanceof Error ? err.message : "Unknown verification error";
     console.error("Webhook signature verification failed:", message);
-    return NextResponse.json(
-      { error: "Webhook signature verification failed" },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: "Webhook signature verification failed" }, { status: 400 });
   }
 
   switch (event.type) {

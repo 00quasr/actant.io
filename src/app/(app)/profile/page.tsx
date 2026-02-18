@@ -4,7 +4,6 @@ import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProfileHeader } from "@/components/profile/profile-header";
-import { SavedConfigsList } from "@/components/profile/saved-configs-list";
 import { PublishedConfigsList } from "@/components/profile/published-configs-list";
 import { FavoritesList } from "@/components/profile/favorites-list";
 import type { Profile, Listing } from "@/types/marketplace";
@@ -12,14 +11,12 @@ import type { Profile, Listing } from "@/types/marketplace";
 export default async function ProfilePage() {
   const supabase = await createClient();
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
+  const { data: profile } = await supabase.from("profiles").select("*").eq("id", user.id).single();
 
   if (!profile) redirect("/login");
 
@@ -38,9 +35,9 @@ export default async function ProfilePage() {
     .order("created_at", { ascending: false });
 
   const published = (publishedListings as Listing[]) ?? [];
-  const favorites = (
-    favoriteData?.map((f: Record<string, unknown>) => f.listing).filter(Boolean) as Listing[]
-  ) ?? [];
+  const favorites =
+    (favoriteData?.map((f: Record<string, unknown>) => f.listing).filter(Boolean) as Listing[]) ??
+    [];
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-8">

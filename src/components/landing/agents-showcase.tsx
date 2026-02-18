@@ -1,12 +1,6 @@
 import { FadeIn } from "./fade-in";
 
-const AGENTS = [
-  "Claude Code",
-  "Cursor",
-  "Windsurf",
-  "Cline",
-  "OpenCode",
-];
+const AGENTS = ["Claude Code", "Cursor", "Windsurf", "Cline", "OpenCode"];
 
 export function AgentsShowcase() {
   return (

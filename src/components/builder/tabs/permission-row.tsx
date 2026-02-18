@@ -20,7 +20,11 @@ export function PermissionRow({ tool, value, onChange, onRemove }: PermissionRow
   return (
     <div className="grid grid-cols-[1fr_auto_auto] gap-2 items-center rounded-lg border px-3 py-2">
       <span className="text-sm font-mono truncate">{tool}</span>
-      <div className="flex items-center gap-1 w-48" role="group" aria-label={`Permission for ${tool}`}>
+      <div
+        className="flex items-center gap-1 w-48"
+        role="group"
+        aria-label={`Permission for ${tool}`}
+      >
         {OPTIONS.map((opt) => (
           <button
             key={opt.value}

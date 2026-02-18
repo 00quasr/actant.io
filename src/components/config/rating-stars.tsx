@@ -8,7 +8,12 @@ interface RatingStarsProps {
   className?: string;
 }
 
-export function RatingStars({ rating, showNumeric = true, size = "default", className }: RatingStarsProps) {
+export function RatingStars({
+  rating,
+  showNumeric = true,
+  size = "default",
+  className,
+}: RatingStarsProps) {
   const iconSize = size === "sm" ? "size-3" : "size-4";
 
   return (

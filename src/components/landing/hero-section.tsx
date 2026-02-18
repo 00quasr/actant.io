@@ -24,28 +24,27 @@ export function HeroSection() {
       <div
         className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px]"
         style={{
-          background: "radial-gradient(ellipse 50% 60% at 50% 0%, var(--muted) 0%, transparent 70%)",
+          background:
+            "radial-gradient(ellipse 50% 60% at 50% 0%, var(--muted) 0%, transparent 70%)",
         }}
       />
 
       <FadeIn>
         <span className="mb-6 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium text-muted-foreground">
-          <span className="size-1.5 rounded-full bg-foreground" />
-          5 Agents Supported
+          <span className="size-1.5 rounded-full bg-foreground" />5 Agents Supported
         </span>
       </FadeIn>
 
       <FadeIn delay={80}>
         <h1 className="max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-          Configure your agent.{" "}
-          <span className="text-muted-foreground">Start building.</span>
+          Configure your agent. <span className="text-muted-foreground">Start building.</span>
         </h1>
       </FadeIn>
 
       <FadeIn delay={160}>
         <p className="mt-6 max-w-lg text-base leading-relaxed text-muted-foreground sm:text-lg">
-          The platform to build, share, and export configurations for
-          Claude Code, Cursor, Windsurf, Cline, and OpenCode.
+          The platform to build, share, and export configurations for Claude Code, Cursor, Windsurf,
+          Cline, and OpenCode.
         </p>
       </FadeIn>
 
@@ -75,11 +74,7 @@ export function HeroSection() {
               className="absolute right-2 text-muted-foreground/60 transition-colors hover:text-foreground"
               aria-label="Copy install command"
             >
-              {copied ? (
-                <CheckIcon className="size-3.5" />
-              ) : (
-                <CopyIcon className="size-3.5" />
-              )}
+              {copied ? <CheckIcon className="size-3.5" /> : <CopyIcon className="size-3.5" />}
             </button>
           </span>
         </div>
@@ -108,7 +103,9 @@ export function HeroSection() {
               {/* Sidebar */}
               <div className="hidden border-r sm:block">
                 <div className="p-3 space-y-1">
-                  <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground px-2 pt-2 pb-1">Build</div>
+                  <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground px-2 pt-2 pb-1">
+                    Build
+                  </div>
                   {["Instructions", "Rules", "MCP Servers", "Permissions", "Skills", "Docs"].map(
                     (tab, i) => (
                       <div
@@ -121,7 +118,7 @@ export function HeroSection() {
                       >
                         {tab}
                       </div>
-                    )
+                    ),
                   )}
                 </div>
               </div>
@@ -130,28 +127,41 @@ export function HeroSection() {
               <div className="p-5 space-y-3">
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-medium">CLAUDE.md</span>
-                  <span className="rounded bg-secondary px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">claude-code</span>
+                  <span className="rounded bg-secondary px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                    claude-code
+                  </span>
                 </div>
                 <div className="space-y-1.5 font-mono text-xs leading-relaxed text-muted-foreground">
-                  <p><span className="text-foreground font-medium">## Project</span></p>
+                  <p>
+                    <span className="text-foreground font-medium">## Project</span>
+                  </p>
                   <p>My App — Next.js 14, TypeScript, Tailwind</p>
-                  <p className="pt-1"><span className="text-foreground font-medium">## Code Style</span></p>
+                  <p className="pt-1">
+                    <span className="text-foreground font-medium">## Code Style</span>
+                  </p>
                   <p>- TypeScript strict, no any</p>
                   <p>- Functional components</p>
                   <p>- Tailwind for styling (shadcn/ui base)</p>
-                  <p className="pt-1"><span className="text-foreground font-medium">## Commands</span></p>
+                  <p className="pt-1">
+                    <span className="text-foreground font-medium">## Commands</span>
+                  </p>
                   <p className="text-muted-foreground/50">```bash</p>
                   <p>npm run dev</p>
                   <p>npm run build</p>
                   <p>npm run lint</p>
-                  <p className="text-muted-foreground/50">```<span className="inline-block w-px h-3.5 bg-foreground ml-0.5 animate-pulse" /></p>
+                  <p className="text-muted-foreground/50">
+                    ```
+                    <span className="inline-block w-px h-3.5 bg-foreground ml-0.5 animate-pulse" />
+                  </p>
                 </div>
               </div>
 
               {/* Live preview panel */}
               <div className="hidden border-l sm:block bg-muted/20">
                 <div className="p-3 border-b">
-                  <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Live Preview</span>
+                  <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                    Live Preview
+                  </span>
                 </div>
                 <div className="p-3 space-y-2">
                   <div className="rounded bg-muted/50 p-2">
@@ -178,8 +188,12 @@ export function HeroSection() {
                   <div className="rounded bg-muted/50 p-2">
                     <div className="text-[10px] text-muted-foreground mb-1">MCP Servers</div>
                     <div className="flex gap-1">
-                      <span className="rounded bg-secondary px-1 py-0.5 text-[9px] text-muted-foreground">Supabase</span>
-                      <span className="rounded bg-secondary px-1 py-0.5 text-[9px] text-muted-foreground">GitHub</span>
+                      <span className="rounded bg-secondary px-1 py-0.5 text-[9px] text-muted-foreground">
+                        Supabase
+                      </span>
+                      <span className="rounded bg-secondary px-1 py-0.5 text-[9px] text-muted-foreground">
+                        GitHub
+                      </span>
                     </div>
                   </div>
                 </div>

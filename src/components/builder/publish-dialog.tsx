@@ -81,7 +81,7 @@ export function PublishDialog({
     form.setValue(
       "tags",
       tags.filter((t) => t !== tag),
-      { shouldValidate: true }
+      { shouldValidate: true },
     );
   }
 
@@ -127,19 +127,13 @@ export function PublishDialog({
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Published</DialogTitle>
-            <DialogDescription>
-              Your config is now live on the marketplace.
-            </DialogDescription>
+            <DialogDescription>Your config is now live on the marketplace.</DialogDescription>
           </DialogHeader>
           <div className="flex gap-3 pt-2">
             <Button asChild variant="default" size="sm">
               <a href={`/marketplace/${listingId}`}>View in Marketplace</a>
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleClose(false)}
-            >
+            <Button variant="outline" size="sm" onClick={() => handleClose(false)}>
               Close
             </Button>
           </div>
@@ -153,16 +147,11 @@ export function PublishDialog({
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Publish to Marketplace</DialogTitle>
-          <DialogDescription>
-            Share your config with the community.
-          </DialogDescription>
+          <DialogDescription>Share your config with the community.</DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-4"
-          >
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
             <FormField
               control={form.control}
               name="title"
@@ -201,23 +190,20 @@ export function PublishDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Use Case</FormLabel>
-                  <Select
-                    value={field.value}
-                    onValueChange={field.onChange}
-                  >
+                  <Select value={field.value} onValueChange={field.onChange}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {(
-                        Object.entries(USE_CASE_LABELS) as [UseCase, string][]
-                      ).map(([value, label]) => (
-                        <SelectItem key={value} value={value}>
-                          {label}
-                        </SelectItem>
-                      ))}
+                      {(Object.entries(USE_CASE_LABELS) as [UseCase, string][]).map(
+                        ([value, label]) => (
+                          <SelectItem key={value} value={value}>
+                            {label}
+                          </SelectItem>
+                        ),
+                      )}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -252,11 +238,7 @@ export function PublishDialog({
                   {tags.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 pt-1">
                       {tags.map((tag) => (
-                        <Badge
-                          key={tag}
-                          variant="secondary"
-                          className="gap-1"
-                        >
+                        <Badge key={tag} variant="secondary" className="gap-1">
                           {tag}
                           <button
                             type="button"
@@ -275,11 +257,7 @@ export function PublishDialog({
             />
 
             <div className="flex justify-end gap-3 pt-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => handleClose(false)}
-              >
+              <Button type="button" variant="outline" onClick={() => handleClose(false)}>
                 Cancel
               </Button>
               <Button type="submit" disabled={publishing}>

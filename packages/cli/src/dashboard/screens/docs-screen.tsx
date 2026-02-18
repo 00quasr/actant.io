@@ -97,7 +97,9 @@ export function DocsScreen({ onBack }: DocsScreenProps) {
       <Box flexDirection="column" padding={1}>
         <Text bold>Generate Docs</Text>
         {analysis && (
-          <Text dimColor>Project: {analysis.name} ({analysis.framework ?? analysis.language ?? "unknown"})</Text>
+          <Text dimColor>
+            Project: {analysis.name} ({analysis.framework ?? analysis.language ?? "unknown"})
+          </Text>
         )}
         <Box marginTop={1}>
           <Spinner label="Generating documentation with AI..." />
@@ -121,10 +123,12 @@ export function DocsScreen({ onBack }: DocsScreenProps) {
       <Box flexDirection="column" padding={1}>
         <Text bold>Generate Docs</Text>
         <Box marginTop={1} flexDirection="column">
-          <Text>Generated {files.length} file{files.length !== 1 ? "s" : ""}:</Text>
+          <Text>
+            Generated {files.length} file{files.length !== 1 ? "s" : ""}:
+          </Text>
           {files.map(([filePath, content]) => (
             <Text key={filePath}>
-              <Text dimColor>  {filePath}</Text>
+              <Text dimColor> {filePath}</Text>
               <Text dimColor> ({content.split("\n").length} lines)</Text>
             </Text>
           ))}
@@ -148,7 +152,9 @@ export function DocsScreen({ onBack }: DocsScreenProps) {
     const fileCount = Object.keys(docs.docs).length;
     return (
       <Box flexDirection="column" padding={1}>
-        <Text color="green">Wrote {fileCount} file{fileCount !== 1 ? "s" : ""} successfully.</Text>
+        <Text color="green">
+          Wrote {fileCount} file{fileCount !== 1 ? "s" : ""} successfully.
+        </Text>
         <Box marginTop={1}>
           <Text dimColor>Press ESC to go back</Text>
         </Box>

@@ -35,7 +35,7 @@ function SidebarContent({ onLinkClick }: { onLinkClick?: () => void }) {
                 "text-sm py-1 px-2 -mx-2 rounded-md transition-colors",
                 pathname === item.href
                   ? "text-foreground font-medium bg-muted"
-                  : "text-muted-foreground hover:text-foreground"
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
               {item.label}
@@ -49,7 +49,10 @@ function SidebarContent({ onLinkClick }: { onLinkClick?: () => void }) {
 
 export function DocsSidebar() {
   return (
-    <aside className="hidden md:block w-56 shrink-0 sticky top-0 h-screen overflow-y-auto py-8 pr-6" aria-label="Documentation navigation">
+    <aside
+      className="hidden md:block w-56 shrink-0 sticky top-0 h-screen overflow-y-auto py-8 pr-6"
+      aria-label="Documentation navigation"
+    >
       <SidebarContent />
     </aside>
   );

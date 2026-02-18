@@ -24,10 +24,16 @@ const FRAMEWORK_INDICATORS: Record<string, { deps: string[]; files: string[] }> 
 
 const TEST_FRAMEWORK_INDICATORS: Record<string, { deps: string[]; files: string[] }> = {
   vitest: { deps: ["vitest"], files: ["vitest.config.ts", "vitest.config.js"] },
-  jest: { deps: ["jest", "@jest/core"], files: ["jest.config.ts", "jest.config.js", "jest.config.mjs"] },
+  jest: {
+    deps: ["jest", "@jest/core"],
+    files: ["jest.config.ts", "jest.config.js", "jest.config.mjs"],
+  },
   pytest: { deps: [], files: ["pytest.ini", "pyproject.toml", "conftest.py"] },
   mocha: { deps: ["mocha"], files: [".mocharc.yml", ".mocharc.js"] },
-  playwright: { deps: ["@playwright/test", "playwright"], files: ["playwright.config.ts", "playwright.config.js"] },
+  playwright: {
+    deps: ["@playwright/test", "playwright"],
+    files: ["playwright.config.ts", "playwright.config.js"],
+  },
   cypress: { deps: ["cypress"], files: ["cypress.config.ts", "cypress.config.js", "cypress.json"] },
   ava: { deps: ["ava"], files: [] },
 };
@@ -35,7 +41,7 @@ const TEST_FRAMEWORK_INDICATORS: Record<string, { deps: string[]; files: string[
 const CI_PLATFORM_INDICATORS: Record<string, string[]> = {
   "github-actions": [".github/workflows"],
   "gitlab-ci": [".gitlab-ci.yml"],
-  "circleci": [".circleci/config.yml"],
+  circleci: [".circleci/config.yml"],
   jenkins: ["Jenkinsfile"],
   "azure-pipelines": ["azure-pipelines.yml"],
   "travis-ci": [".travis.yml"],
@@ -44,17 +50,21 @@ const CI_PLATFORM_INDICATORS: Record<string, string[]> = {
 
 export function detectFramework(
   deps: Record<string, string> | null,
-  files: string[]
+  files: string[],
 ): string | null {
   const allDeps = deps ? Object.keys(deps) : [];
-  const fileNames = files.map((f) => f.replace(/^[📁📄]\s*/, "").split("/").pop() ?? f);
+  const fileNames = files.map(
+    (f) =>
+      f
+        .replace(/^[📁📄]\s*/, "")
+        .split("/")
+        .pop() ?? f,
+  );
   const filePaths = files.map((f) => f.replace(/^[📁📄]\s*/, ""));
 
   for (const [framework, indicators] of Object.entries(FRAMEWORK_INDICATORS)) {
     const hasDep = indicators.deps.some((d) => allDeps.includes(d));
-    const hasFile = indicators.files.some(
-      (f) => fileNames.includes(f) || filePaths.includes(f)
-    );
+    const hasFile = indicators.files.some((f) => fileNames.includes(f) || filePaths.includes(f));
     if (hasDep || hasFile) return framework;
   }
 
@@ -63,17 +73,21 @@ export function detectFramework(
 
 export function detectTestFramework(
   deps: Record<string, string> | null,
-  files: string[]
+  files: string[],
 ): string | null {
   const allDeps = deps ? Object.keys(deps) : [];
-  const fileNames = files.map((f) => f.replace(/^[📁📄]\s*/, "").split("/").pop() ?? f);
+  const fileNames = files.map(
+    (f) =>
+      f
+        .replace(/^[📁📄]\s*/, "")
+        .split("/")
+        .pop() ?? f,
+  );
   const filePaths = files.map((f) => f.replace(/^[📁📄]\s*/, ""));
 
   for (const [framework, indicators] of Object.entries(TEST_FRAMEWORK_INDICATORS)) {
     const hasDep = indicators.deps.some((d) => allDeps.includes(d));
-    const hasFile = indicators.files.some(
-      (f) => fileNames.includes(f) || filePaths.includes(f)
-    );
+    const hasFile = indicators.files.some((f) => fileNames.includes(f) || filePaths.includes(f));
     if (hasDep || hasFile) return framework;
   }
 
@@ -85,7 +99,7 @@ export function detectCiPlatform(files: string[]): string | null {
 
   for (const [platform, indicators] of Object.entries(CI_PLATFORM_INDICATORS)) {
     const hasIndicator = indicators.some((indicator) =>
-      filePaths.some((f) => f === indicator || f.startsWith(indicator + "/"))
+      filePaths.some((f) => f === indicator || f.startsWith(indicator + "/")),
     );
     if (hasIndicator) return platform;
   }
@@ -104,9 +118,6 @@ export function parseEnvExample(content: string): string[] {
   return vars;
 }
 
-export function buildCompactTree(
-  entries: string[],
-  maxEntries: number = 300
-): string[] {
+export function buildCompactTree(entries: string[], maxEntries: number = 300): string[] {
   return entries.slice(0, maxEntries);
 }

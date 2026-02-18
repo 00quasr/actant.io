@@ -29,7 +29,9 @@ export default async function ListingPage({ params }: ListingPageProps) {
     .eq("id", typedListing.config_id)
     .single();
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   let isFavorited = false;
   if (user) {

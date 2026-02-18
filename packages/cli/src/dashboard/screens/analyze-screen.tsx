@@ -98,25 +98,34 @@ export function AnalyzeScreen({ onBack }: AnalyzeScreenProps) {
 
       {analysis.envVars.length > 0 && (
         <Box marginTop={1} flexDirection="column">
-          <Text bold dimColor>Environment Variables</Text>
+          <Text bold dimColor>
+            Environment Variables
+          </Text>
           {analysis.envVars.slice(0, 10).map((v, i) => (
-            <Text key={`${i}-${v}`} dimColor>  {v}</Text>
+            <Text key={`${i}-${v}`} dimColor>
+              {" "}
+              {v}
+            </Text>
           ))}
           {analysis.envVars.length > 10 && (
-            <Text dimColor>  ...and {analysis.envVars.length - 10} more</Text>
+            <Text dimColor> ...and {analysis.envVars.length - 10} more</Text>
           )}
         </Box>
       )}
 
       {analysis.packageScripts && (
         <Box marginTop={1} flexDirection="column">
-          <Text bold dimColor>Scripts</Text>
-          {Object.entries(analysis.packageScripts).slice(0, 8).map(([name, cmd]) => (
-            <Text key={name}>
-              <Text dimColor>  {name.padEnd(16)}</Text>
-              <Text>{cmd.length > 50 ? cmd.slice(0, 47) + "..." : cmd}</Text>
-            </Text>
-          ))}
+          <Text bold dimColor>
+            Scripts
+          </Text>
+          {Object.entries(analysis.packageScripts)
+            .slice(0, 8)
+            .map(([name, cmd]) => (
+              <Text key={name}>
+                <Text dimColor> {name.padEnd(16)}</Text>
+                <Text>{cmd.length > 50 ? cmd.slice(0, 47) + "..." : cmd}</Text>
+              </Text>
+            ))}
         </Box>
       )}
 

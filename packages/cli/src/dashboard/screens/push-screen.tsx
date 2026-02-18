@@ -39,10 +39,12 @@ export function PushScreen({ onBack }: PushScreenProps) {
       targetAgent: parsed.targetAgent,
       name: parsed.name,
       description: parsed.description,
-      files: [{
-        path: `${parsed.targetAgent}-config`,
-        content: JSON.stringify(parsed, null, 2),
-      }],
+      files: [
+        {
+          path: `${parsed.targetAgent}-config`,
+          content: JSON.stringify(parsed, null, 2),
+        },
+      ],
     };
 
     pushConfig(data)

@@ -16,7 +16,7 @@ export const mcpServerFormSchema = z
       }
       return true;
     },
-    { message: "Command is required for stdio servers", path: ["command"] }
+    { message: "Command is required for stdio servers", path: ["command"] },
   )
   .refine(
     (data) => {
@@ -25,7 +25,7 @@ export const mcpServerFormSchema = z
       }
       return true;
     },
-    { message: "URL is required for SSE and HTTP servers", path: ["url"] }
+    { message: "URL is required for SSE and HTTP servers", path: ["url"] },
   );
 
 export type McpServerFormValues = z.infer<typeof mcpServerFormSchema>;

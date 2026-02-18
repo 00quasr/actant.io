@@ -23,7 +23,7 @@ export function FadeIn({ children, className = "", delay = 0 }: FadeInProps) {
           observer.unobserve(el);
         }
       },
-      { threshold: 0.15 }
+      { threshold: 0.15 },
     );
 
     observer.observe(el);

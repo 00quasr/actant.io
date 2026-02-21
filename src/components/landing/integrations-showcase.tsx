@@ -1,9 +1,5 @@
 import { FadeIn } from "./fade-in";
-import {
-  AGENT_ICON_MAP,
-  AGENT_BRAND_COLORS,
-  type AgentName,
-} from "@/components/icons/agent-icons";
+import { AGENT_ICON_MAP, AGENT_BRAND_COLORS, type AgentName } from "@/components/icons/agent-icons";
 
 const AGENTS: {
   name: AgentName;
@@ -63,7 +59,10 @@ export function IntegrationsShowcase() {
                   <div className="mx-3 mb-3 rounded-md bg-muted/50 px-3 py-2.5">
                     <div className="space-y-1">
                       {agent.files.map((file) => (
-                        <div key={file} className="flex items-center gap-2 text-[11px] font-mono text-muted-foreground">
+                        <div
+                          key={file}
+                          className="flex items-center gap-2 text-[11px] font-mono text-muted-foreground"
+                        >
                           <span className="size-1 shrink-0 rounded-full bg-muted-foreground/30" />
                           {file}
                         </div>

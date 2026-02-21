@@ -1,9 +1,5 @@
 import { FadeIn } from "./fade-in";
-import {
-  AGENT_ICON_MAP,
-  AGENT_BRAND_COLORS,
-  type AgentName,
-} from "@/components/icons/agent-icons";
+import { AGENT_ICON_MAP, AGENT_BRAND_COLORS, type AgentName } from "@/components/icons/agent-icons";
 
 const AGENT_NAMES: AgentName[] = ["Claude Code", "Cursor", "Windsurf", "Cline", "OpenCode"];
 
@@ -116,8 +112,7 @@ export function FeaturesSection() {
             <div className="group h-full rounded-lg border bg-background p-6 transition-all duration-200 hover:border-foreground/20 hover:shadow-sm">
               <h3 className="text-base font-semibold mb-2">Templates</h3>
               <p className="text-sm leading-relaxed text-muted-foreground">
-                Start from pre-built templates for popular stacks — React, Python, DevOps, and
-                more.
+                Start from pre-built templates for popular stacks — React, Python, DevOps, and more.
               </p>
             </div>
           </FadeIn>

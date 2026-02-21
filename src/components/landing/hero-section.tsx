@@ -5,11 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CopyIcon, CheckIcon, ArrowRightIcon } from "@radix-ui/react-icons";
 import { FadeIn } from "./fade-in";
-import {
-  AGENT_ICON_MAP,
-  AGENT_BRAND_COLORS,
-  type AgentName,
-} from "@/components/icons/agent-icons";
+import { AGENT_ICON_MAP, AGENT_BRAND_COLORS, type AgentName } from "@/components/icons/agent-icons";
 
 const INSTALL_CMD = "npx actant init";
 
@@ -124,10 +120,7 @@ export function HeroSection() {
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <Icon
-                          className="size-4 shrink-0"
-                          style={{ color: brandColor }}
-                        />
+                        <Icon className="size-4 shrink-0" style={{ color: brandColor }} />
                         <span className="text-sm font-semibold">{agent.name}</span>
                       </div>
                       <code className="text-xs font-mono text-muted-foreground">{agent.file}</code>

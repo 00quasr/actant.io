@@ -1,10 +1,6 @@
 import { CheckIcon, Cross2Icon } from "@radix-ui/react-icons";
 import { FadeIn } from "./fade-in";
-import {
-  AGENT_ICON_MAP,
-  AGENT_BRAND_COLORS,
-  type AgentName,
-} from "@/components/icons/agent-icons";
+import { AGENT_ICON_MAP, AGENT_BRAND_COLORS, type AgentName } from "@/components/icons/agent-icons";
 
 const AGENTS: AgentName[] = ["Claude Code", "Cursor", "Windsurf", "Cline", "OpenCode"];
 

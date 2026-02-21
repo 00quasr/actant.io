@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { ArrowRight, Link, Zap } from "lucide-react";
+import { ArrowRightIcon, LinkBreak2Icon, LightningBoltIcon } from "@radix-ui/react-icons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,7 +11,7 @@ interface TimelineItem {
   date: string;
   content: string;
   category: string;
-  icon: React.ElementType;
+  stepNumber: number;
   relatedIds: number[];
   status: "completed" | "in-progress" | "pending";
   energy: number;
@@ -174,7 +174,6 @@ export default function RadialOrbitalTimeline({ timelineData }: RadialOrbitalTim
             const isExpanded = expandedItems[item.id];
             const isRelated = isRelatedToActive(item.id);
             const isPulsing = pulseEffect[item.id];
-            const Icon = item.icon;
 
             const nodeStyle = {
               transform: `translate(${position.x}px, ${position.y}px)`,
@@ -208,7 +207,7 @@ export default function RadialOrbitalTimeline({ timelineData }: RadialOrbitalTim
                   }}
                 ></div>
 
-                {/* Node circle */}
+                {/* Node circle — step number instead of icon */}
                 <div
                   className={`
                   w-10 h-10 rounded-full flex items-center justify-center
@@ -231,7 +230,7 @@ export default function RadialOrbitalTimeline({ timelineData }: RadialOrbitalTim
                   ${isExpanded ? "scale-150" : ""}
                 `}
                 >
-                  <Icon size={16} />
+                  <span className="text-xs font-semibold">{item.stepNumber}</span>
                 </div>
 
                 {/* Node label */}
@@ -268,8 +267,8 @@ export default function RadialOrbitalTimeline({ timelineData }: RadialOrbitalTim
 
                       <div className="mt-4 pt-3 border-t border-border">
                         <div className="flex justify-between items-center text-xs mb-1">
-                          <span className="flex items-center text-muted-foreground">
-                            <Zap size={10} className="mr-1" />
+                          <span className="flex items-center gap-1 text-muted-foreground">
+                            <LightningBoltIcon className="size-2.5" />
                             Progress
                           </span>
                           <span className="font-mono text-foreground">{item.energy}%</span>
@@ -284,8 +283,8 @@ export default function RadialOrbitalTimeline({ timelineData }: RadialOrbitalTim
 
                       {item.relatedIds.length > 0 && (
                         <div className="mt-4 pt-3 border-t border-border">
-                          <div className="flex items-center mb-2">
-                            <Link size={10} className="text-muted-foreground mr-1" />
+                          <div className="flex items-center gap-1 mb-2">
+                            <LinkBreak2Icon className="size-2.5 text-muted-foreground" />
                             <h4 className="text-xs uppercase tracking-wider font-medium text-muted-foreground">
                               Connected Steps
                             </h4>
@@ -305,7 +304,7 @@ export default function RadialOrbitalTimeline({ timelineData }: RadialOrbitalTim
                                   }}
                                 >
                                   {relatedItem?.title}
-                                  <ArrowRight size={8} className="ml-1" />
+                                  <ArrowRightIcon className="size-2.5 ml-1" />
                                 </Button>
                               );
                             })}

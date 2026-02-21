@@ -1,6 +1,5 @@
 "use client";
 
-import { Settings, Layers, Sparkles, Share2, Terminal } from "lucide-react";
 import RadialOrbitalTimeline from "@/components/ui/radial-orbital-timeline";
 import { FadeIn } from "./fade-in";
 
@@ -11,7 +10,7 @@ const workflowData = [
     date: "Step 1",
     content: "Pick your AI coding agent — Claude Code, Cursor, Windsurf, Cline, or OpenCode.",
     category: "Setup",
-    icon: Settings,
+    stepNumber: 1,
     relatedIds: [2],
     status: "completed" as const,
     energy: 100,
@@ -23,7 +22,7 @@ const workflowData = [
     content:
       "Use the visual builder or AI generation to configure instructions, skills, MCP servers, and permissions.",
     category: "Build",
-    icon: Layers,
+    stepNumber: 2,
     relatedIds: [1, 3],
     status: "completed" as const,
     energy: 85,
@@ -35,7 +34,7 @@ const workflowData = [
     content:
       "Let AI refine your config with smart suggestions, best practices, and optimized rules.",
     category: "Enhance",
-    icon: Sparkles,
+    stepNumber: 3,
     relatedIds: [2, 4],
     status: "in-progress" as const,
     energy: 65,
@@ -46,7 +45,7 @@ const workflowData = [
     date: "Step 4",
     content: "Publish to the marketplace for others to discover, or share directly with your team.",
     category: "Share",
-    icon: Share2,
+    stepNumber: 4,
     relatedIds: [3, 5],
     status: "pending" as const,
     energy: 40,
@@ -57,7 +56,7 @@ const workflowData = [
     date: "Step 5",
     content: "Pull any config into your project instantly with npx actant init.",
     category: "Deploy",
-    icon: Terminal,
+    stepNumber: 5,
     relatedIds: [4],
     status: "pending" as const,
     energy: 20,

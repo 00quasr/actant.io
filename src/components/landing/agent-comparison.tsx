@@ -1,9 +1,14 @@
 import { CheckIcon, Cross2Icon } from "@radix-ui/react-icons";
 import { FadeIn } from "./fade-in";
+import {
+  AGENT_ICON_MAP,
+  AGENT_BRAND_COLORS,
+  type AgentName,
+} from "@/components/icons/agent-icons";
 
-const AGENTS = ["Claude Code", "Cursor", "Windsurf", "Cline", "OpenCode"] as const;
+const AGENTS: AgentName[] = ["Claude Code", "Cursor", "Windsurf", "Cline", "OpenCode"];
 
-const FEATURES: Record<string, Record<(typeof AGENTS)[number], boolean>> = {
+const FEATURES: Record<string, Record<AgentName, boolean>> = {
   Instructions: {
     "Claude Code": true,
     Cursor: true,
@@ -67,14 +72,24 @@ export function AgentComparison() {
                     <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">
                       Feature
                     </th>
-                    {AGENTS.map((agent) => (
-                      <th
-                        key={agent}
-                        className="px-2 py-3 text-center text-xs font-medium text-muted-foreground"
-                      >
-                        {agent}
-                      </th>
-                    ))}
+                    {AGENTS.map((agent) => {
+                      const Icon = AGENT_ICON_MAP[agent];
+                      const brandColor = AGENT_BRAND_COLORS[agent];
+                      return (
+                        <th
+                          key={agent}
+                          className="px-2 py-3 text-center text-xs font-medium text-muted-foreground"
+                        >
+                          <div className="flex flex-col items-center gap-1.5">
+                            <Icon
+                              className="size-4 shrink-0"
+                              style={{ color: brandColor } as React.CSSProperties}
+                            />
+                            <span>{agent}</span>
+                          </div>
+                        </th>
+                      );
+                    })}
                   </tr>
                 </thead>
                 <tbody>

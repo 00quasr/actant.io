@@ -1,6 +1,14 @@
 import { FadeIn } from "./fade-in";
+import {
+  AGENT_ICON_MAP,
+  AGENT_BRAND_COLORS,
+  type AgentName,
+} from "@/components/icons/agent-icons";
 
-const AGENTS = [
+const AGENTS: {
+  name: AgentName;
+  files: string[];
+}[] = [
   {
     name: "Claude Code",
     files: ["CLAUDE.md", "settings.json", ".mcp.json"],
@@ -39,20 +47,33 @@ export function IntegrationsShowcase() {
           </p>
         </FadeIn>
         <div className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-          {AGENTS.map((agent, i) => (
-            <FadeIn key={agent.name} delay={i * 60}>
-              <div className="h-full rounded-lg border bg-background p-5 transition-all duration-200 hover:border-foreground/20 hover:shadow-sm">
-                <h3 className="text-sm font-semibold mb-3">{agent.name}</h3>
-                <ul className="space-y-1">
-                  {agent.files.map((file) => (
-                    <li key={file} className="text-xs font-mono text-muted-foreground">
-                      {file}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </FadeIn>
-          ))}
+          {AGENTS.map((agent, i) => {
+            const Icon = AGENT_ICON_MAP[agent.name];
+            const brandColor = AGENT_BRAND_COLORS[agent.name];
+            return (
+              <FadeIn key={agent.name} delay={i * 60}>
+                <div className="group h-full rounded-lg border bg-background transition-all duration-200 hover:border-foreground/20 hover:shadow-sm overflow-hidden">
+                  <div className="flex items-center gap-2.5 px-5 pt-5 pb-4">
+                    <Icon
+                      className="size-5 shrink-0 opacity-40 transition-opacity duration-200 group-hover:opacity-100"
+                      style={{ color: brandColor } as React.CSSProperties}
+                    />
+                    <h3 className="text-sm font-semibold">{agent.name}</h3>
+                  </div>
+                  <div className="mx-3 mb-3 rounded-md bg-muted/50 px-3 py-2.5">
+                    <div className="space-y-1">
+                      {agent.files.map((file) => (
+                        <div key={file} className="flex items-center gap-2 text-[11px] font-mono text-muted-foreground">
+                          <span className="size-1 shrink-0 rounded-full bg-muted-foreground/30" />
+                          {file}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </FadeIn>
+            );
+          })}
         </div>
       </div>
     </section>

@@ -43,12 +43,12 @@ src/
 │   ├── (app)/           # Builder, marketplace, profile (sidebar layout, auth required)
 │   ├── (docs)/          # Documentation (docs sidebar layout)
 │   ├── auth/            # OAuth callback, CLI auth
-│   └── api/             # REST endpoints (configs, generation, marketplace, favorites, stripe, docs)
+│   └── api/             # REST endpoints (configs, generation, marketplace, favorites, stripe, docs, analysis)
 ├── components/
 │   ├── ui/              # shadcn/ui primitives + radial-orbital-timeline (auto-generated, don't edit)
 │   ├── layout/          # top-nav, sidebar-nav, docs-sidebar, footer
 │   ├── auth/            # login-form, signup-form, auth-guard, user-menu
-│   ├── builder/         # builder-shell, tabs, export/publish/ai-generate/repo-import dialogs, onboarding-wizard, live-preview
+│   ├── builder/         # builder-shell, tabs, export/publish/ai-generate/repo-import dialogs, onboarding-wizard, live-preview, project-intelligence-report
 │   ├── marketplace/     # search-bar, filter-sidebar, listing-grid, listing-detail, review-form, review-list, import/favorite buttons
 │   ├── config/          # config-card, user-config-card, agent-badge, rating-stars
 │   ├── markdown/        # markdown-editor, markdown-preview
@@ -59,12 +59,26 @@ src/
 │   ├── supabase/        # client.ts, server.ts, middleware.ts
 │   ├── exporters/       # claude-code.ts, cursor.ts, windsurf.ts, cline.ts, opencode.ts, utils.ts
 │   ├── ai/              # provider.ts, schema.ts, questions-schema.ts, prompts.ts
+│   ├── analysis/        # Deep multi-pass project analysis engine
+│   │   ├── types.ts             # ProjectProfile, Detection<T>, all sub-types
+│   │   ├── source.ts            # ProjectDataSource interface
+│   │   ├── detection-maps.ts    # Static lookup tables (ORMs, auth, deploy, etc.)
+│   │   ├── github-source.ts     # GitHub API data source adapter
+│   │   ├── analyze.ts           # Orchestrator — runs 5 passes via Promise.allSettled
+│   │   ├── summary.ts           # Tech stack list, gap detection, detection counting
+│   │   ├── profile-to-prompt.ts # ProjectProfile → structured AI prompt
+│   │   └── passes/              # 5 independent analysis passes
+│   │       ├── structure.ts     # Architecture, modules, key dirs, entry points
+│   │       ├── dependencies.ts  # Pkg manager, ORM, state, UI lib, build tool, API style
+│   │       ├── conventions.ts   # File naming, imports, tests, linting, git hooks
+│   │       ├── integrations.ts  # DB, auth, CI, deploy, monitoring, payments, env vars
+│   │       └── agents.ts        # Existing agent configs + quality assessment
 │   ├── utils.ts         # cn() helper
 │   ├── constants.ts     # Agent types, categories, nav items, enums
 │   ├── stripe.ts        # Stripe singleton client
 │   ├── presets.ts       # Permission, rule, and MCP presets
-│   ├── smart-suggestions.ts  # Tech stack → MCP/rules/permissions mapping
-│   └── repo-analysis.ts     # Framework, test, CI detection for imports
+│   ├── smart-suggestions.ts  # Tech stack → MCP/rules/permissions mapping (+ profile-based)
+│   └── repo-analysis.ts     # Framework, test, CI detection for imports (legacy)
 ├── hooks/               # use-auth, use-config, use-auto-save, use-debounce, use-config-generation, use-docs-generation, use-repo-import
 ├── types/               # config.ts, marketplace.ts
 ├── services/            # configs, skills, skills-server, marketplace, reviews, favorites, templates, mcp-providers, profiles
@@ -87,8 +101,11 @@ packages/cli/
 │       ├── api.ts             # Actant API client with auto-refresh
 │       ├── scanner.ts         # Agent-specific file discovery
 │       ├── parser.ts          # Config file parsing per agent
-│       ├── project-analyzer.ts # Project structure analysis
-│       └── writer.ts          # Write exported files to disk
+│       ├── project-analyzer.ts # Project structure analysis (+ deep analysis via FsSource)
+│       ├── writer.ts          # Write exported files to disk
+│       └── analysis/          # Deep analysis engine (mirrored from src/lib/analysis, ESM imports)
+│           ├── fs-source.ts   # Node.js filesystem data source adapter
+│           └── passes/        # 5 analysis passes (structure, deps, conventions, integrations, agents)
 ├── dist/                      # Built ESM output
 ├── package.json               # bin: actant
 └── tsup.config.ts             # ESM build config

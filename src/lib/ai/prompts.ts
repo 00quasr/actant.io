@@ -561,6 +561,8 @@ export interface DocsPromptInput {
   existingDocs?: Record<string, string>;
 }
 
+export { buildProfilePrompt } from "@/lib/analysis/profile-to-prompt";
+
 export function buildDocsUserPrompt(input: DocsPromptInput): string {
   const sections: string[] = [];
 

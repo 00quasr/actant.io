@@ -1,6 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { ProjectAnalysis } from "../types.js";
+import { FsSource } from "./analysis/fs-source.js";
+import { analyzeProject as analyzeProjectDeepImpl } from "./analysis/analyze.js";
+import type { ProjectProfile } from "./analysis/types.js";
 
 const IGNORE_DIRS = new Set([
   "node_modules",
@@ -303,4 +306,13 @@ export async function analyzeProject(cwd: string): Promise<ProjectAnalysis> {
     hasDocker,
     envVars,
   };
+}
+
+/**
+ * Deep project analysis returning a full ProjectProfile.
+ * Uses the multi-pass analysis engine with FsSource.
+ */
+export async function analyzeProjectDeep(cwd: string): Promise<ProjectProfile> {
+  const source = new FsSource(cwd);
+  return analyzeProjectDeepImpl(source);
 }

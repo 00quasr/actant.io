@@ -9,6 +9,7 @@ import {
   LockClosedIcon,
   EyeOpenIcon,
   EyeNoneIcon,
+  MagnifyingGlassIcon,
 } from "@radix-ui/react-icons";
 import {
   Dialog,
@@ -21,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRepoImport } from "@/hooks/use-repo-import";
+import { ProjectIntelligenceReport } from "@/components/builder/project-intelligence-report";
 import type { AgentConfig, AgentType } from "@/types/config";
 
 const GITHUB_URL_REGEX = /^https?:\/\/(www\.)?github\.com\/[\w.-]+\/[\w.-]+\/?$/;
@@ -40,7 +42,7 @@ export function RepoImportDialog({
   targetAgent,
   onAccept,
 }: RepoImportDialogProps) {
-  const { status, result, error, importRepo, reset } = useRepoImport();
+  const { status, result, profile, error, importRepo, analyzeRepo, reset } = useRepoImport();
   const [repoUrl, setRepoUrl] = useState("");
   const [visibility, setVisibility] = useState<RepoVisibility>("public");
   const [accessToken, setAccessToken] = useState("");
@@ -63,11 +65,19 @@ export function RepoImportDialog({
 
   const isValidUrl = GITHUB_URL_REGEX.test(repoUrl.trim());
 
-  async function handleImport() {
+  async function handleAnalyze() {
+    await analyzeRepo({
+      repoUrl: repoUrl.trim(),
+      accessToken: visibility === "private" ? accessToken.trim() || undefined : undefined,
+    });
+  }
+
+  async function handleGenerate() {
     await importRepo({
       repoUrl: repoUrl.trim(),
       targetAgent,
       accessToken: visibility === "private" ? accessToken.trim() || undefined : undefined,
+      useDeepAnalysis: true,
     });
   }
 
@@ -80,8 +90,15 @@ export function RepoImportDialog({
 
   function handleRegenerate() {
     reset();
-    handleImport();
+    handleGenerate();
   }
+
+  const showInputForm = status === "idle" && !profile;
+  const showAnalyzing = status === "analyzing";
+  const showReport = (status === "idle" || status === "error") && profile && !result;
+  const showImporting = status === "importing";
+  const showResult = status === "done" && result;
+  const showError = status === "error";
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -96,7 +113,7 @@ export function RepoImportDialog({
           </DialogDescription>
         </DialogHeader>
 
-        {status === "idle" || status === "error" ? (
+        {(showInputForm || showError) && !profile ? (
           <div className="space-y-5 flex-1 min-h-0 overflow-y-auto">
             {/* Repository type toggle */}
             <div className="space-y-2">
@@ -179,24 +196,55 @@ export function RepoImportDialog({
             )}
 
             <Button
-              onClick={handleImport}
+              onClick={handleAnalyze}
               disabled={!isValidUrl || (visibility === "private" && !accessToken.trim())}
               className="w-full"
             >
+              <MagnifyingGlassIcon className="size-4" />
               Analyze Repository
             </Button>
           </div>
-        ) : status === "importing" ? (
+        ) : showAnalyzing ? (
           <div className="flex flex-col items-center justify-center py-12 gap-4">
             <ReloadIcon className="size-6 animate-spin text-muted-foreground" />
             <div className="text-center space-y-1">
               <p className="text-sm font-medium">Analyzing repository...</p>
               <p className="text-xs text-muted-foreground">
-                Fetching README, dependencies, and project structure.
+                Running deep analysis: structure, dependencies, conventions, integrations, and agent
+                configs.
               </p>
             </div>
           </div>
-        ) : status === "done" && result ? (
+        ) : showReport && profile ? (
+          <div className="space-y-4 flex-1 min-h-0 overflow-y-auto">
+            <ProjectIntelligenceReport profile={profile} />
+
+            {error && (
+              <div className="rounded-md border border-destructive/20 bg-destructive/5 p-3">
+                <p className="text-sm text-destructive">{error}</p>
+              </div>
+            )}
+
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={resetForm} className="flex-1">
+                Back
+              </Button>
+              <Button onClick={handleGenerate} className="flex-1">
+                Generate Config
+              </Button>
+            </div>
+          </div>
+        ) : showImporting ? (
+          <div className="flex flex-col items-center justify-center py-12 gap-4">
+            <ReloadIcon className="size-6 animate-spin text-muted-foreground" />
+            <div className="text-center space-y-1">
+              <p className="text-sm font-medium">Generating configuration...</p>
+              <p className="text-xs text-muted-foreground">
+                Using deep analysis to generate a tailored config with AI.
+              </p>
+            </div>
+          </div>
+        ) : showResult && result ? (
           <ImportPreview result={result} onAccept={handleAccept} onRegenerate={handleRegenerate} />
         ) : null}
       </DialogContent>

@@ -1,4 +1,5 @@
 import type { AgentType, McpServer } from "@/types/config";
+import type { ProjectProfile } from "@/lib/analysis/types";
 
 export interface SmartSuggestions {
   mcpServers: McpServer[];
@@ -205,4 +206,106 @@ export function getSuggestions(techStack: string[], targetAgent: AgentType): Sma
 export function getRecommendedMcpSlugs(techStack: string[]): string[] {
   const suggestions = getSuggestions(techStack, "claude-code");
   return suggestions.mcpServers.map((s) => s.name);
+}
+
+/**
+ * Generate suggestions from a full ProjectProfile with richer detection data.
+ * Uses integration detections (databases, auth, monitoring, deployment)
+ * plus dependency analysis (ORM, state, UI lib, framework) to produce
+ * more targeted recommendations than the simple techStack-based approach.
+ */
+export function getSuggestionsFromProfile(
+  profile: ProjectProfile,
+  targetAgent: AgentType,
+): SmartSuggestions {
+  // Build a synthetic tech stack from profile detections for base suggestions
+  const techStack: string[] = [];
+  if (profile.dependencies.framework) techStack.push(profile.dependencies.framework.value);
+  if (
+    profile.dependencies.componentLibrary &&
+    profile.dependencies.componentLibrary.value !== "none"
+  ) {
+    techStack.push(profile.dependencies.componentLibrary.value);
+  }
+  if (profile.dependencies.orm && profile.dependencies.orm.value !== "none") {
+    techStack.push(profile.dependencies.orm.value);
+  }
+
+  // Add integration-detected services
+  for (const db of profile.integrations.databases) {
+    techStack.push(db.name);
+  }
+  for (const deploy of profile.integrations.deployment) {
+    techStack.push(deploy.name);
+  }
+  for (const mon of profile.integrations.monitoring) {
+    techStack.push(mon.name);
+  }
+
+  // Start with base suggestions
+  const base = getSuggestions(techStack, targetAgent);
+
+  // Enrich with profile-specific MCP servers
+  const mcpSlugs = new Set(base.mcpServers.map((s) => s.name));
+  const rulePresetIds = new Set(base.rulePresetIds);
+
+  // Database → MCP server mapping
+  const dbMcpMap: Record<string, string> = {
+    supabase: "supabase",
+    neon: "neon",
+    postgresql: "filesystem",
+    turso: "turso",
+  };
+  for (const db of profile.integrations.databases) {
+    const slug = dbMcpMap[db.name];
+    if (slug && !mcpSlugs.has(slug)) mcpSlugs.add(slug);
+  }
+
+  // Deployment → MCP server mapping
+  const deployMcpMap: Record<string, string> = {
+    vercel: "vercel",
+    cloudflare: "cloudflare",
+  };
+  for (const deploy of profile.integrations.deployment) {
+    const slug = deployMcpMap[deploy.name];
+    if (slug && !mcpSlugs.has(slug)) mcpSlugs.add(slug);
+  }
+
+  // Monitoring → MCP server mapping
+  if (profile.integrations.monitoring.some((m) => m.name === "sentry")) {
+    mcpSlugs.add("sentry");
+  }
+
+  // Convention-based rule presets
+  if (profile.conventions.testPattern && profile.conventions.testPattern.value !== "none") {
+    rulePresetIds.add("testing");
+  }
+  if (profile.integrations.payments.length > 0) {
+    rulePresetIds.add("security");
+  }
+  if (profile.dependencies.framework?.value === "next.js") {
+    rulePresetIds.add("nextjs-conventions");
+  }
+  if (profile.dependencies.apiStyle) {
+    rulePresetIds.add("api-design");
+  }
+
+  // Permission strictness from language
+  let permissionPresetId = base.permissionPresetId;
+  if (
+    profile.dependencies.language?.value === "rust" ||
+    profile.dependencies.language?.value === "go"
+  ) {
+    permissionPresetId = "restrictive";
+  }
+
+  const mcpServers = Array.from(mcpSlugs)
+    .map((slug) => MCP_SERVER_CATALOG[slug])
+    .filter((s): s is McpServer => s !== undefined);
+
+  return {
+    mcpServers,
+    rulePresetIds: Array.from(rulePresetIds),
+    permissionPresetId,
+  };
 }

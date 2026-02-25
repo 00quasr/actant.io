@@ -30,18 +30,11 @@ interface CommandEditorProps {
   existingNames: string[];
 }
 
-export function CommandEditor({
-  command,
-  onSave,
-  onCancel,
-  existingNames,
-}: CommandEditorProps) {
+export function CommandEditor({ command, onSave, onCancel, existingNames }: CommandEditorProps) {
   const [name, setName] = useState(command?.name ?? "");
   const [description, setDescription] = useState(command?.description ?? "");
   const [argumentHint, setArgumentHint] = useState(command?.argumentHint ?? "");
-  const [allowedTools, setAllowedTools] = useState<string[]>(
-    command?.allowedTools ?? []
-  );
+  const [allowedTools, setAllowedTools] = useState<string[]>(command?.allowedTools ?? []);
   const [prompt, setPrompt] = useState(command?.prompt ?? "");
 
   const nameError = (() => {
@@ -51,7 +44,7 @@ export function CommandEditor({
       return "Use lowercase letters, numbers, and hyphens only";
     }
     const isDuplicate = existingNames.some(
-      (existing) => existing === trimmed && existing !== command?.name
+      (existing) => existing === trimmed && existing !== command?.name,
     );
     if (isDuplicate) {
       return "A command with this name already exists";
@@ -59,16 +52,10 @@ export function CommandEditor({
     return undefined;
   })();
 
-  const canSubmit =
-    name.trim() &&
-    !nameError &&
-    description.trim() &&
-    prompt.trim();
+  const canSubmit = name.trim() && !nameError && description.trim() && prompt.trim();
 
   const handleToolToggle = (tool: string, checked: boolean) => {
-    setAllowedTools((prev) =>
-      checked ? [...prev, tool] : prev.filter((t) => t !== tool)
-    );
+    setAllowedTools((prev) => (checked ? [...prev, tool] : prev.filter((t) => t !== tool)));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -96,9 +83,7 @@ export function CommandEditor({
             placeholder="plan-phase"
             className="font-mono"
           />
-          {nameError && (
-            <p className="text-xs text-destructive">{nameError}</p>
-          )}
+          {nameError && <p className="text-xs text-destructive">{nameError}</p>}
         </div>
         <div className="space-y-2">
           <Label htmlFor="cmd-description">Description</Label>
@@ -130,14 +115,9 @@ export function CommandEditor({
               <Checkbox
                 id={`tool-${tool}`}
                 checked={allowedTools.includes(tool)}
-                onCheckedChange={(checked) =>
-                  handleToolToggle(tool, checked === true)
-                }
+                onCheckedChange={(checked) => handleToolToggle(tool, checked === true)}
               />
-              <Label
-                htmlFor={`tool-${tool}`}
-                className="font-mono text-xs font-normal"
-              >
+              <Label htmlFor={`tool-${tool}`} className="font-mono text-xs font-normal">
                 {tool}
               </Label>
             </div>

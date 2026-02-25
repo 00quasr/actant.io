@@ -67,9 +67,7 @@ export function exportWindsurf(config: AgentConfig): ExportResult {
   }
   if (workflowSections.length > 0) {
     const appendedContent = workflowSections.join("\n\n");
-    rulesContent = rulesContent
-      ? rulesContent + "\n\n" + appendedContent
-      : appendedContent;
+    rulesContent = rulesContent ? rulesContent + "\n\n" + appendedContent : appendedContent;
   }
 
   if (rulesContent) {

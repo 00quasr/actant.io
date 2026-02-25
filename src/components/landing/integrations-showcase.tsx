@@ -1,9 +1,5 @@
 import { FadeIn } from "./fade-in";
-import {
-  AGENT_ICON_MAP,
-  AGENT_BRAND_COLORS,
-  type AgentName,
-} from "@/components/icons/agent-icons";
+import { AGENT_ICON_MAP, AGENT_BRAND_COLORS, type AgentName } from "@/components/icons/agent-icons";
 
 const AGENTS: {
   name: AgentName;
@@ -11,13 +7,7 @@ const AGENTS: {
 }[] = [
   {
     name: "Claude Code",
-    files: [
-      "CLAUDE.md",
-      ".claude/settings.json",
-      ".mcp.json",
-      "commands/*.md",
-      "agents/*.md",
-    ],
+    files: ["CLAUDE.md", ".claude/settings.json", ".mcp.json", "commands/*.md", "agents/*.md"],
   },
   {
     name: "Cursor",
@@ -46,8 +36,8 @@ export function IntegrationsShowcase() {
             Native file output
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-center text-sm text-muted-foreground">
-            Every agent gets its own format. No wrappers, no adapters — just the
-            files your agent expects.
+            Every agent gets its own format. No wrappers, no adapters — just the files your agent
+            expects.
           </p>
         </FadeIn>
 

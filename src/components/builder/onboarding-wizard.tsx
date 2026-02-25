@@ -77,10 +77,31 @@ interface TreeNodeDef {
 
 const TREE_NODES: TreeNodeDef[] = [
   { id: "agent", label: "Agent", top: "2%", left: "50%", size: "size-12", icon: RocketIcon },
-  { id: "instructions", label: "Instructions", top: "22%", left: "15%", size: "size-9", icon: FileTextIcon },
+  {
+    id: "instructions",
+    label: "Instructions",
+    top: "22%",
+    left: "15%",
+    size: "size-9",
+    icon: FileTextIcon,
+  },
   { id: "rules", label: "Rules", top: "22%", left: "50%", size: "size-9", icon: ListBulletIcon },
-  { id: "permissions", label: "Permissions", top: "22%", left: "85%", size: "size-9", icon: LockClosedIcon },
-  { id: "skills", label: "Skills", top: "46%", left: "15%", size: "size-9", icon: LightningBoltIcon },
+  {
+    id: "permissions",
+    label: "Permissions",
+    top: "22%",
+    left: "85%",
+    size: "size-9",
+    icon: LockClosedIcon,
+  },
+  {
+    id: "skills",
+    label: "Skills",
+    top: "46%",
+    left: "15%",
+    size: "size-9",
+    icon: LightningBoltIcon,
+  },
   { id: "mcp", label: "MCP", top: "46%", left: "50%", size: "size-9", icon: MixerHorizontalIcon },
   { id: "docs", label: "Docs", top: "46%", left: "85%", size: "size-9", icon: ReaderIcon },
   { id: "commands", label: "Commands", top: "70%", left: "33%", size: "size-9", icon: CodeIcon },
@@ -135,8 +156,7 @@ function TreePreview({
           const to = nodeMap[toId];
           if (!from || !to) return null;
 
-          const fromHasContent =
-            fromId === "agent" || (nodeCounts[fromId] ?? 0) > 0;
+          const fromHasContent = fromId === "agent" || (nodeCounts[fromId] ?? 0) > 0;
           const toHasContent = (nodeCounts[toId] ?? 0) > 0;
           const active = fromHasContent && toHasContent;
 
@@ -358,29 +378,17 @@ export function OnboardingWizard({
                     onClick={() => setSelectedAgent(agent)}
                     className={cn(
                       "text-left rounded-xl border p-4 transition-colors",
-                      isSelected
-                        ? "border-foreground"
-                        : "border-border hover:border-foreground/30",
+                      isSelected ? "border-foreground" : "border-border hover:border-foreground/30",
                     )}
                   >
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-sm font-medium">
-                        {AGENT_LABELS[agent]}
-                      </span>
-                      {isSelected && (
-                        <CheckCircledIcon className="size-4 text-foreground" />
-                      )}
+                      <span className="text-sm font-medium">{AGENT_LABELS[agent]}</span>
+                      {isSelected && <CheckCircledIcon className="size-4 text-foreground" />}
                     </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      {info.tagline}
-                    </p>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{info.tagline}</p>
                     <div className="flex flex-wrap gap-1 mt-3">
                       {info.features.map((f) => (
-                        <Badge
-                          key={f}
-                          variant="secondary"
-                          className="text-[10px]"
-                        >
+                        <Badge key={f} variant="secondary" className="text-[10px]">
                           {f}
                         </Badge>
                       ))}
@@ -401,10 +409,7 @@ export function OnboardingWizard({
                 Use a Template
               </button>
               <span className="text-border">|</span>
-              <button
-                onClick={onSkip}
-                className="hover:text-foreground transition-colors"
-              >
+              <button onClick={onSkip} className="hover:text-foreground transition-colors">
                 Skip setup
               </button>
             </div>
@@ -430,8 +435,8 @@ export function OnboardingWizard({
                 <div className="space-y-1">
                   <h2 className="text-lg font-medium">Configure your setup</h2>
                   <p className="text-sm text-muted-foreground">
-                    Describe your project and select your tech stack. The config
-                    tree updates in real-time.
+                    Describe your project and select your tech stack. The config tree updates in
+                    real-time.
                   </p>
                 </div>
 
@@ -445,16 +450,12 @@ export function OnboardingWizard({
                   />
 
                   <div className="space-y-2">
-                    <p className="text-xs text-muted-foreground font-medium">
-                      Tech stack
-                    </p>
+                    <p className="text-xs text-muted-foreground font-medium">Tech stack</p>
                     <div className="flex flex-wrap gap-1.5">
                       {QUICK_STACK_OPTIONS.map((tech) => (
                         <Badge
                           key={tech}
-                          variant={
-                            techStack.includes(tech) ? "default" : "outline"
-                          }
+                          variant={techStack.includes(tech) ? "default" : "outline"}
                           className="cursor-pointer select-none"
                           onClick={() => toggleStackItem(tech)}
                         >
@@ -472,10 +473,7 @@ export function OnboardingWizard({
                   Config tree
                 </p>
                 <div className="w-[280px]">
-                  <TreePreview
-                    agentLabel={AGENT_LABELS[selectedAgent]}
-                    nodeCounts={nodeCounts}
-                  />
+                  <TreePreview agentLabel={AGENT_LABELS[selectedAgent]} nodeCounts={nodeCounts} />
                 </div>
               </div>
             </div>
@@ -492,13 +490,8 @@ export function OnboardingWizard({
                   <div className="flex flex-col items-start gap-1 text-left">
                     <div className="flex items-center gap-2">
                       <MagicWandIcon className="size-3.5 shrink-0" />
-                      <span className="text-sm font-medium">
-                        Generate with AI
-                      </span>
-                      <Badge
-                        variant="secondary"
-                        className="text-[9px] leading-none"
-                      >
+                      <span className="text-sm font-medium">Generate with AI</span>
+                      <Badge variant="secondary" className="text-[9px] leading-none">
                         Recommended
                       </Badge>
                     </div>

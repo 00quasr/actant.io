@@ -177,7 +177,10 @@ function parseCommandFrontmatter(fileName: string, content: string): ParsedComma
         argumentHint = line.slice("argument-hint:".length).trim();
       } else if (line.startsWith("allowed-tools:")) {
         const toolsValue = line.slice("allowed-tools:".length).trim();
-        allowedTools = toolsValue.split(",").map((t) => t.trim()).filter(Boolean);
+        allowedTools = toolsValue
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean);
       }
     }
   }
@@ -205,7 +208,10 @@ function parseAgentFrontmatter(fileName: string, content: string): ParsedAgentDe
         description = line.slice("description:".length).trim();
       } else if (line.startsWith("tools:")) {
         const toolsValue = line.slice("tools:".length).trim();
-        tools = toolsValue.split(",").map((t) => t.trim()).filter(Boolean);
+        tools = toolsValue
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean);
       }
     }
   }

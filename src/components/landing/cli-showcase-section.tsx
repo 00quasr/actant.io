@@ -61,10 +61,7 @@ export function CliShowcaseSection() {
       const timeout = setTimeout(() => setPhase("pause"), 200);
       return () => clearTimeout(timeout);
     }
-    const timeout = setTimeout(
-      () => setTypedChars((c) => c + 1),
-      TYPE_SPEED + Math.random() * 30,
-    );
+    const timeout = setTimeout(() => setTypedChars((c) => c + 1), TYPE_SPEED + Math.random() * 30);
     return () => clearTimeout(timeout);
   }, [visible, phase, typedChars]);
 
@@ -82,10 +79,7 @@ export function CliShowcaseSection() {
       const timeout = setTimeout(() => setPhase("done"), PAUSE_BEFORE_RESTART);
       return () => clearTimeout(timeout);
     }
-    const timeout = setTimeout(
-      () => setOutputLines((l) => l + 1),
-      LINE_DELAY,
-    );
+    const timeout = setTimeout(() => setOutputLines((l) => l + 1), LINE_DELAY);
     return () => clearTimeout(timeout);
   }, [phase, outputLines]);
 
@@ -106,8 +100,7 @@ export function CliShowcaseSection() {
             One command to ship
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-center text-muted-foreground">
-            Pull any config into your project. Analyze your setup. Push configs
-            to the cloud.
+            Pull any config into your project. Analyze your setup. Push configs to the cloud.
           </p>
 
           {/* Terminal mockup */}
@@ -159,8 +152,7 @@ export function CliShowcaseSection() {
               <code className="rounded bg-muted px-1.5 py-0.5 text-xs font-mono text-foreground">
                 npx actant push
               </code>{" "}
-              uploads your local config files to the cloud for backup and
-              sharing.
+              uploads your local config files to the cloud for backup and sharing.
             </p>
           </div>
         </div>

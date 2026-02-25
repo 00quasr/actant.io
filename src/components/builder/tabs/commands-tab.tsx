@@ -17,7 +17,7 @@ interface CommandPreset {
 
 const COMMAND_PRESETS: CommandPreset[] =
   "COMMAND_PRESETS" in presets
-    ? (presets as Record<string, unknown>).COMMAND_PRESETS as CommandPreset[]
+    ? ((presets as Record<string, unknown>).COMMAND_PRESETS as CommandPreset[])
     : [];
 
 interface CommandsTabProps {
@@ -27,12 +27,7 @@ interface CommandsTabProps {
   onUpdate: (index: number, command: WorkflowCommand) => void;
 }
 
-export function CommandsTab({
-  commands,
-  onAdd,
-  onRemove,
-  onUpdate,
-}: CommandsTabProps) {
+export function CommandsTab({ commands, onAdd, onRemove, onUpdate }: CommandsTabProps) {
   const [editorOpen, setEditorOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
@@ -71,9 +66,7 @@ export function CommandsTab({
     <div className="space-y-4">
       {COMMAND_PRESETS.length > 0 && (
         <div className="flex flex-wrap gap-2">
-          <span className="text-xs text-muted-foreground self-center mr-1">
-            Presets:
-          </span>
+          <span className="text-xs text-muted-foreground self-center mr-1">Presets:</span>
           {COMMAND_PRESETS.map((preset) => (
             <Button
               key={preset.id}
@@ -91,15 +84,10 @@ export function CommandsTab({
       {commands.length > 0 && (
         <div className="space-y-2">
           {commands.map((command, index) => (
-            <div
-              key={index}
-              className="flex items-start justify-between rounded-lg border p-3"
-            >
+            <div key={index} className="flex items-start justify-between rounded-lg border p-3">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-sm font-medium">
-                    /{command.name}
-                  </span>
+                  <span className="font-mono text-sm font-medium">/{command.name}</span>
                   {command.allowedTools && command.allowedTools.length > 0 && (
                     <Badge variant="secondary" className="text-[10px]">
                       {command.allowedTools.length} tool
@@ -112,18 +100,10 @@ export function CommandsTab({
                 </p>
               </div>
               <div className="flex items-center gap-1 ml-2 shrink-0">
-                <Button
-                  variant="ghost"
-                  size="icon-xs"
-                  onClick={() => handleEdit(index)}
-                >
+                <Button variant="ghost" size="icon-xs" onClick={() => handleEdit(index)}>
                   <Pencil1Icon />
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="icon-xs"
-                  onClick={() => onRemove(index)}
-                >
+                <Button variant="ghost" size="icon-xs" onClick={() => onRemove(index)}>
                   <TrashIcon />
                 </Button>
               </div>
@@ -143,15 +123,10 @@ export function CommandsTab({
         <div>
           {commands.length === 0 && (
             <p className="text-sm text-muted-foreground mb-4">
-              No commands yet. Add workflow commands to automate development
-              processes.
+              No commands yet. Add workflow commands to automate development processes.
             </p>
           )}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setEditorOpen(true)}
-          >
+          <Button variant="outline" size="sm" onClick={() => setEditorOpen(true)}>
             <PlusIcon />
             Add Command
           </Button>

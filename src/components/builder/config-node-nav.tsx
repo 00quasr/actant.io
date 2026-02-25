@@ -112,7 +112,7 @@ export function ConfigNodeNav({
                     "border-border bg-background hover:border-foreground/30 hover:scale-105",
                   !isSelected &&
                     !hasContent &&
-                    "border-dashed border-border bg-muted/30 hover:border-foreground/20 hover:scale-105"
+                    "border-dashed border-border bg-muted/30 hover:border-foreground/20 hover:scale-105",
                 )}
               >
                 <Icon
@@ -120,7 +120,7 @@ export function ConfigNodeNav({
                     "size-4",
                     isSelected && "text-foreground",
                     !isSelected && hasContent && "text-muted-foreground",
-                    !isSelected && !hasContent && "text-muted-foreground/30"
+                    !isSelected && !hasContent && "text-muted-foreground/30",
                   )}
                 />
               </div>
@@ -128,7 +128,7 @@ export function ConfigNodeNav({
               <span
                 className={cn(
                   "text-[10px] font-medium",
-                  isSelected ? "text-foreground" : "text-muted-foreground"
+                  isSelected ? "text-foreground" : "text-muted-foreground",
                 )}
               >
                 {node.label}

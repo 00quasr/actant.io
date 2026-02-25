@@ -42,9 +42,7 @@ export function HowItWorksSection() {
                   {step.number}
                 </span>
                 <h3 className="text-base font-semibold mt-4">{step.title}</h3>
-                <p className="text-sm text-muted-foreground mt-2">
-                  {step.description}
-                </p>
+                <p className="text-sm text-muted-foreground mt-2">{step.description}</p>
               </div>
             </FadeIn>
           ))}

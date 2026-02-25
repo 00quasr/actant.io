@@ -50,11 +50,7 @@ export function FaqSection() {
             Frequently asked questions
           </h2>
 
-          <Accordion
-            type="single"
-            collapsible
-            className="mx-auto mt-14 max-w-2xl"
-          >
+          <Accordion type="single" collapsible className="mx-auto mt-14 max-w-2xl">
             {FAQ_ITEMS.map((item, i) => (
               <AccordionItem key={i} value={`item-${i}`}>
                 <AccordionTrigger className="text-left text-sm font-medium">

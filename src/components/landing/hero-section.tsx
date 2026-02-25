@@ -144,9 +144,7 @@ const CONNECTIONS: Connection[] = [
 
 /** Subset of nodes to show in the compact mobile strip */
 const MOBILE_NODES: TreeNode[] = TREE_NODES.filter((n) =>
-  ["agent", "instructions", "rules", "skills", "mcp", "commands"].includes(
-    n.id,
-  ),
+  ["agent", "instructions", "rules", "skills", "mcp", "commands"].includes(n.id),
 );
 
 /* ------------------------------------------------------------------ */
@@ -168,13 +166,7 @@ function connectionTier(c: Connection): number {
 /*  SVG connection lines                                               */
 /* ------------------------------------------------------------------ */
 
-function ConnectionLines({
-  activeTier,
-  pulseDone,
-}: {
-  activeTier: number;
-  pulseDone: boolean;
-}) {
+function ConnectionLines({ activeTier, pulseDone }: { activeTier: number; pulseDone: boolean }) {
   const W = 380;
   const H = 480;
 
@@ -215,9 +207,7 @@ function ConnectionLines({
             strokeDasharray={pathLength}
             strokeDashoffset={isActive ? 0 : pathLength}
             style={{
-              transition: `stroke-dashoffset 0.6s ease, stroke 0.5s ease${
-                pulseDone ? "" : ""
-              }`,
+              transition: `stroke-dashoffset 0.6s ease, stroke 0.5s ease${pulseDone ? "" : ""}`,
             }}
           />
         );
@@ -325,11 +315,7 @@ function SkillTree() {
   }, []);
 
   return (
-    <div
-      ref={containerRef}
-      className="relative mx-auto"
-      style={{ width: 380, height: 480 }}
-    >
+    <div ref={containerRef} className="relative mx-auto" style={{ width: 380, height: 480 }}>
       <ConnectionLines activeTier={activeTier} pulseDone={pulseDone} />
       {TREE_NODES.map((node) => (
         <SkillTreeNode
@@ -474,8 +460,8 @@ export function HeroSection() {
             {/* Subtitle */}
             <FadeIn delay={160}>
               <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground mx-auto lg:mx-0">
-                Build, share, and deploy configs and workflows for Claude Code,
-                Cursor, Windsurf, Cline, and OpenCode.
+                Build, share, and deploy configs and workflows for Claude Code, Cursor, Windsurf,
+                Cline, and OpenCode.
               </p>
             </FadeIn>
 

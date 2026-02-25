@@ -1,17 +1,7 @@
 import { FadeIn } from "./fade-in";
-import {
-  AGENT_ICON_MAP,
-  AGENT_BRAND_COLORS,
-  type AgentName,
-} from "@/components/icons/agent-icons";
+import { AGENT_ICON_MAP, AGENT_BRAND_COLORS, type AgentName } from "@/components/icons/agent-icons";
 
-const AGENT_NAMES: AgentName[] = [
-  "Claude Code",
-  "Cursor",
-  "Windsurf",
-  "Cline",
-  "OpenCode",
-];
+const AGENT_NAMES: AgentName[] = ["Claude Code", "Cursor", "Windsurf", "Cline", "OpenCode"];
 
 export function FeaturesSection() {
   return (
@@ -22,8 +12,7 @@ export function FeaturesSection() {
             Everything you need
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-center text-muted-foreground">
-            Configs, workflows, and agent definitions — built visually, exported
-            everywhere.
+            Configs, workflows, and agent definitions — built visually, exported everywhere.
           </p>
         </FadeIn>
 
@@ -33,8 +22,8 @@ export function FeaturesSection() {
             <div className="group h-full rounded-xl border p-6 transition-all duration-200 hover:border-foreground/20 hover:shadow-sm">
               <h3 className="text-base font-semibold">Visual Builder</h3>
               <p className="text-sm text-muted-foreground mt-2">
-                Eight-tab builder for instructions, skills, MCP servers,
-                permissions, rules, commands, agents, and docs.
+                Eight-tab builder for instructions, skills, MCP servers, permissions, rules,
+                commands, agents, and docs.
               </p>
 
               {/* Mini mockup */}
@@ -82,8 +71,8 @@ export function FeaturesSection() {
             <div className="group h-full rounded-xl border p-6 transition-all duration-200 hover:border-foreground/20 hover:shadow-sm">
               <h3 className="text-base font-semibold">AI Generation</h3>
               <p className="text-sm text-muted-foreground mt-2">
-                Describe your project and let AI generate a complete config with
-                workflow commands and agent definitions.
+                Describe your project and let AI generate a complete config with workflow commands
+                and agent definitions.
               </p>
             </div>
           </FadeIn>
@@ -93,8 +82,8 @@ export function FeaturesSection() {
             <div className="group h-full rounded-xl border p-6 transition-all duration-200 hover:border-foreground/20 hover:shadow-sm">
               <h3 className="text-base font-semibold">Multi-Agent Export</h3>
               <p className="text-sm text-muted-foreground mt-2">
-                One config, five agents. Export native files for Claude Code,
-                Cursor, Windsurf, Cline, and OpenCode.
+                One config, five agents. Export native files for Claude Code, Cursor, Windsurf,
+                Cline, and OpenCode.
               </p>
               <div className="mt-4 flex items-center gap-3">
                 {AGENT_NAMES.map((name) => {
@@ -117,8 +106,8 @@ export function FeaturesSection() {
             <div className="group h-full rounded-xl border p-6 transition-all duration-200 hover:border-foreground/20 hover:shadow-sm">
               <h3 className="text-base font-semibold">Workflow Builder</h3>
               <p className="text-sm text-muted-foreground mt-2">
-                Define slash commands and specialized agent roles — planners,
-                executors, verifiers, researchers.
+                Define slash commands and specialized agent roles — planners, executors, verifiers,
+                researchers.
               </p>
             </div>
           </FadeIn>
@@ -128,8 +117,8 @@ export function FeaturesSection() {
             <div className="group h-full rounded-xl border p-6 transition-all duration-200 hover:border-foreground/20 hover:shadow-sm">
               <h3 className="text-base font-semibold">Marketplace</h3>
               <p className="text-sm text-muted-foreground mt-2">
-                Browse and import community-curated configs and workflows.
-                Publish your own for others to use.
+                Browse and import community-curated configs and workflows. Publish your own for
+                others to use.
               </p>
             </div>
           </FadeIn>
@@ -141,8 +130,8 @@ export function FeaturesSection() {
                 <div className="p-6">
                   <h3 className="text-base font-semibold">CLI Deploy</h3>
                   <p className="text-sm text-muted-foreground mt-2">
-                    Pull any config into your project with one command. Analyze
-                    your existing setup and push configs back.
+                    Pull any config into your project with one command. Analyze your existing setup
+                    and push configs back.
                   </p>
                 </div>
                 <div className="px-6 pb-6 sm:pb-0 sm:pr-8">
@@ -150,25 +139,13 @@ export function FeaturesSection() {
                     <div className="space-y-1.5 font-mono text-xs">
                       <div className="flex items-center gap-2">
                         <span className="text-background/40">$</span>
-                        <span className="text-background/90">
-                          npx actant init
-                        </span>
+                        <span className="text-background/90">npx actant init</span>
                       </div>
-                      <p className="text-background/40">
-                        Detecting project...
-                      </p>
-                      <p className="text-background/40">
-                        Found: Next.js + TypeScript
-                      </p>
-                      <p className="text-background/50">
-                        Writing CLAUDE.md
-                      </p>
-                      <p className="text-background/50">
-                        Writing .cursorrules
-                      </p>
-                      <p className="text-background/60">
-                        Done. 5 files written.
-                      </p>
+                      <p className="text-background/40">Detecting project...</p>
+                      <p className="text-background/40">Found: Next.js + TypeScript</p>
+                      <p className="text-background/50">Writing CLAUDE.md</p>
+                      <p className="text-background/50">Writing .cursorrules</p>
+                      <p className="text-background/60">Done. 5 files written.</p>
                     </div>
                   </div>
                 </div>

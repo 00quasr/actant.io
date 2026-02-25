@@ -43,8 +43,7 @@ export function AgentDefinitionEditor({
   const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
   const isValidSlug = name.length === 0 || slugPattern.test(name);
   const isDuplicate =
-    name.length > 0 &&
-    existingNames.some((n) => n === name && n !== definition?.name);
+    name.length > 0 && existingNames.some((n) => n === name && n !== definition?.name);
 
   const canSubmit =
     name.trim().length > 0 &&

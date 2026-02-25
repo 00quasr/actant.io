@@ -1,9 +1,4 @@
-import type {
-  AgentDefinition,
-  McpServer,
-  Rule,
-  WorkflowCommand,
-} from "@/types/config";
+import type { AgentDefinition, McpServer, Rule, WorkflowCommand } from "@/types/config";
 
 export interface PermissionPreset {
   id: string;
@@ -288,8 +283,7 @@ export const COMMAND_PRESETS: CommandPreset[] = [
   {
     id: "gsd-workflow",
     label: "GSD Workflow",
-    description:
-      "Spec-driven development workflow inspired by Get Shit Done methodology",
+    description: "Spec-driven development workflow inspired by Get Shit Done methodology",
     commands: [
       {
         name: "new-project",
@@ -299,8 +293,7 @@ export const COMMAND_PRESETS: CommandPreset[] = [
       },
       {
         name: "plan-phase",
-        description:
-          "Create detailed phase plan with research and verification",
+        description: "Create detailed phase plan with research and verification",
         prompt:
           "You are planning the next phase of work from the project roadmap. First, research any technical decisions or unknowns that need resolving — look up library APIs, check documentation, and evaluate trade-offs. Then create a detailed execution plan that breaks the phase into discrete, parallelizable tasks. Each task should specify the files to create or modify, the expected behavior, and how to verify it. After drafting the plan, review it against the phase goals to ensure nothing is missed. Present the plan for approval before execution begins.",
       },
@@ -382,8 +375,7 @@ export const AGENT_DEFINITION_PRESETS: AgentDefinitionPreset[] = [
   {
     id: "gsd-agents",
     label: "GSD Agents",
-    description:
-      "Multi-agent orchestration for spec-driven development workflows",
+    description: "Multi-agent orchestration for spec-driven development workflows",
     agentDefinitions: [
       {
         name: "planner",

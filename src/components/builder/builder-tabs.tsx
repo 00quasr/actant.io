@@ -1,14 +1,18 @@
 "use client";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState } from "react";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { ConfigNodeNav } from "@/components/builder/config-node-nav";
 import { InstructionsTab } from "@/components/builder/tabs/instructions-tab";
 import { SkillsTab } from "@/components/builder/tabs/skills-tab";
 import { McpTab } from "@/components/builder/tabs/mcp-tab";
 import { PermissionsTab } from "@/components/builder/tabs/permissions-tab";
 import { RulesTab } from "@/components/builder/tabs/rules-tab";
+import { CommandsTab } from "@/components/builder/tabs/commands-tab";
+import { AgentsTab } from "@/components/builder/tabs/agents-tab";
 import { DocsTab } from "@/components/builder/tabs/docs-tab";
 import type { ConfigState } from "@/hooks/use-config";
-import type { McpServer, Rule, SkillEntry } from "@/types/config";
+import type { AgentDefinition, McpServer, Rule, SkillEntry, WorkflowCommand } from "@/types/config";
 import type { Template } from "@/types/marketplace";
 
 interface BuilderTabsProps {
@@ -26,6 +30,12 @@ interface BuilderTabsProps {
   removeRule: (index: number) => void;
   updateRule: (index: number, rule: Rule) => void;
   addRulesBatch: (rules: Rule[]) => void;
+  addCommand: (command: WorkflowCommand) => void;
+  removeCommand: (index: number) => void;
+  updateCommand: (index: number, command: WorkflowCommand) => void;
+  addAgentDefinition: (definition: AgentDefinition) => void;
+  removeAgentDefinition: (index: number) => void;
+  updateAgentDefinition: (index: number, definition: AgentDefinition) => void;
   onLoadTemplate: (template: Template) => void;
   setDoc: (filename: string, content: string) => void;
   removeDoc: (filename: string) => void;
@@ -46,22 +56,33 @@ export function BuilderTabs({
   removeRule,
   updateRule,
   addRulesBatch,
+  addCommand,
+  removeCommand,
+  updateCommand,
+  addAgentDefinition,
+  removeAgentDefinition,
+  updateAgentDefinition,
   onLoadTemplate,
   setDoc,
   removeDoc,
 }: BuilderTabsProps) {
+  const [activeTab, setActiveTab] = useState("instructions");
   const docsCount = Object.keys(state.docs).length;
 
   return (
-    <Tabs defaultValue="instructions" className="px-6 py-6">
-      <TabsList variant="line">
-        <TabsTrigger value="instructions">Instructions</TabsTrigger>
-        <TabsTrigger value="skills">Skills</TabsTrigger>
-        <TabsTrigger value="mcp">MCP Servers</TabsTrigger>
-        <TabsTrigger value="permissions">Permissions</TabsTrigger>
-        <TabsTrigger value="rules">Rules</TabsTrigger>
-        <TabsTrigger value="docs">Docs{docsCount > 0 ? ` (${docsCount})` : ""}</TabsTrigger>
-      </TabsList>
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="px-6 py-6">
+      <ConfigNodeNav
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        instructionsLength={state.instructions.content.length}
+        skillsCount={state.skills.length}
+        mcpCount={state.mcpServers.length}
+        permissionsCount={Object.keys(state.permissions).length}
+        rulesCount={state.rules.length}
+        commandsCount={state.commands.length}
+        agentsCount={state.agentDefinitions.length}
+        docsCount={docsCount}
+      />
 
       <TabsContent value="instructions" className="pt-6">
         <InstructionsTab
@@ -108,6 +129,24 @@ export function BuilderTabs({
           removeRule={removeRule}
           updateRule={updateRule}
           onApplyPreset={addRulesBatch}
+        />
+      </TabsContent>
+
+      <TabsContent value="commands" className="pt-6">
+        <CommandsTab
+          commands={state.commands}
+          onAdd={addCommand}
+          onRemove={removeCommand}
+          onUpdate={updateCommand}
+        />
+      </TabsContent>
+
+      <TabsContent value="agents" className="pt-6">
+        <AgentsTab
+          agentDefinitions={state.agentDefinitions}
+          onAdd={addAgentDefinition}
+          onRemove={removeAgentDefinition}
+          onUpdate={updateAgentDefinition}
         />
       </TabsContent>
 

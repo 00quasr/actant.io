@@ -226,6 +226,47 @@ function extractSkills(
     });
 }
 
+function extractCommands(
+  files: PushFile[],
+): Array<{ name: string; description: string; prompt: string }> {
+  return files
+    .filter((f) => f.path.includes(".claude/commands/") && f.path.endsWith(".md"))
+    .map((f) => {
+      const parts = f.path.split("/");
+      const filename = parts[parts.length - 1] ?? "command.md";
+      const name = filename.replace(/\.md$/, "");
+      const lines = f.content.split("\n");
+      const firstLine = lines[0]?.trim() ?? "";
+      const description = firstLine.startsWith("#")
+        ? firstLine.replace(/^#+\s*/, "")
+        : `Custom command: ${name}`;
+      return { name, description, prompt: f.content };
+    });
+}
+
+function extractAgentDefinitions(
+  files: PushFile[],
+): Array<{ name: string; description: string; role: string; instructions: string }> {
+  return files
+    .filter((f) => f.path.includes(".claude/agents/") && f.path.endsWith(".md"))
+    .map((f) => {
+      const parts = f.path.split("/");
+      const filename = parts[parts.length - 1] ?? "agent.md";
+      const name = filename.replace(/\.md$/, "");
+      const lines = f.content.split("\n");
+      const firstLine = lines[0]?.trim() ?? "";
+      const description = firstLine.startsWith("#")
+        ? firstLine.replace(/^#+\s*/, "")
+        : `Agent: ${name}`;
+      return {
+        name,
+        description,
+        role: description,
+        instructions: f.content,
+      };
+    });
+}
+
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
   const {
@@ -266,6 +307,12 @@ export async function POST(request: NextRequest) {
   const permissions = extractPermissions(files, targetAgent);
   const rules = extractRules(files, targetAgent);
   const skills = extractSkills(files);
+  const commands = extractCommands(files);
+  const agentDefinitions = extractAgentDefinitions(files);
+
+  const content: Record<string, unknown> = {};
+  if (commands.length > 0) content.commands = commands;
+  if (agentDefinitions.length > 0) content.agentDefinitions = agentDefinitions;
 
   const { data, error } = await supabase
     .from("configs")
@@ -279,6 +326,7 @@ export async function POST(request: NextRequest) {
       mcp_servers: mcpServers,
       permissions,
       rules,
+      ...(Object.keys(content).length > 0 ? { content } : {}),
     })
     .select()
     .single();

@@ -33,6 +33,22 @@ export interface Rule {
   alwaysApply?: boolean;
 }
 
+export interface WorkflowCommand {
+  name: string;
+  description: string;
+  argumentHint?: string;
+  allowedTools?: string[];
+  prompt: string;
+}
+
+export interface AgentDefinition {
+  name: string;
+  description: string;
+  role: string;
+  instructions: string;
+  tools?: string[];
+}
+
 export interface AgentConfig {
   name: string;
   description: string;
@@ -45,8 +61,11 @@ export interface AgentConfig {
   mcpServers: McpServer[];
   permissions: Record<string, "allow" | "ask" | "deny">;
   rules: Rule[];
+  commands: WorkflowCommand[];
+  agentDefinitions: AgentDefinition[];
   techStack?: string[];
   docs?: Record<string, string>;
+  workflowTemplateId?: string;
 }
 
 export type UseCase =

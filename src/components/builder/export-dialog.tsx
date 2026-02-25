@@ -54,6 +54,8 @@ export function ExportDialog({ open, onOpenChange, state }: ExportDialogProps) {
         mcpServers: state.mcpServers,
         permissions: state.permissions,
         rules: state.rules,
+        commands: state.commands,
+        agentDefinitions: state.agentDefinitions,
         docs: state.docs,
       });
       setResult(exportResult);

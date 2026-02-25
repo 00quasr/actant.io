@@ -5,16 +5,25 @@ import {
   ArrowRightIcon,
   ArrowLeftIcon,
   CheckCircledIcon,
-  CheckIcon,
   MagicWandIcon,
+  FileTextIcon,
+  LightningBoltIcon,
+  MixerHorizontalIcon,
+  LockClosedIcon,
+  ListBulletIcon,
+  CodeIcon,
+  PersonIcon,
+  ReaderIcon,
+  RocketIcon,
 } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import { AGENT_TYPES, AGENT_LABELS, type AgentType } from "@/types/config";
 import type { McpServer } from "@/types/config";
 import { getSuggestions } from "@/lib/smart-suggestions";
-import { RULE_PRESETS, PERMISSION_PRESETS } from "@/lib/presets";
+import { RULE_PRESETS, COMMAND_PRESETS } from "@/lib/presets";
 
 const QUICK_STACK_OPTIONS = [
   "React",
@@ -53,6 +62,163 @@ const AGENT_DESCRIPTIONS: Record<AgentType, { tagline: string; features: string[
   },
 };
 
+/* ------------------------------------------------------------------ */
+/*  Tree node definitions                                              */
+/* ------------------------------------------------------------------ */
+
+interface TreeNodeDef {
+  id: string;
+  label: string;
+  top: string;
+  left: string;
+  size: string;
+  icon: React.ComponentType<{ className?: string }>;
+}
+
+const TREE_NODES: TreeNodeDef[] = [
+  { id: "agent", label: "Agent", top: "2%", left: "50%", size: "size-12", icon: RocketIcon },
+  { id: "instructions", label: "Instructions", top: "22%", left: "15%", size: "size-9", icon: FileTextIcon },
+  { id: "rules", label: "Rules", top: "22%", left: "50%", size: "size-9", icon: ListBulletIcon },
+  { id: "permissions", label: "Permissions", top: "22%", left: "85%", size: "size-9", icon: LockClosedIcon },
+  { id: "skills", label: "Skills", top: "46%", left: "15%", size: "size-9", icon: LightningBoltIcon },
+  { id: "mcp", label: "MCP", top: "46%", left: "50%", size: "size-9", icon: MixerHorizontalIcon },
+  { id: "docs", label: "Docs", top: "46%", left: "85%", size: "size-9", icon: ReaderIcon },
+  { id: "commands", label: "Commands", top: "70%", left: "33%", size: "size-9", icon: CodeIcon },
+  { id: "agents", label: "Agents", top: "70%", left: "67%", size: "size-9", icon: PersonIcon },
+];
+
+/* Connection lines between tree tiers */
+const TREE_EDGES: [string, string][] = [
+  ["agent", "instructions"],
+  ["agent", "rules"],
+  ["agent", "permissions"],
+  ["instructions", "skills"],
+  ["rules", "mcp"],
+  ["permissions", "docs"],
+  ["skills", "commands"],
+  ["mcp", "commands"],
+  ["mcp", "agents"],
+  ["docs", "agents"],
+];
+
+/* ------------------------------------------------------------------ */
+/*  TreePreview component                                              */
+/* ------------------------------------------------------------------ */
+
+function TreePreview({
+  agentLabel,
+  nodeCounts,
+}: {
+  agentLabel: string;
+  nodeCounts: Record<string, number>;
+}) {
+  /* Build a lookup for quick access */
+  const nodeMap = useMemo(() => {
+    const map: Record<string, TreeNodeDef> = {};
+    for (const n of TREE_NODES) {
+      map[n.id] = n;
+    }
+    return map;
+  }, []);
+
+  return (
+    <div className="relative w-full" style={{ height: 340 }}>
+      {/* SVG layer for connection lines */}
+      <svg
+        className="absolute inset-0 pointer-events-none"
+        width="100%"
+        height="100%"
+        style={{ overflow: "visible" }}
+      >
+        {TREE_EDGES.map(([fromId, toId]) => {
+          const from = nodeMap[fromId];
+          const to = nodeMap[toId];
+          if (!from || !to) return null;
+
+          const fromHasContent =
+            fromId === "agent" || (nodeCounts[fromId] ?? 0) > 0;
+          const toHasContent = (nodeCounts[toId] ?? 0) > 0;
+          const active = fromHasContent && toHasContent;
+
+          return (
+            <line
+              key={`${fromId}-${toId}`}
+              x1={from.left}
+              y1={from.top}
+              x2={to.left}
+              y2={to.top}
+              className={cn(
+                "transition-all duration-500",
+                active ? "stroke-foreground/15" : "stroke-border/40",
+              )}
+              strokeWidth={1}
+              strokeDasharray={active ? undefined : "4 4"}
+            />
+          );
+        })}
+      </svg>
+
+      {/* Nodes */}
+      {TREE_NODES.map((node) => {
+        const count = node.id === "agent" ? -1 : (nodeCounts[node.id] ?? 0);
+        const hasContent = count > 0 || node.id === "agent";
+        const Icon = node.icon;
+
+        return (
+          <div
+            key={node.id}
+            className="absolute flex flex-col items-center"
+            style={{
+              top: node.top,
+              left: node.left,
+              transform: "translate(-50%, -50%)",
+            }}
+          >
+            {/* Count badge */}
+            {count > 0 && (
+              <span className="mb-1 text-[9px] font-mono text-foreground tabular-nums">
+                {count}
+              </span>
+            )}
+
+            {/* Circle */}
+            <div
+              className={cn(
+                node.size,
+                "rounded-full border-2 flex items-center justify-center transition-all duration-500",
+                hasContent
+                  ? "border-foreground/40 bg-background shadow-[0_0_12px_rgba(0,0,0,0.04)]"
+                  : "border-dashed border-border bg-muted/30",
+              )}
+            >
+              <Icon
+                className={cn(
+                  "size-3.5",
+                  hasContent ? "text-foreground" : "text-muted-foreground/30",
+                )}
+              />
+            </div>
+
+            {/* Label */}
+            <span
+              className={cn(
+                "mt-1 text-[9px] font-medium whitespace-nowrap",
+                hasContent ? "text-foreground" : "text-muted-foreground/40",
+              )}
+            >
+              {node.id === "agent" ? agentLabel : node.label}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  OnboardingWizard                                                   */
+/* ------------------------------------------------------------------ */
+
 interface OnboardingWizardProps {
   onComplete: (config: {
     targetAgent: AgentType;
@@ -60,6 +226,7 @@ interface OnboardingWizardProps {
     techStack?: string[];
     suggestedMcpServers?: McpServer[];
     suggestedRulePresetIds?: string[];
+    suggestedCommandPresetIds?: string[];
     suggestedPermissionPresetId?: string;
   }) => void;
   onOpenTemplate: () => void;
@@ -73,144 +240,110 @@ export function OnboardingWizard({
   onOpenGenerate,
   onSkip,
 }: OnboardingWizardProps) {
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(0); // 0 = agent, 1 = configure
   const [selectedAgent, setSelectedAgent] = useState<AgentType | null>(null);
   const [description, setDescription] = useState("");
   const [techStack, setTechStack] = useState<string[]>([]);
 
-  // Suggestions state
-  const [selectedMcpSlugs, setSelectedMcpSlugs] = useState<Set<string>>(new Set());
-  const [selectedRulePresetIds, setSelectedRulePresetIds] = useState<Set<string>>(new Set());
-  const [selectedPermissionPresetId, setSelectedPermissionPresetId] = useState("standard");
-  const [suggestionsInitialized, setSuggestionsInitialized] = useState(false);
+  const totalSteps = 2;
+
+  /* ----- Suggestions ----- */
 
   const suggestions = useMemo(() => {
     if (techStack.length === 0 || !selectedAgent) return null;
     return getSuggestions(techStack, selectedAgent);
   }, [techStack, selectedAgent]);
 
-  const hasSuggestions =
-    suggestions && (suggestions.mcpServers.length > 0 || suggestions.rulePresetIds.length > 0);
+  /* ----- Node counts for tree preview ----- */
 
-  // Steps: 0=agent, 1=describe, 2=suggestions (conditional), 3=start
-  const describeStep = 1;
-  const suggestionsStep = hasSuggestions ? 2 : -1;
-  const startStep = hasSuggestions ? 3 : 2;
-  const totalSteps = startStep + 1;
+  const nodeCounts = useMemo(() => {
+    const counts: Record<string, number> = {
+      instructions: 1, // always at least instructions
+      skills: 0,
+      mcp: 0,
+      permissions: 1, // always set a permission preset
+      rules: 0,
+      commands: 0,
+      agents: 0,
+      docs: 0,
+    };
+    if (suggestions) {
+      counts.mcp = suggestions.mcpServers.length;
+      for (const presetId of suggestions.rulePresetIds) {
+        const preset = RULE_PRESETS.find((p) => p.id === presetId);
+        if (preset) counts.rules += preset.rules.length;
+      }
+      for (const presetId of suggestions.commandPresetIds) {
+        const preset = COMMAND_PRESETS.find((p) => p.id === presetId);
+        if (preset) counts.commands += preset.commands.length;
+      }
+    }
+    return counts;
+  }, [suggestions]);
+
+  /* ----- Handlers ----- */
 
   const toggleStackItem = (item: string) => {
     setTechStack((prev) =>
       prev.includes(item) ? prev.filter((t) => t !== item) : [...prev, item],
     );
-    setSuggestionsInitialized(false);
   };
 
-  const handleNext = () => {
-    if (step === describeStep && hasSuggestions && !suggestionsInitialized) {
-      if (suggestions) {
-        setSelectedMcpSlugs(new Set(suggestions.mcpServers.map((s) => s.name)));
-        setSelectedRulePresetIds(new Set(suggestions.rulePresetIds));
-        setSelectedPermissionPresetId(suggestions.permissionPresetId);
-        setSuggestionsInitialized(true);
-      }
-    }
-    if (step < totalSteps - 1) {
-      setStep(step + 1);
-    }
-  };
-
-  const handleBack = () => {
-    if (step > 0) {
-      setStep(step - 1);
-    }
-  };
-
-  function toggleMcpSlug(slug: string) {
-    setSelectedMcpSlugs((prev) => {
-      const next = new Set(prev);
-      if (next.has(slug)) next.delete(slug);
-      else next.add(slug);
-      return next;
-    });
-  }
-
-  function toggleRulePreset(id: string) {
-    setSelectedRulePresetIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }
-
-  function buildCompleteConfig() {
-    const config: Parameters<typeof onComplete>[0] = {
+  function handleStartBuilding() {
+    onComplete({
       targetAgent: selectedAgent ?? "claude-code",
       description: description || undefined,
       techStack: techStack.length > 0 ? techStack : undefined,
-    };
-
-    if (hasSuggestions && suggestions && suggestionsInitialized) {
-      config.suggestedMcpServers = suggestions.mcpServers.filter((s) =>
-        selectedMcpSlugs.has(s.name),
-      );
-      config.suggestedRulePresetIds = Array.from(selectedRulePresetIds);
-      config.suggestedPermissionPresetId = selectedPermissionPresetId;
-    }
-
-    return config;
+      suggestedMcpServers: suggestions?.mcpServers,
+      suggestedRulePresetIds: suggestions?.rulePresetIds,
+      suggestedCommandPresetIds: suggestions?.commandPresetIds,
+      suggestedPermissionPresetId: suggestions?.permissionPresetId,
+    });
   }
 
-  const handleStartBlank = () => {
-    onComplete(buildCompleteConfig());
-  };
-
-  const handleUseTemplate = () => {
-    onComplete(buildCompleteConfig());
-    onOpenTemplate();
-  };
-
-  const handleUseGenerate = () => {
-    onComplete(buildCompleteConfig());
+  function handleUseGenerate() {
+    handleStartBuilding();
     onOpenGenerate();
-  };
+  }
+
+  function handleUseTemplate() {
+    handleStartBuilding();
+    onOpenTemplate();
+  }
+
+  /* ---------------------------------------------------------------- */
+  /*  Render                                                           */
+  /* ---------------------------------------------------------------- */
 
   return (
     <div className="flex-1 flex items-start justify-center overflow-y-auto py-12 px-6">
-      <div className="w-full max-w-2xl space-y-8">
+      <div className="w-full max-w-3xl space-y-8">
         {/* Step indicators */}
         <div className="flex items-center justify-center gap-2">
           {Array.from({ length: totalSteps }).map((_, i) => (
             <div
               key={i}
-              className={`h-2 w-2 rounded-full transition-colors ${
+              className={cn(
+                "h-2 w-2 rounded-full transition-colors",
                 i === step
                   ? "bg-foreground"
                   : i < step
                     ? "bg-foreground/40"
-                    : "bg-muted-foreground/20"
-              }`}
+                    : "bg-muted-foreground/20",
+              )}
             />
           ))}
         </div>
 
-        {/* Skip link */}
-        <div className="text-center">
-          <button
-            onClick={onSkip}
-            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Skip setup
-          </button>
-        </div>
-
-        {/* Step 0: Pick your agent */}
+        {/* -------------------------------------------------------- */}
+        {/*  Step 0: Choose your agent                                */}
+        {/* -------------------------------------------------------- */}
         {step === 0 && (
           <div className="space-y-6">
             <div className="text-center space-y-1">
-              <h2 className="text-lg font-medium">Pick your agent</h2>
+              <h2 className="text-lg font-medium">Choose your agent</h2>
               <p className="text-sm text-muted-foreground">
-                Choose the AI coding agent you want to configure.
+                Select the AI coding agent you want to configure.
               </p>
             </div>
 
@@ -223,18 +356,31 @@ export function OnboardingWizard({
                   <button
                     key={agent}
                     onClick={() => setSelectedAgent(agent)}
-                    className={`text-left rounded-lg border p-4 transition-colors ${
-                      isSelected ? "border-foreground" : "border-border hover:border-foreground/30"
-                    }`}
+                    className={cn(
+                      "text-left rounded-xl border p-4 transition-colors",
+                      isSelected
+                        ? "border-foreground"
+                        : "border-border hover:border-foreground/30",
+                    )}
                   >
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-sm font-medium">{AGENT_LABELS[agent]}</span>
-                      {isSelected && <CheckCircledIcon className="size-4 text-foreground" />}
+                      <span className="text-sm font-medium">
+                        {AGENT_LABELS[agent]}
+                      </span>
+                      {isSelected && (
+                        <CheckCircledIcon className="size-4 text-foreground" />
+                      )}
                     </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed">{info.tagline}</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      {info.tagline}
+                    </p>
                     <div className="flex flex-wrap gap-1 mt-3">
                       {info.features.map((f) => (
-                        <Badge key={f} variant="secondary" className="text-[10px]">
+                        <Badge
+                          key={f}
+                          variant="secondary"
+                          className="text-[10px]"
+                        >
                           {f}
                         </Badge>
                       ))}
@@ -244,8 +390,27 @@ export function OnboardingWizard({
               })}
             </div>
 
+            {/* Subtle links */}
+            <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
+              <button
+                onClick={() => {
+                  onOpenTemplate();
+                }}
+                className="hover:text-foreground transition-colors"
+              >
+                Use a Template
+              </button>
+              <span className="text-border">|</span>
+              <button
+                onClick={onSkip}
+                className="hover:text-foreground transition-colors"
+              >
+                Skip setup
+              </button>
+            </div>
+
             <div className="flex justify-end">
-              <Button onClick={handleNext} disabled={!selectedAgent}>
+              <Button onClick={() => setStep(1)} disabled={!selectedAgent}>
                 Next
                 <ArrowRightIcon />
               </Button>
@@ -253,231 +418,119 @@ export function OnboardingWizard({
           </div>
         )}
 
-        {/* Describe your project */}
-        {step === describeStep && (
-          <div className="space-y-6">
-            <div className="text-center space-y-1">
-              <h2 className="text-lg font-medium">Describe your project</h2>
-              <p className="text-sm text-muted-foreground">
-                Optional. This helps tailor your configuration.
-              </p>
+        {/* -------------------------------------------------------- */}
+        {/*  Step 1: Configure your setup                             */}
+        {/* -------------------------------------------------------- */}
+        {step === 1 && selectedAgent && (
+          <div className="space-y-8">
+            {/* Two-column layout: form + tree */}
+            <div className="grid lg:grid-cols-2 gap-8">
+              {/* Left column: form */}
+              <div className="space-y-6">
+                <div className="space-y-1">
+                  <h2 className="text-lg font-medium">Configure your setup</h2>
+                  <p className="text-sm text-muted-foreground">
+                    Describe your project and select your tech stack. The config
+                    tree updates in real-time.
+                  </p>
+                </div>
+
+                <div className="space-y-4">
+                  <Textarea
+                    placeholder="What are you building? Describe your project, its architecture, key conventions..."
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    className="min-h-24 resize-none"
+                    maxLength={2000}
+                  />
+
+                  <div className="space-y-2">
+                    <p className="text-xs text-muted-foreground font-medium">
+                      Tech stack
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {QUICK_STACK_OPTIONS.map((tech) => (
+                        <Badge
+                          key={tech}
+                          variant={
+                            techStack.includes(tech) ? "default" : "outline"
+                          }
+                          className="cursor-pointer select-none"
+                          onClick={() => toggleStackItem(tech)}
+                        >
+                          {tech}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right column: live config tree preview (hidden below lg) */}
+              <div className="hidden lg:flex flex-col items-center">
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-4">
+                  Config tree
+                </p>
+                <div className="w-[280px]">
+                  <TreePreview
+                    agentLabel={AGENT_LABELS[selectedAgent]}
+                    nodeCounts={nodeCounts}
+                  />
+                </div>
+              </div>
             </div>
 
+            {/* Action buttons */}
             <div className="space-y-4">
-              <Textarea
-                placeholder="What are you building? Describe your project, its architecture, key conventions..."
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="min-h-24 resize-none"
-                maxLength={2000}
-              />
-
-              <div className="space-y-2">
-                <p className="text-xs text-muted-foreground font-medium">Tech stack</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {QUICK_STACK_OPTIONS.map((tech) => (
-                    <Badge
-                      key={tech}
-                      variant={techStack.includes(tech) ? "default" : "outline"}
-                      className="cursor-pointer select-none"
-                      onClick={() => toggleStackItem(tech)}
-                    >
-                      {tech}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex justify-between">
-              <Button variant="outline" onClick={handleBack}>
-                <ArrowLeftIcon />
-                Back
-              </Button>
-              <Button onClick={handleNext}>
-                {description || techStack.length > 0 ? "Next" : "Skip"}
-                <ArrowRightIcon />
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {/* Recommended for your stack */}
-        {step === suggestionsStep && suggestions && (
-          <div className="space-y-6">
-            <div className="text-center space-y-1">
-              <h2 className="text-lg font-medium">Recommended for your stack</h2>
-              <p className="text-sm text-muted-foreground">
-                Based on your tech stack, we suggest these configurations. Uncheck anything you
-                don&apos;t need.
-              </p>
-            </div>
-
-            {suggestions.mcpServers.length > 0 && (
-              <div className="space-y-2">
-                <p className="text-xs text-muted-foreground font-medium">MCP Servers</p>
-                <div className="grid gap-2">
-                  {suggestions.mcpServers.map((server) => {
-                    const isChecked = selectedMcpSlugs.has(server.name);
-                    return (
-                      <button
-                        key={server.name}
-                        onClick={() => toggleMcpSlug(server.name)}
-                        className={`text-left rounded-lg border p-3 flex items-center gap-3 transition-colors ${
-                          isChecked
-                            ? "border-foreground/30 bg-foreground/[0.02]"
-                            : "border-border opacity-60"
-                        }`}
+              <div className="grid sm:grid-cols-3 gap-3">
+                {/* Generate with AI — primary */}
+                <Button
+                  variant="outline"
+                  className="h-auto py-3 px-4 border-foreground justify-start"
+                  onClick={handleUseGenerate}
+                >
+                  <div className="flex flex-col items-start gap-1 text-left">
+                    <div className="flex items-center gap-2">
+                      <MagicWandIcon className="size-3.5 shrink-0" />
+                      <span className="text-sm font-medium">
+                        Generate with AI
+                      </span>
+                      <Badge
+                        variant="secondary"
+                        className="text-[9px] leading-none"
                       >
-                        <div
-                          className={`size-4 rounded border flex items-center justify-center shrink-0 ${
-                            isChecked
-                              ? "border-foreground bg-foreground"
-                              : "border-muted-foreground/30"
-                          }`}
-                        >
-                          {isChecked && <CheckIcon className="size-3 text-background" />}
-                        </div>
-                        <div className="min-w-0">
-                          <span className="text-sm font-medium">{server.name}</span>
-                          <span className="text-xs text-muted-foreground ml-2">
-                            {server.command} {(server.args ?? []).slice(1, 2).join(" ")}
-                          </span>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
+                        Recommended
+                      </Badge>
+                    </div>
+                  </div>
+                </Button>
+
+                {/* Use Template */}
+                <Button
+                  variant="outline"
+                  className="h-auto py-3 px-4 justify-start"
+                  onClick={handleUseTemplate}
+                >
+                  <span className="text-sm font-medium">Use Template</span>
+                </Button>
+
+                {/* Start Building */}
+                <Button
+                  variant="outline"
+                  className="h-auto py-3 px-4 justify-start"
+                  onClick={handleStartBuilding}
+                >
+                  <span className="text-sm font-medium">Start Building</span>
+                </Button>
               </div>
-            )}
 
-            {suggestions.rulePresetIds.length > 0 && (
-              <div className="space-y-2">
-                <p className="text-xs text-muted-foreground font-medium">Rule Presets</p>
-                <div className="grid gap-2">
-                  {suggestions.rulePresetIds.map((presetId) => {
-                    const preset = RULE_PRESETS.find((p) => p.id === presetId);
-                    if (!preset) return null;
-                    const isChecked = selectedRulePresetIds.has(presetId);
-                    return (
-                      <button
-                        key={presetId}
-                        onClick={() => toggleRulePreset(presetId)}
-                        className={`text-left rounded-lg border p-3 flex items-center gap-3 transition-colors ${
-                          isChecked
-                            ? "border-foreground/30 bg-foreground/[0.02]"
-                            : "border-border opacity-60"
-                        }`}
-                      >
-                        <div
-                          className={`size-4 rounded border flex items-center justify-center shrink-0 ${
-                            isChecked
-                              ? "border-foreground bg-foreground"
-                              : "border-muted-foreground/30"
-                          }`}
-                        >
-                          {isChecked && <CheckIcon className="size-3 text-background" />}
-                        </div>
-                        <div className="min-w-0">
-                          <span className="text-sm font-medium">{preset.label}</span>
-                          <span className="text-xs text-muted-foreground ml-2">
-                            {preset.description}
-                          </span>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
+              {/* Back button */}
+              <div className="flex justify-start">
+                <Button variant="outline" onClick={() => setStep(0)}>
+                  <ArrowLeftIcon />
+                  Back
+                </Button>
               </div>
-            )}
-
-            <div className="space-y-2">
-              <p className="text-xs text-muted-foreground font-medium">Permission Preset</p>
-              <div className="flex gap-2">
-                {PERMISSION_PRESETS.map((preset) => (
-                  <button
-                    key={preset.id}
-                    onClick={() => setSelectedPermissionPresetId(preset.id)}
-                    className={`rounded-lg border px-3 py-2 text-left flex-1 transition-colors ${
-                      selectedPermissionPresetId === preset.id
-                        ? "border-foreground"
-                        : "border-border hover:border-foreground/30"
-                    }`}
-                  >
-                    <span className="text-xs font-medium block">{preset.label}</span>
-                    <span className="text-[11px] text-muted-foreground">{preset.description}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex justify-between">
-              <Button variant="outline" onClick={handleBack}>
-                <ArrowLeftIcon />
-                Back
-              </Button>
-              <Button onClick={handleNext}>
-                Apply &amp; Continue
-                <ArrowRightIcon />
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {/* How to start — AI Generate is primary */}
-        {step === startStep && (
-          <div className="space-y-6">
-            <div className="text-center space-y-1">
-              <h2 className="text-lg font-medium">How do you want to start?</h2>
-              <p className="text-sm text-muted-foreground">
-                Choose a starting point for your configuration.
-              </p>
-            </div>
-
-            <div className="grid gap-3">
-              <button
-                onClick={handleUseGenerate}
-                className="text-left rounded-lg border-2 border-foreground p-4 transition-colors hover:bg-foreground/[0.02]"
-              >
-                <div className="flex items-center gap-2">
-                  <MagicWandIcon className="size-4" />
-                  <span className="text-sm font-medium">Generate with AI</span>
-                  <Badge variant="secondary" className="text-[10px]">
-                    Recommended
-                  </Badge>
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  AI generates a complete config with instructions, rules, MCP servers, permissions,
-                  and documentation — all in one shot.
-                </p>
-              </button>
-
-              <button
-                onClick={handleUseTemplate}
-                className="text-left rounded-lg border p-4 hover:border-foreground/30 transition-colors"
-              >
-                <span className="text-sm font-medium">Use a Template</span>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Start from a pre-built configuration and customize it for your needs.
-                </p>
-              </button>
-
-              <button
-                onClick={handleStartBlank}
-                className="text-left rounded-lg border p-4 hover:border-foreground/30 transition-colors"
-              >
-                <span className="text-sm font-medium">Start Blank</span>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Begin with an empty configuration and build it from scratch.
-                </p>
-              </button>
-            </div>
-
-            <div className="flex justify-start">
-              <Button variant="outline" onClick={handleBack}>
-                <ArrowLeftIcon />
-                Back
-              </Button>
             </div>
           </div>
         )}

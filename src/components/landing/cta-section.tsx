@@ -5,30 +5,28 @@ import { FadeIn } from "./fade-in";
 
 export function CtaSection() {
   return (
-    <section className="px-6 py-20 sm:py-28">
-      <div className="mx-auto max-w-5xl">
-        <FadeIn>
-          <div className="rounded-xl border bg-background p-10 sm:p-16 flex flex-col items-center text-center">
-            <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
-              Ready to configure your agent?
-            </h2>
-            <p className="mt-3 text-sm text-muted-foreground">
-              Start building in under a minute. Free forever for individuals.
-            </p>
-            <div className="mt-8 flex items-center gap-3">
-              <Button size="lg" asChild>
-                <Link href="/signup">
-                  Get Started Free
-                  <ArrowRightIcon className="ml-1 size-4" />
-                </Link>
-              </Button>
-              <Button size="lg" variant="outline" asChild>
-                <Link href="/docs">View Docs</Link>
-              </Button>
-            </div>
+    <section className="px-6 py-24 sm:py-32">
+      <FadeIn>
+        <div className="mx-auto flex max-w-5xl flex-col items-center text-center">
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            Start building your agent config
+          </h2>
+          <p className="mt-4 text-muted-foreground">
+            Free forever for individuals. Set up in under a minute.
+          </p>
+          <div className="mt-10 flex items-center gap-3">
+            <Button size="lg" asChild>
+              <Link href="/signup">
+                Get Started Free
+                <ArrowRightIcon className="ml-1.5 size-4" />
+              </Link>
+            </Button>
+            <Button size="lg" variant="outline" asChild>
+              <Link href="/docs">View Documentation</Link>
+            </Button>
           </div>
-        </FadeIn>
-      </div>
+        </div>
+      </FadeIn>
     </section>
   );
 }

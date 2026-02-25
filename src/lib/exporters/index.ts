@@ -17,9 +17,9 @@ export interface ExportResult {
 
 const exporters: Record<AgentType, (config: AgentConfig) => ExportResult> = {
   "claude-code": (config) => ({ files: exportClaudeCode(config), warnings: [] }),
-  cursor: (config) => ({ files: exportCursor(config), warnings: [] }),
+  cursor: exportCursor,
   windsurf: exportWindsurf,
-  cline: (config) => ({ files: exportCline(config), warnings: [] }),
+  cline: exportCline,
   opencode: (config) => ({ files: exportOpenCode(config), warnings: [] }),
 };
 

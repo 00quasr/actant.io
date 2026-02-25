@@ -1,20 +1,20 @@
 # Actant.io
 
-CLI agent configuration platform. Build, share, and export configurations for AI coding agents.
+CLI agent configuration and workflow platform. Build, share, and export configurations and workflows for AI coding agents.
 
-Actant provides a visual builder for creating configuration files that AI coding agents read to understand your project. Instead of manually writing rules files, permission configs, and MCP server definitions, you use the builder to assemble everything and export a ready-to-use set of files.
+Actant provides a visual builder for creating configuration files that AI coding agents read to understand your project. Instead of manually writing rules files, permission configs, MCP server definitions, workflow commands, and agent definitions, you use the builder to assemble everything and export a ready-to-use set of files.
 
 https://github.com/user-attachments/assets/078cc9be-4312-4060-894c-f8b81a702aa9
 
 ## Supported Agents
 
-| Agent       | Config Files                                                                   | MCP Support |
-| ----------- | ------------------------------------------------------------------------------ | ----------- |
-| Claude Code | `CLAUDE.md`, `.claude/settings.json`, `.mcp.json`, `.claude/skills/*/SKILL.md` | Yes         |
-| Cursor      | `.cursorrules`, `.cursor/rules/*.mdc`, `.mcp.json`                             | Yes         |
-| Windsurf    | `.windsurfrules`, `.windsurf/rules/rules.md`                                   | No          |
-| Cline       | `.clinerules/*.md` (numbered)                                                  | No          |
-| OpenCode    | `opencode.json`                                                                | Yes         |
+| Agent       | Config Files                                                                                                                   | MCP | Commands | Agents |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------ | --- | -------- | ------ |
+| Claude Code | `CLAUDE.md`, `.claude/settings.json`, `.mcp.json`, `.claude/skills/*/SKILL.md`, `.claude/commands/*.md`, `.claude/agents/*.md` | Yes | Yes      | Yes    |
+| Cursor      | `.cursorrules`, `.cursor/rules/*.mdc`, `.mcp.json`                                                                             | Yes | No       | No     |
+| Windsurf    | `.windsurfrules`, `.windsurf/rules/rules.md`                                                                                   | No  | No       | No     |
+| Cline       | `.clinerules/*.md` (numbered)                                                                                                  | No  | No       | No     |
+| OpenCode    | `opencode.json`, `.opencode/commands/*.md`                                                                                     | Yes | Yes      | Yes    |
 
 ## Quick Start
 
@@ -54,7 +54,7 @@ src/
 │   ├── ui/              # shadcn/ui primitives (auto-generated)
 │   ├── layout/          # Top nav, sidebar nav, docs sidebar, footer
 │   ├── auth/            # Login form, signup form, auth guard, user menu
-│   ├── builder/         # Builder shell, tabs, export dialog
+│   ├── builder/         # Builder shell, 8 tabs (instructions, skills, mcp, permissions, rules, commands, agents, docs), export dialog
 │   ├── marketplace/     # Search, filters, listing components
 │   ├── config/          # Config card, agent badge, rating stars
 │   ├── markdown/        # Markdown editor, markdown preview

@@ -34,6 +34,8 @@ const CONFIG_SCHEMA_DESCRIPTION = `You generate AgentConfig JSON objects with th
   "mcpServers": [ { "name": string, "type": "stdio"|"sse"|"streamable-http", "command": string|null, "args": string[]|null, "url": string|null, "envKeys": [{key: string, value: string}]|null, "enabled": boolean } ] - Include **all relevant** servers from the known catalog for the given tech stack. Use "stdio" type with npx commands for npm-based servers. Use envKeys array for environment variables (e.g. [{"key": "SUPABASE_ACCESS_TOKEN", "value": ""}]).
   "permissionEntries": [ { "tool": string, "value": "allow"|"ask"|"deny" } ] - Generate **8-12 permission entries** covering all common tool categories. Common tools: "Bash(npm run *)", "Bash(npx *)", "Bash(git *)", "Bash(rm *)", "file_edit", "file_read", "file_write", "web_search", "mcp", "Bash(docker *)", "notebook_edit". Use "allow" for safe operations, "ask" for destructive ones, "deny" for dangerous ones.
   "rules": [ { "title": string, "content": string, "glob": string|null, "alwaysApply": boolean } ] - Generate **8-15 rules** minimum. Each rule content should be **3-5 sentences** with specific guidance, not one-liners. Include glob patterns to scope rules to relevant files. Use "glob" to scope rules to specific file patterns (e.g., "*.test.ts" for testing rules). Set "alwaysApply" to true for universal rules.
+  "commands": [ { "name": string (kebab-case), "description": string, "argumentHint": string|null (e.g. "<task description>"), "allowedTools": string[]|null, "prompt": string (3-5 sentences minimum) } ] - Optional workflow commands. Generate these when the project would benefit from structured workflows like spec-driven development, code review, or documentation generation. Each command is a reusable slash command the agent can invoke. Prompts should be substantive — describe the full behavior expected. Set to empty array if the project doesn't need custom workflows.
+  "agentDefinitions": [ { "name": string (kebab-case), "description": string, "role": string, "instructions": string (3-5 sentences minimum), "tools": string[]|null } ] - Optional agent definitions for multi-agent orchestration. Generate when the project would benefit from specialized sub-agents (e.g., planner/executor/verifier for large projects, or reviewer/security-auditor for team workflows). Set to empty array if not applicable.
   "docs": [ { "filename": string, "content": string } ] - Generate documentation files. Generate at minimum 5 docs for any non-trivial project, each 500-2000 words with real file paths and commands. Doc types:
     - README.md (ALWAYS): project overview, features, tech stack, prerequisites, setup, dev workflow, structure, env vars, deployment.
     - DEVELOPMENT.md (ALWAYS): local dev setup, debugging tips, hot reload config, database seeding, dev tools, common issues.
@@ -64,6 +66,15 @@ const QUALITY_GUIDELINES = `Quality guidelines for generated configs:
 - Structure instructions with clear markdown sections: ## Project Overview, ## Architecture, ## Code Style & Conventions, ## File Structure, ## Component Patterns, ## Data Fetching, ## State Management, ## Testing Strategy, ## Error Handling, ## Git Workflow, ## Deployment, ## Security.
 - Include at least 8 specific rules with detailed multi-sentence content.
 - Generate at least 8 permission entries covering all relevant tool categories.
+
+Workflow commands and agent definitions:
+- Only generate commands and agentDefinitions when they add real value for the project type.
+- For large, multi-phase projects: consider a spec-driven workflow (plan, execute, verify commands) and specialized agents (planner, executor, verifier).
+- For team projects: consider code review commands and reviewer/auditor agents.
+- For projects with frequent documentation needs: consider documentation generation commands.
+- Command prompts must be substantive (3-5 sentences minimum) describing the full expected behavior.
+- Agent instructions must be detailed enough for the agent to operate independently.
+- If the project is simple or doesn't benefit from workflows, leave both arrays empty.
 
 Documentation quality:
 - README.md (ALWAYS): project name as h1, one-paragraph description, features list, tech stack section, prerequisites, step-by-step setup, environment variables table, project structure tree, available scripts/commands, and deployment notes.
@@ -508,6 +519,8 @@ export function buildUserPrompt(input: UserPromptInput): string {
 
   sections.push(
     `Generate a comprehensive agent configuration for this project. The instructions should be a complete developer handbook of 1500-3000 words with multiple structured sections, code examples, and specific guidance. Include at least 8 detailed rules. The output should feel like a thorough team onboarding document, not a brief summary.
+
+If the project would benefit from structured workflows, generate workflow commands (custom slash commands) with substantive prompts. For larger or team projects, consider generating agent definitions for multi-agent orchestration. Only include these if they add real value — leave as empty arrays otherwise.
 
 Also generate documentation files:
 - README.md (ALWAYS): project overview, features, tech stack, prerequisites, setup, dev workflow, structure, env vars, deployment

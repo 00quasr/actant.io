@@ -12,7 +12,7 @@ import { BuilderTabs } from "@/components/builder/builder-tabs";
 import { LivePreview } from "@/components/builder/live-preview";
 import { OnboardingWizard } from "@/components/builder/onboarding-wizard";
 import { AiGenerateDialog } from "@/components/builder/ai-generate-dialog";
-import { RULE_PRESETS, PERMISSION_PRESETS } from "@/lib/presets";
+import { RULE_PRESETS, PERMISSION_PRESETS, COMMAND_PRESETS } from "@/lib/presets";
 
 interface BuilderShellProps {
   initialConfig?: AgentConfig & {
@@ -46,6 +46,12 @@ export function BuilderShell({ initialConfig, initialTemplate }: BuilderShellPro
     setTechStack,
     setDoc,
     removeDoc,
+    addCommand,
+    removeCommand,
+    updateCommand,
+    addAgentDefinition,
+    removeAgentDefinition,
+    updateAgentDefinition,
     loadGeneratedConfig,
     loadTemplate,
   } = useConfig(initialConfig);
@@ -67,6 +73,8 @@ export function BuilderShell({ initialConfig, initialTemplate }: BuilderShellPro
         mcpServers: current.mcpServers,
         permissions: current.permissions,
         rules: current.rules,
+        commands: current.commands,
+        agentDefinitions: current.agentDefinitions,
         docs: current.docs,
       });
       dispatch({ type: "SET_ID", payload: dbConfig.id });
@@ -134,6 +142,7 @@ export function BuilderShell({ initialConfig, initialTemplate }: BuilderShellPro
     techStack?: string[];
     suggestedMcpServers?: McpServer[];
     suggestedRulePresetIds?: string[];
+    suggestedCommandPresetIds?: string[];
     suggestedPermissionPresetId?: string;
   }) => {
     // Apply state changes locally
@@ -170,6 +179,19 @@ export function BuilderShell({ initialConfig, initialTemplate }: BuilderShellPro
       }
     }
 
+    const commands: import("@/types/config").WorkflowCommand[] = [];
+    if (config.suggestedCommandPresetIds) {
+      for (const presetId of config.suggestedCommandPresetIds) {
+        const preset = COMMAND_PRESETS.find((p) => p.id === presetId);
+        if (preset) {
+          for (const cmd of preset.commands) {
+            addCommand(cmd);
+            commands.push(cmd);
+          }
+        }
+      }
+    }
+
     let permissions: Record<string, "allow" | "ask" | "deny"> = {};
     if (config.suggestedPermissionPresetId) {
       const preset = PERMISSION_PRESETS.find((p) => p.id === config.suggestedPermissionPresetId);
@@ -193,6 +215,8 @@ export function BuilderShell({ initialConfig, initialTemplate }: BuilderShellPro
           mcpServers,
           permissions,
           rules,
+          commands,
+          agentDefinitions: [],
         });
 
         dispatch({ type: "SET_SAVED" });
@@ -259,6 +283,12 @@ export function BuilderShell({ initialConfig, initialTemplate }: BuilderShellPro
             removeRule={removeRule}
             updateRule={updateRule}
             addRulesBatch={addRulesBatch}
+            addCommand={addCommand}
+            removeCommand={removeCommand}
+            updateCommand={updateCommand}
+            addAgentDefinition={addAgentDefinition}
+            removeAgentDefinition={removeAgentDefinition}
+            updateAgentDefinition={updateAgentDefinition}
             onLoadTemplate={handleLoadTemplate}
             setDoc={setDoc}
             removeDoc={removeDoc}

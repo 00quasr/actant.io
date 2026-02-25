@@ -18,6 +18,8 @@ function makeConfig(overrides: Partial<AgentConfig> = {}): AgentConfig {
     mcpServers: [],
     permissions: {},
     rules: [],
+    commands: [],
+    agentDefinitions: [],
     ...overrides,
   };
 }
@@ -128,21 +130,21 @@ describe("exportClaudeCode", () => {
 
 describe("exportCursor", () => {
   it("exports .cursorrules with instructions and rules", () => {
-    const files = exportCursor(
+    const result = exportCursor(
       makeConfig({
         targetAgent: "cursor",
         instructions: { content: "You are a cursor agent." },
         rules: [{ title: "R1", content: "Rule content." }],
       }),
     );
-    const cursorrules = files.find((f) => f.path === ".cursorrules");
+    const cursorrules = result.files.find((f) => f.path === ".cursorrules");
     expect(cursorrules).toBeDefined();
     expect(cursorrules!.content).toContain("You are a cursor agent.");
     expect(cursorrules!.content).toContain("Rule content.");
   });
 
   it("exports .mdc files with frontmatter", () => {
-    const files = exportCursor(
+    const result = exportCursor(
       makeConfig({
         targetAgent: "cursor",
         rules: [
@@ -150,7 +152,7 @@ describe("exportCursor", () => {
         ],
       }),
     );
-    const mdc = files.find((f) => f.path.endsWith(".mdc"));
+    const mdc = result.files.find((f) => f.path.endsWith(".mdc"));
     expect(mdc).toBeDefined();
     expect(mdc!.content).toContain("description: Style Guide");
     expect(mdc!.content).toContain("globs: *.tsx");
@@ -159,13 +161,13 @@ describe("exportCursor", () => {
   });
 
   it("exports .mcp.json", () => {
-    const files = exportCursor(
+    const result = exportCursor(
       makeConfig({
         targetAgent: "cursor",
         mcpServers: [{ name: "server1", type: "sse", url: "http://localhost:3000", enabled: true }],
       }),
     );
-    const mcp = files.find((f) => f.path === ".mcp.json");
+    const mcp = result.files.find((f) => f.path === ".mcp.json");
     expect(mcp).toBeDefined();
     const parsed = JSON.parse(mcp!.content);
     expect(parsed.mcpServers.server1.url).toBe("http://localhost:3000");
@@ -213,7 +215,7 @@ describe("exportWindsurf", () => {
 
 describe("exportCline", () => {
   it("exports numbered markdown files", () => {
-    const files = exportCline(
+    const result = exportCline(
       makeConfig({
         targetAgent: "cline",
         instructions: { content: "Main instructions." },
@@ -223,21 +225,21 @@ describe("exportCline", () => {
         ],
       }),
     );
-    expect(files.find((f) => f.path === ".clinerules/01-instructions.md")).toBeDefined();
-    expect(files.find((f) => f.path === ".clinerules/02-style.md")).toBeDefined();
-    expect(files.find((f) => f.path === ".clinerules/03-testing.md")).toBeDefined();
+    expect(result.files.find((f) => f.path === ".clinerules/01-instructions.md")).toBeDefined();
+    expect(result.files.find((f) => f.path === ".clinerules/02-style.md")).toBeDefined();
+    expect(result.files.find((f) => f.path === ".clinerules/03-testing.md")).toBeDefined();
   });
 
   it("skips instructions file when no content", () => {
-    const files = exportCline(
+    const result = exportCline(
       makeConfig({
         targetAgent: "cline",
         instructions: { content: "" },
         rules: [{ title: "R1", content: "Content." }],
       }),
     );
-    expect(files.find((f) => f.path === ".clinerules/01-instructions.md")).toBeUndefined();
-    expect(files.find((f) => f.path === ".clinerules/02-r1.md")).toBeDefined();
+    expect(result.files.find((f) => f.path === ".clinerules/01-instructions.md")).toBeUndefined();
+    expect(result.files.find((f) => f.path === ".clinerules/02-r1.md")).toBeDefined();
   });
 });
 

@@ -63,6 +63,22 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
   if (config.mcpServers !== undefined) updates.mcp_servers = config.mcpServers;
   if (config.permissions !== undefined) updates.permissions = config.permissions;
   if (config.rules !== undefined) updates.rules = config.rules;
+  if (config.commands !== undefined || config.agentDefinitions !== undefined) {
+    // Fetch existing content to merge
+    const { data: existing } = await supabase
+      .from("configs")
+      .select("content")
+      .eq("id", id)
+      .eq("owner_id", user.id)
+      .single();
+
+    const existingContent = (existing?.content as Record<string, unknown>) ?? {};
+    const updatedContent = { ...existingContent };
+    if (config.commands !== undefined) updatedContent.commands = config.commands;
+    if (config.agentDefinitions !== undefined)
+      updatedContent.agentDefinitions = config.agentDefinitions;
+    updates.content = updatedContent;
+  }
 
   const { data, error } = await supabase
     .from("configs")

@@ -13,11 +13,18 @@ export interface ScanResult {
 }
 
 const AGENT_FILE_PATTERNS: Record<AgentType, string[]> = {
-  "claude-code": ["CLAUDE.md", ".claude/settings.json", ".mcp.json", ".claude/skills/*/SKILL.md"],
+  "claude-code": [
+    "CLAUDE.md",
+    ".claude/settings.json",
+    ".mcp.json",
+    ".claude/skills/*/SKILL.md",
+    ".claude/commands/*.md",
+    ".claude/agents/*.md",
+  ],
   cursor: [".cursorrules", ".cursor/rules/*.mdc", ".mcp.json"],
   windsurf: [".windsurfrules", ".windsurf/rules/rules.md"],
   cline: [".clinerules/*.md"],
-  opencode: ["opencode.json"],
+  opencode: ["opencode.json", ".opencode/commands/*.md"],
 };
 
 function resolvePattern(cwd: string, pattern: string): ScannedFile[] {

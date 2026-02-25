@@ -66,6 +66,8 @@ export function useAutoSave(
         mcpServers: current.mcpServers,
         permissions: current.permissions,
         rules: current.rules,
+        commands: current.commands,
+        agentDefinitions: current.agentDefinitions,
         documentType: current.documentType,
         content: {
           ...current.content,
@@ -114,6 +116,8 @@ export function useAutoSave(
     state.mcpServers,
     state.permissions,
     state.rules,
+    state.commands,
+    state.agentDefinitions,
     state.documentType,
     state.content,
     state.docs,

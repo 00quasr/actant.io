@@ -40,6 +40,20 @@ const FEATURES: Record<string, Record<AgentName, boolean>> = {
     Cline: false,
     OpenCode: false,
   },
+  Commands: {
+    "Claude Code": true,
+    Cursor: false,
+    Windsurf: false,
+    Cline: false,
+    OpenCode: true,
+  },
+  Agents: {
+    "Claude Code": true,
+    Cursor: false,
+    Windsurf: false,
+    Cline: false,
+    OpenCode: true,
+  },
 };
 
 export function AgentComparison() {

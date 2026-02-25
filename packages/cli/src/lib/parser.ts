@@ -1,6 +1,22 @@
 import type { AgentType } from "../types.js";
 import type { ScannedFile } from "./scanner.js";
 
+export interface ParsedCommand {
+  name: string;
+  description: string;
+  argumentHint?: string;
+  allowedTools?: string[];
+  prompt: string;
+}
+
+export interface ParsedAgentDefinition {
+  name: string;
+  description: string;
+  role: string;
+  instructions: string;
+  tools?: string[];
+}
+
 export interface ParsedConfig {
   targetAgent: AgentType;
   name: string;
@@ -18,6 +34,8 @@ export interface ParsedConfig {
   }>;
   permissions: Record<string, "allow" | "ask" | "deny">;
   rules: Array<{ title: string; content: string; glob?: string; alwaysApply?: boolean }>;
+  commands: ParsedCommand[];
+  agentDefinitions: ParsedAgentDefinition[];
 }
 
 function findFile(files: ScannedFile[], name: string): ScannedFile | undefined {
@@ -139,6 +157,65 @@ function parseCursorMdcFrontmatter(content: string): {
   return { title: title || "Untitled Rule", content: body, glob, alwaysApply };
 }
 
+function parseCommandFrontmatter(fileName: string, content: string): ParsedCommand {
+  const lines = content.split("\n");
+  let description = "";
+  let argumentHint: string | undefined;
+  let allowedTools: string[] | undefined;
+  let bodyStart = 0;
+
+  if (lines[0]?.trim() === "---") {
+    for (let i = 1; i < lines.length; i++) {
+      if (lines[i]?.trim() === "---") {
+        bodyStart = i + 1;
+        break;
+      }
+      const line = lines[i]?.trim() ?? "";
+      if (line.startsWith("description:")) {
+        description = line.slice("description:".length).trim();
+      } else if (line.startsWith("argument-hint:")) {
+        argumentHint = line.slice("argument-hint:".length).trim();
+      } else if (line.startsWith("allowed-tools:")) {
+        const toolsValue = line.slice("allowed-tools:".length).trim();
+        allowedTools = toolsValue.split(",").map((t) => t.trim()).filter(Boolean);
+      }
+    }
+  }
+
+  const prompt = lines.slice(bodyStart).join("\n").trim();
+  const cmdName = fileName.replace(/\.md$/, "");
+
+  return { name: cmdName, description, argumentHint, allowedTools, prompt };
+}
+
+function parseAgentFrontmatter(fileName: string, content: string): ParsedAgentDefinition {
+  const lines = content.split("\n");
+  let description = "";
+  let tools: string[] | undefined;
+  let bodyStart = 0;
+
+  if (lines[0]?.trim() === "---") {
+    for (let i = 1; i < lines.length; i++) {
+      if (lines[i]?.trim() === "---") {
+        bodyStart = i + 1;
+        break;
+      }
+      const line = lines[i]?.trim() ?? "";
+      if (line.startsWith("description:")) {
+        description = line.slice("description:".length).trim();
+      } else if (line.startsWith("tools:")) {
+        const toolsValue = line.slice("tools:".length).trim();
+        tools = toolsValue.split(",").map((t) => t.trim()).filter(Boolean);
+      }
+    }
+  }
+
+  const instructions = lines.slice(bodyStart).join("\n").trim();
+  const agentName = fileName.replace(/\.md$/, "");
+
+  return { name: agentName, description, role: description, instructions, tools };
+}
+
 function parseClaudeCode(files: ScannedFile[], name: string): ParsedConfig {
   const config: ParsedConfig = {
     targetAgent: "claude-code",
@@ -149,6 +226,8 @@ function parseClaudeCode(files: ScannedFile[], name: string): ParsedConfig {
     mcpServers: [],
     permissions: {},
     rules: [],
+    commands: [],
+    agentDefinitions: [],
   };
 
   const claudeMd = findFile(files, "CLAUDE.md");
@@ -184,6 +263,22 @@ function parseClaudeCode(files: ScannedFile[], name: string): ParsedConfig {
     });
   }
 
+  const commandFiles = files.filter(
+    (f) => f.path.includes(".claude/commands/") && f.path.endsWith(".md"),
+  );
+  for (const cmdFile of commandFiles) {
+    const fileName = cmdFile.path.split("/").pop() ?? "command.md";
+    config.commands.push(parseCommandFrontmatter(fileName, cmdFile.content));
+  }
+
+  const agentFiles = files.filter(
+    (f) => f.path.includes(".claude/agents/") && f.path.endsWith(".md"),
+  );
+  for (const agentFile of agentFiles) {
+    const fileName = agentFile.path.split("/").pop() ?? "agent.md";
+    config.agentDefinitions.push(parseAgentFrontmatter(fileName, agentFile.content));
+  }
+
   return config;
 }
 
@@ -197,6 +292,8 @@ function parseCursor(files: ScannedFile[], name: string): ParsedConfig {
     mcpServers: [],
     permissions: {},
     rules: [],
+    commands: [],
+    agentDefinitions: [],
   };
 
   const cursorrules = findFile(files, ".cursorrules");
@@ -227,6 +324,8 @@ function parseWindsurf(files: ScannedFile[], name: string): ParsedConfig {
     mcpServers: [],
     permissions: {},
     rules: [],
+    commands: [],
+    agentDefinitions: [],
   };
 
   const windsurfrules = findFile(files, ".windsurfrules");
@@ -255,6 +354,8 @@ function parseCline(files: ScannedFile[], name: string): ParsedConfig {
     mcpServers: [],
     permissions: {},
     rules: [],
+    commands: [],
+    agentDefinitions: [],
   };
 
   const mdFiles = findFilesByExt(files, ".md");
@@ -298,44 +399,54 @@ function parseOpenCode(files: ScannedFile[], name: string): ParsedConfig {
     mcpServers: [],
     permissions: {},
     rules: [],
+    commands: [],
+    agentDefinitions: [],
   };
 
   const file = findFile(files, "opencode.json");
-  if (!file) return config;
+  if (file) {
+    const parsed = safeJsonParse(file.content) as OpenCodeJson | null;
+    if (parsed && typeof parsed === "object") {
+      if (parsed.name) config.name = parsed.name;
+      if (parsed.description) config.description = parsed.description;
 
-  const parsed = safeJsonParse(file.content) as OpenCodeJson | null;
-  if (!parsed || typeof parsed !== "object") return config;
+      if (typeof parsed.instructions === "string") {
+        config.instructions.content = parsed.instructions;
+      } else if (parsed.instructions && typeof parsed.instructions.content === "string") {
+        config.instructions.content = parsed.instructions.content;
+      }
 
-  if (parsed.name) config.name = parsed.name;
-  if (parsed.description) config.description = parsed.description;
+      if (parsed.mcpServers && typeof parsed.mcpServers === "object") {
+        config.mcpServers = parseMcpJson(JSON.stringify({ mcpServers: parsed.mcpServers }));
+      }
 
-  if (typeof parsed.instructions === "string") {
-    config.instructions.content = parsed.instructions;
-  } else if (parsed.instructions && typeof parsed.instructions.content === "string") {
-    config.instructions.content = parsed.instructions.content;
-  }
+      if (parsed.permissions && typeof parsed.permissions === "object") {
+        for (const [key, value] of Object.entries(parsed.permissions)) {
+          if (value === "allow" || value === "ask" || value === "deny") {
+            config.permissions[key] = value;
+          }
+        }
+      }
 
-  if (parsed.mcpServers && typeof parsed.mcpServers === "object") {
-    config.mcpServers = parseMcpJson(JSON.stringify({ mcpServers: parsed.mcpServers }));
-  }
-
-  if (parsed.permissions && typeof parsed.permissions === "object") {
-    for (const [key, value] of Object.entries(parsed.permissions)) {
-      if (value === "allow" || value === "ask" || value === "deny") {
-        config.permissions[key] = value;
+      if (Array.isArray(parsed.rules)) {
+        for (const rule of parsed.rules) {
+          if (rule && typeof rule === "object" && typeof rule.content === "string") {
+            config.rules.push({
+              title: rule.title ?? "Rule",
+              content: rule.content,
+            });
+          }
+        }
       }
     }
   }
 
-  if (Array.isArray(parsed.rules)) {
-    for (const rule of parsed.rules) {
-      if (rule && typeof rule === "object" && typeof rule.content === "string") {
-        config.rules.push({
-          title: rule.title ?? "Rule",
-          content: rule.content,
-        });
-      }
-    }
+  const commandFiles = files.filter(
+    (f) => f.path.includes(".opencode/commands/") && f.path.endsWith(".md"),
+  );
+  for (const cmdFile of commandFiles) {
+    const fileName = cmdFile.path.split("/").pop() ?? "command.md";
+    config.commands.push(parseCommandFrontmatter(fileName, cmdFile.content));
   }
 
   return config;

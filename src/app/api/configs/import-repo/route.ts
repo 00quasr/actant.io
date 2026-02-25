@@ -1,11 +1,16 @@
 import { NextResponse } from "next/server";
 import { generateObject } from "ai";
+import type { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { getModel } from "@/lib/ai/provider";
 import { generatedConfigSchema } from "@/lib/ai/schema";
 import { buildSystemPrompt, buildRepoPrompt } from "@/lib/ai/prompts";
 import type { RepoContext } from "@/lib/ai/prompts";
 import { repoImportSchema } from "@/validations/repo-import";
+import { GitHubSource } from "@/lib/analysis/github-source";
+import { analyzeProject } from "@/lib/analysis/analyze";
+import { buildProfilePrompt } from "@/lib/analysis/profile-to-prompt";
+import type { ProjectProfile } from "@/lib/analysis/types";
 
 const FREE_TIER_LIMIT = 5;
 
@@ -84,7 +89,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const { repoUrl, targetAgent, accessToken } = parseResult.data;
+  const { repoUrl, targetAgent, accessToken, useDeepAnalysis } = parseResult.data;
 
   // Use provided access token, fall back to OAuth provider token
   let githubToken = accessToken;
@@ -135,6 +140,60 @@ export async function POST(request: Request) {
   }
 
   const { owner, repo } = parsed;
+
+  // ---------------------------------------------------------------------------
+  // Deep analysis path (new)
+  // ---------------------------------------------------------------------------
+  if (useDeepAnalysis) {
+    let projectProfile: ProjectProfile;
+    try {
+      const source = await GitHubSource.create(owner, repo, githubToken);
+      projectProfile = await analyzeProject(source);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Analysis failed";
+      return NextResponse.json({ error: "Repository not found", message }, { status: 404 });
+    }
+
+    const systemPrompt = buildSystemPrompt(targetAgent);
+    const userPrompt = buildProfilePrompt(projectProfile);
+
+    let generatedConfig;
+    try {
+      const result = await generateObject({
+        model: getModel(),
+        schema: generatedConfigSchema,
+        system: systemPrompt,
+        prompt: userPrompt,
+      });
+      generatedConfig = result.object;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "AI generation failed";
+      return NextResponse.json({ error: "Generation failed", message }, { status: 500 });
+    }
+
+    // Increment generation credits
+    const { error: rpcError } = await supabase.rpc("increment_generation_credits", {
+      p_user_id: user.id,
+    });
+    if (rpcError) console.error("Failed to increment generation credits:", rpcError);
+
+    // Log the generation
+    const { error: logError } = await supabase.from("generation_logs").insert({
+      user_id: user.id,
+      target_agent: targetAgent,
+      input_summary: `GitHub deep import: ${owner}/${repo}`,
+    });
+    if (logError) console.error("Failed to log generation:", logError);
+
+    return NextResponse.json({
+      config: transformGeneratedConfig(generatedConfig, targetAgent),
+      profile: projectProfile,
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Legacy path (backwards-compatible)
+  // ---------------------------------------------------------------------------
   const basePath = `/repos/${owner}/${repo}`;
 
   // Fetch all GitHub data in parallel
@@ -344,9 +403,51 @@ export async function POST(request: Request) {
   }
 
   return NextResponse.json({
-    config: {
-      ...generatedConfig,
-      targetAgent,
-    },
+    config: transformGeneratedConfig(generatedConfig, targetAgent),
   });
+}
+
+function transformGeneratedConfig(
+  generatedConfig: z.infer<typeof generatedConfigSchema>,
+  targetAgent: string,
+) {
+  return {
+    name: generatedConfig.name,
+    description: generatedConfig.description,
+    instructions: generatedConfig.instructions,
+    skills: generatedConfig.skills,
+    mcpServers: generatedConfig.mcpServers.map((s) => ({
+      name: s.name,
+      type: s.type,
+      command: s.command ?? undefined,
+      args: s.args ?? undefined,
+      url: s.url ?? undefined,
+      env: s.envKeys
+        ? s.envKeys.reduce<Record<string, string>>((acc, { key, value }) => {
+            acc[key] = value;
+            return acc;
+          }, {})
+        : undefined,
+      enabled: s.enabled,
+    })),
+    permissions: generatedConfig.permissionEntries.reduce<Record<string, "allow" | "ask" | "deny">>(
+      (acc, { tool, value }) => {
+        acc[tool] = value;
+        return acc;
+      },
+      {},
+    ),
+    rules: generatedConfig.rules.map((r) => ({
+      ...r,
+      glob: r.glob ?? undefined,
+    })),
+    targetAgent,
+    docs: (generatedConfig.docs ?? []).reduce<Record<string, string>>(
+      (acc, { filename, content }) => {
+        acc[filename] = content;
+        return acc;
+      },
+      {},
+    ),
+  };
 }

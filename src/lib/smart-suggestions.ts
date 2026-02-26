@@ -324,6 +324,7 @@ export function getSuggestionsFromProfile(
   return {
     mcpServers,
     rulePresetIds: Array.from(rulePresetIds),
+    commandPresetIds: [],
     permissionPresetId,
   };
 }

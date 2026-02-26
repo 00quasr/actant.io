@@ -12,52 +12,48 @@ const FAQ_ITEMS = [
   {
     question: "What is Actant?",
     answer:
-      "Actant is a platform to build, share, and export configurations for AI coding agents. It provides a visual builder, community marketplace, and CLI to manage configs for Claude Code, Cursor, Windsurf, Cline, and OpenCode.",
+      "Actant is a configuration platform for AI coding agents. It helps you build, share, and deploy configs for Claude Code, Cursor, Windsurf, Cline, and OpenCode through a visual builder, community marketplace, and CLI.",
   },
   {
-    question: "Which agents are supported?",
+    question: "What agents are supported?",
     answer:
-      "Actant supports Claude Code, Cursor, Windsurf, Cline, and OpenCode. Each agent has its own native config format, and Actant generates the correct files for each one.",
+      "Claude Code, Cursor, Windsurf, Cline, and OpenCode. Each gets native configuration files \u2014 CLAUDE.md for Claude Code, .cursorrules for Cursor, and so on.",
   },
   {
-    question: "Is Actant free?",
+    question: "What are workflow commands and agent definitions?",
     answer:
-      "Yes. The free tier includes up to 3 configs and 5 AI generations per month. The Pro plan ($10/month) unlocks unlimited configs, unlimited AI generation, and priority support.",
+      "Workflow commands are reusable slash commands that automate development tasks like planning, code review, or documentation. Agent definitions create specialized roles \u2014 planners, executors, verifiers \u2014 that work together on complex tasks.",
   },
   {
-    question: "How does export work?",
+    question: "Is it free?",
     answer:
-      "When you export a config, Actant generates the native config files for your selected agent. For example, Claude Code gets a CLAUDE.md and settings.json, while Cursor gets .cursorrules and .mdc rule files.",
+      "Yes. The free plan includes up to 3 configs, 5 AI generations per month, and access to the community marketplace. The Pro plan adds unlimited configs, unlimited AI generation, and priority support.",
+  },
+  {
+    question: "How does the CLI work?",
+    answer:
+      "Run npx actant init to pull any config into your project. The CLI detects your agent, downloads the config, and writes native files to your project directory. You can also push existing configs with npx actant push.",
   },
   {
     question: "Can I share my configs?",
     answer:
-      "Absolutely. You can publish configs to the marketplace for others to discover and use, or share them directly via the CLI with npx actant init.",
-  },
-  {
-    question: "What is the CLI?",
-    answer:
-      "The Actant CLI lets you pull any config into your project with a single command: npx actant init. It fetches the config from the marketplace and generates the correct files for your agent.",
+      "Yes. Publish your configs to the Actant marketplace for the community to discover, import, and build on. You can also export configs as downloadable ZIP files.",
   },
 ];
 
 export function FaqSection() {
   return (
-    <section className="px-6 py-20 sm:py-28 bg-muted/30">
-      <div className="mx-auto max-w-5xl">
-        <FadeIn>
-          <p className="text-center text-xs font-medium uppercase tracking-wider text-muted-foreground mb-3">
-            FAQ
-          </p>
-          <h2 className="text-center text-2xl font-bold tracking-tight sm:text-3xl">
+    <section className="px-6 py-24 sm:py-32">
+      <FadeIn>
+        <div className="mx-auto max-w-5xl">
+          <h2 className="text-center text-3xl font-bold tracking-tight sm:text-4xl">
             Frequently asked questions
           </h2>
-        </FadeIn>
-        <FadeIn delay={100}>
-          <Accordion type="single" collapsible className="mx-auto mt-12 max-w-2xl">
+
+          <Accordion type="single" collapsible className="mx-auto mt-14 max-w-2xl">
             {FAQ_ITEMS.map((item, i) => (
               <AccordionItem key={i} value={`item-${i}`}>
-                <AccordionTrigger className="text-sm font-medium text-left">
+                <AccordionTrigger className="text-left text-sm font-medium">
                   {item.question}
                 </AccordionTrigger>
                 <AccordionContent className="text-sm text-muted-foreground">
@@ -66,8 +62,8 @@ export function FaqSection() {
               </AccordionItem>
             ))}
           </Accordion>
-        </FadeIn>
-      </div>
+        </div>
+      </FadeIn>
     </section>
   );
 }

@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/client";
 import type { Config } from "@/types/marketplace";
-import type { AgentConfig } from "@/types/config";
+import type { AgentConfig, AgentDefinition, WorkflowCommand } from "@/types/config";
 function toDbConfig(
   config: AgentConfig & { id?: string; documentType?: string; content?: Record<string, unknown> },
 ) {
@@ -17,6 +17,11 @@ function toDbConfig(
     content: {
       ...(config.content ?? {}),
       ...(config.docs && Object.keys(config.docs).length > 0 ? { docs: config.docs } : {}),
+      ...(config.commands && config.commands.length > 0 ? { commands: config.commands } : {}),
+      ...(config.agentDefinitions && config.agentDefinitions.length > 0
+        ? { agentDefinitions: config.agentDefinitions }
+        : {}),
+      ...(config.workflowTemplateId ? { workflowTemplateId: config.workflowTemplateId } : {}),
     },
   };
 }
@@ -26,9 +31,13 @@ export function fromDbConfig(row: Config): AgentConfig & {
   documentType: string;
   content: Record<string, unknown>;
   docs: Record<string, string>;
+  commands: WorkflowCommand[];
+  agentDefinitions: AgentDefinition[];
 } {
   const rawContent = (row.content as Record<string, unknown>) ?? {};
   const docs = (rawContent.docs as Record<string, string>) ?? {};
+  const commands = (rawContent.commands as WorkflowCommand[]) ?? [];
+  const agentDefinitions = (rawContent.agentDefinitions as AgentDefinition[]) ?? [];
   return {
     id: row.id,
     name: row.name,
@@ -39,6 +48,8 @@ export function fromDbConfig(row: Config): AgentConfig & {
     mcpServers: row.mcp_servers as unknown as AgentConfig["mcpServers"],
     permissions: row.permissions as AgentConfig["permissions"],
     rules: row.rules as unknown as AgentConfig["rules"],
+    commands,
+    agentDefinitions,
     documentType: row.document_type ?? "agent-config",
     content: rawContent,
     docs,

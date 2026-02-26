@@ -1,13 +1,23 @@
 "use client";
 
 import { useReducer, useCallback } from "react";
-import type { AgentConfig, AgentType, McpServer, Rule, SkillEntry } from "@/types/config";
+import type {
+  AgentConfig,
+  AgentDefinition,
+  AgentType,
+  McpServer,
+  Rule,
+  SkillEntry,
+  WorkflowCommand,
+} from "@/types/config";
 export interface ConfigState extends AgentConfig {
   id?: string;
   techStack: string[];
   documentType: string;
   content: Record<string, unknown>;
   docs: Record<string, string>;
+  commands: WorkflowCommand[];
+  agentDefinitions: AgentDefinition[];
   isDirty: boolean;
   isSaving: boolean;
   lastSaved?: Date;
@@ -51,6 +61,12 @@ type ConfigAction =
   | { type: "SET_DOCS"; payload: Record<string, string> }
   | { type: "SET_DOC"; payload: { filename: string; content: string } }
   | { type: "REMOVE_DOC"; payload: string }
+  | { type: "ADD_COMMAND"; payload: WorkflowCommand }
+  | { type: "REMOVE_COMMAND"; payload: number }
+  | { type: "UPDATE_COMMAND"; payload: { index: number; command: WorkflowCommand } }
+  | { type: "ADD_AGENT_DEFINITION"; payload: AgentDefinition }
+  | { type: "REMOVE_AGENT_DEFINITION"; payload: number }
+  | { type: "UPDATE_AGENT_DEFINITION"; payload: { index: number; definition: AgentDefinition } }
   | { type: "RESET" }
   | { type: "SET_SAVING"; payload: boolean }
   | { type: "SET_SAVED" };
@@ -73,6 +89,8 @@ function createInitialState(
     mcpServers: initial?.mcpServers ?? [],
     permissions: initial?.permissions ?? {},
     rules: initial?.rules ?? [],
+    commands: initial?.commands ?? [],
+    agentDefinitions: initial?.agentDefinitions ?? [],
     techStack: initial?.techStack ?? [],
     documentType: initial?.documentType ?? "agent-config",
     content: initial?.content ?? {},
@@ -201,6 +219,42 @@ function configReducer(state: ConfigState, action: ConfigAction): ConfigState {
       const { [action.payload]: _removed, ...rest } = state.docs;
       return { ...state, docs: rest, isDirty: true };
     }
+    case "ADD_COMMAND":
+      return { ...state, commands: [...state.commands, action.payload], isDirty: true };
+    case "REMOVE_COMMAND":
+      return {
+        ...state,
+        commands: state.commands.filter((_, i) => i !== action.payload),
+        isDirty: true,
+      };
+    case "UPDATE_COMMAND":
+      return {
+        ...state,
+        commands: state.commands.map((c, i) =>
+          i === action.payload.index ? action.payload.command : c,
+        ),
+        isDirty: true,
+      };
+    case "ADD_AGENT_DEFINITION":
+      return {
+        ...state,
+        agentDefinitions: [...state.agentDefinitions, action.payload],
+        isDirty: true,
+      };
+    case "REMOVE_AGENT_DEFINITION":
+      return {
+        ...state,
+        agentDefinitions: state.agentDefinitions.filter((_, i) => i !== action.payload),
+        isDirty: true,
+      };
+    case "UPDATE_AGENT_DEFINITION":
+      return {
+        ...state,
+        agentDefinitions: state.agentDefinitions.map((d, i) =>
+          i === action.payload.index ? action.payload.definition : d,
+        ),
+        isDirty: true,
+      };
     case "LOAD_CONFIG":
       return createInitialState(action.payload);
     case "LOAD_GENERATED_CONFIG":
@@ -213,6 +267,8 @@ function configReducer(state: ConfigState, action: ConfigAction): ConfigState {
         mcpServers: action.payload.mcpServers,
         permissions: action.payload.permissions,
         rules: action.payload.rules,
+        commands: action.payload.commands ?? state.commands,
+        agentDefinitions: action.payload.agentDefinitions ?? state.agentDefinitions,
         docs: action.payload.docs ?? state.docs,
         isDirty: true,
       };
@@ -357,6 +413,33 @@ export function useConfig(
     (filename: string) => dispatch({ type: "REMOVE_DOC", payload: filename }),
     [],
   );
+  const addCommand = useCallback(
+    (command: WorkflowCommand) => dispatch({ type: "ADD_COMMAND", payload: command }),
+    [],
+  );
+  const removeCommand = useCallback(
+    (index: number) => dispatch({ type: "REMOVE_COMMAND", payload: index }),
+    [],
+  );
+  const updateCommand = useCallback(
+    (index: number, command: WorkflowCommand) =>
+      dispatch({ type: "UPDATE_COMMAND", payload: { index, command } }),
+    [],
+  );
+  const addAgentDefinition = useCallback(
+    (definition: AgentDefinition) =>
+      dispatch({ type: "ADD_AGENT_DEFINITION", payload: definition }),
+    [],
+  );
+  const removeAgentDefinition = useCallback(
+    (index: number) => dispatch({ type: "REMOVE_AGENT_DEFINITION", payload: index }),
+    [],
+  );
+  const updateAgentDefinition = useCallback(
+    (index: number, definition: AgentDefinition) =>
+      dispatch({ type: "UPDATE_AGENT_DEFINITION", payload: { index, definition } }),
+    [],
+  );
   const reset = useCallback(() => dispatch({ type: "RESET" }), []);
 
   return {
@@ -389,6 +472,12 @@ export function useConfig(
     setDocs,
     setDoc,
     removeDoc,
+    addCommand,
+    removeCommand,
+    updateCommand,
+    addAgentDefinition,
+    removeAgentDefinition,
+    updateAgentDefinition,
     reset,
   };
 }

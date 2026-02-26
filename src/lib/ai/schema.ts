@@ -35,6 +35,32 @@ export const generatedConfigSchema = z.object({
       alwaysApply: z.boolean(),
     }),
   ),
+  commands: z
+    .array(
+      z.object({
+        name: z.string(),
+        description: z.string(),
+        argumentHint: z.string().nullable(),
+        allowedTools: z.array(z.string()).nullable(),
+        prompt: z.string(),
+      }),
+    )
+    .describe(
+      "Optional workflow commands (custom slash commands). Generate these when the project would benefit from structured workflows — e.g., spec-driven development, code review pipelines, or documentation generation. Each command defines a reusable prompt the agent can invoke. Leave as empty array if not applicable.",
+    ),
+  agentDefinitions: z
+    .array(
+      z.object({
+        name: z.string(),
+        description: z.string(),
+        role: z.string(),
+        instructions: z.string(),
+        tools: z.array(z.string()).nullable(),
+      }),
+    )
+    .describe(
+      "Optional agent definitions for multi-agent orchestration. Generate these when the project would benefit from specialized sub-agents — e.g., a planner/executor/verifier workflow, or a reviewer/security-auditor team. Each agent has a role and detailed instructions. Leave as empty array if not applicable.",
+    ),
   docs: z
     .array(
       z.object({

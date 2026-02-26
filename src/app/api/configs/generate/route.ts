@@ -199,6 +199,20 @@ export async function POST(request: Request) {
       ...r,
       glob: r.glob ?? undefined,
     })),
+    commands: (generatedConfig.commands ?? []).map((c) => ({
+      name: c.name,
+      description: c.description,
+      argumentHint: c.argumentHint ?? undefined,
+      allowedTools: c.allowedTools ?? undefined,
+      prompt: c.prompt,
+    })),
+    agentDefinitions: (generatedConfig.agentDefinitions ?? []).map((a) => ({
+      name: a.name,
+      description: a.description,
+      role: a.role,
+      instructions: a.instructions,
+      tools: a.tools ?? undefined,
+    })),
     targetAgent: input.targetAgent,
     docs: (generatedConfig.docs ?? []).reduce<Record<string, string>>(
       (acc, { filename, content }) => {

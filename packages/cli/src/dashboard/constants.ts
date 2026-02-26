@@ -3,7 +3,7 @@ export const ASCII_LOGO = `    _   ___ _____ _   _  _ _____
   / _ \\ (__  | |/ _ \\| .\` | | |
  /_/ \\_\\___| |_/_/ \\_\\_|\\_| |_|`;
 
-export const TAGLINE = "Configure AI coding agents";
+export const TAGLINE = "Configs & workflows for AI coding agents";
 
 export const VERSION = "0.1.0";
 
@@ -31,19 +31,19 @@ export const MENU_ITEMS: MenuItem[] = [
   {
     id: "init",
     label: "Pull Config",
-    description: "Pull a config from Actant",
+    description: "Pull a config or workflow from Actant",
     requiresAuth: true,
   },
   {
     id: "push",
     label: "Push Config",
-    description: "Push local config to Actant",
+    description: "Push local config, commands & agents to Actant",
     requiresAuth: true,
   },
   {
     id: "list",
     label: "My Configs",
-    description: "List saved configurations",
+    description: "List saved configs and workflows",
     requiresAuth: true,
   },
   {

@@ -54,11 +54,15 @@ export const pushCommand = new Command("push")
     if (!scanResult) {
       spinner.fail("No config files found in this directory.");
       console.log(chalk.dim("\nSupported files:"));
-      console.log(chalk.dim("  Claude Code: CLAUDE.md, .claude/settings.json, .mcp.json"));
+      console.log(
+        chalk.dim(
+          "  Claude Code: CLAUDE.md, .claude/settings.json, .mcp.json, .claude/commands/*.md, .claude/agents/*.md",
+        ),
+      );
       console.log(chalk.dim("  Cursor:      .cursorrules, .cursor/rules/*.mdc, .mcp.json"));
       console.log(chalk.dim("  Windsurf:    .windsurfrules, .windsurf/rules/rules.md"));
       console.log(chalk.dim("  Cline:       .clinerules/*.md"));
-      console.log(chalk.dim("  OpenCode:    opencode.json"));
+      console.log(chalk.dim("  OpenCode:    opencode.json, .opencode/commands/*.md"));
       process.exit(1);
     }
 
@@ -97,6 +101,12 @@ export const pushCommand = new Command("push")
     }
     if (parsed.skills.length > 0) {
       console.log(chalk.dim(`  Skills: ${parsed.skills.length}`));
+    }
+    if (parsed.commands.length > 0) {
+      console.log(chalk.dim(`  Commands: ${parsed.commands.length}`));
+    }
+    if (parsed.agentDefinitions.length > 0) {
+      console.log(chalk.dim(`  Agent definitions: ${parsed.agentDefinitions.length}`));
     }
     console.log();
 

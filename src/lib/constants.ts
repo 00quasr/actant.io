@@ -1,6 +1,6 @@
 export const SITE_NAME = "Actant";
 export const SITE_DESCRIPTION =
-  "Configure, share, and export CLI agent configurations for Claude Code, Cursor, Windsurf, Cline, and OpenCode.";
+  "Configure, share, and export CLI agent configurations and workflows for Claude Code, Cursor, Windsurf, Cline, and OpenCode.";
 function resolveUrl(raw: string): string {
   if (raw.startsWith("http://") || raw.startsWith("https://")) return raw;
   return `https://${raw}`;

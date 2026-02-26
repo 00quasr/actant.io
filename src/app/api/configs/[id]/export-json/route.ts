@@ -76,6 +76,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     return NextResponse.json({ error: "Config not found" }, { status: 404 });
   }
 
+  const rawContent = (configData.content as Record<string, unknown>) ?? {};
   const config: AgentConfig = {
     name: configData.name ?? "",
     description: configData.description ?? "",
@@ -85,6 +86,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     mcpServers: configData.mcp_servers ?? [],
     permissions: configData.permissions ?? {},
     rules: configData.rules ?? [],
+    commands: (rawContent.commands as AgentConfig["commands"]) ?? [],
+    agentDefinitions: (rawContent.agentDefinitions as AgentConfig["agentDefinitions"]) ?? [],
   };
 
   const result = exportConfig(config);

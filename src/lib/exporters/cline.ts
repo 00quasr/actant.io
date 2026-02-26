@@ -1,9 +1,10 @@
 import type { AgentConfig } from "@/types/config";
-import type { ExportFile } from "./index";
+import type { ExportFile, ExportResult } from "./index";
 import { slugify } from "./utils";
 
-export function exportCline(config: AgentConfig): ExportFile[] {
+export function exportCline(config: AgentConfig): ExportResult {
   const files: ExportFile[] = [];
+  const warnings: string[] = [];
 
   // .clinerules/01-instructions.md
   if (config.instructions.content) {
@@ -14,14 +15,59 @@ export function exportCline(config: AgentConfig): ExportFile[] {
   }
 
   // .clinerules/0N-{slug}.md for each rule
+  let nextNum = 2;
   for (let i = 0; i < config.rules.length; i++) {
     const rule = config.rules[i];
-    const num = String(i + 2).padStart(2, "0");
+    const num = String(nextNum++).padStart(2, "0");
     const slug = slugify(rule.title || "rule");
     files.push({
       path: `.clinerules/${num}-${slug}.md`,
       content: rule.content || "",
     });
+  }
+
+  // Commands & Agent Definitions (as additional numbered rule files)
+  if (config.commands?.length > 0) {
+    const lines: string[] = ["## Workflow Commands", ""];
+    for (const cmd of config.commands) {
+      lines.push(`### /${cmd.name}`);
+      lines.push("");
+      lines.push(cmd.description);
+      if (cmd.argumentHint) lines.push(`\nArgument: ${cmd.argumentHint}`);
+      lines.push(`\n${cmd.prompt}`);
+      lines.push("");
+    }
+    const num = String(nextNum++).padStart(2, "0");
+    files.push({
+      path: `.clinerules/${num}-workflow-commands.md`,
+      content: lines.join("\n"),
+    });
+    warnings.push(
+      "Cline does not natively support custom commands. Commands have been documented in .clinerules for reference.",
+    );
+  }
+  if (config.agentDefinitions?.length > 0) {
+    const lines: string[] = ["## Agent Definitions", ""];
+    for (const agent of config.agentDefinitions) {
+      lines.push(`### ${agent.name}`);
+      lines.push("");
+      lines.push(`**Role:** ${agent.role}`);
+      lines.push("");
+      lines.push(agent.description);
+      lines.push(`\n${agent.instructions}`);
+      if (agent.tools?.length) {
+        lines.push(`\n**Tools:** ${agent.tools.join(", ")}`);
+      }
+      lines.push("");
+    }
+    const num = String(nextNum++).padStart(2, "0");
+    files.push({
+      path: `.clinerules/${num}-agent-definitions.md`,
+      content: lines.join("\n"),
+    });
+    warnings.push(
+      "Cline does not natively support agent definitions. Agents have been documented in .clinerules for reference.",
+    );
   }
 
   // Docs
@@ -31,5 +77,5 @@ export function exportCline(config: AgentConfig): ExportFile[] {
     }
   }
 
-  return files;
+  return { files, warnings };
 }

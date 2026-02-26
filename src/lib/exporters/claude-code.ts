@@ -66,6 +66,43 @@ export function exportClaudeCode(config: AgentConfig): ExportFile[] {
     });
   }
 
+  // Commands
+  if (config.commands?.length > 0) {
+    for (const cmd of config.commands) {
+      const frontmatter: string[] = ["---"];
+      frontmatter.push(`description: ${cmd.description}`);
+      if (cmd.argumentHint) {
+        frontmatter.push(`argument-hint: ${cmd.argumentHint}`);
+      }
+      if (cmd.allowedTools?.length) {
+        frontmatter.push(`allowed-tools: ${cmd.allowedTools.join(", ")}`);
+      }
+      frontmatter.push("---");
+      const body = `${frontmatter.join("\n")}\n\n${cmd.prompt}`;
+      files.push({
+        path: `.claude/commands/${slugify(cmd.name)}.md`,
+        content: body,
+      });
+    }
+  }
+
+  // Agent definitions
+  if (config.agentDefinitions?.length > 0) {
+    for (const agent of config.agentDefinitions) {
+      const frontmatter: string[] = ["---"];
+      frontmatter.push(`description: ${agent.description}`);
+      if (agent.tools?.length) {
+        frontmatter.push(`tools: ${agent.tools.join(", ")}`);
+      }
+      frontmatter.push("---");
+      const body = `${frontmatter.join("\n")}\n\n${agent.instructions}`;
+      files.push({
+        path: `.claude/agents/${slugify(agent.name)}.md`,
+        content: body,
+      });
+    }
+  }
+
   // Documentation files
   if (config.docs) {
     for (const [filename, content] of Object.entries(config.docs)) {

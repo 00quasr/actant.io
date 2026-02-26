@@ -4,12 +4,14 @@ import type { ProjectProfile } from "@/lib/analysis/types";
 export interface SmartSuggestions {
   mcpServers: McpServer[];
   rulePresetIds: string[];
+  commandPresetIds: string[];
   permissionPresetId: string;
 }
 
 interface StackMapping {
   mcpSlugs: string[];
   rulePresetIds: string[];
+  commandPresetIds?: string[];
   permissionPresetId: string;
 }
 
@@ -81,16 +83,23 @@ const STACK_MAPPINGS: Record<string, StackMapping> = {
   },
 };
 
-const COMBO_MAPPINGS: { stacks: string[]; mcpSlugs: string[]; rulePresetIds: string[] }[] = [
+const COMBO_MAPPINGS: {
+  stacks: string[];
+  mcpSlugs: string[];
+  rulePresetIds: string[];
+  commandPresetIds?: string[];
+}[] = [
   {
     stacks: ["next.js", "supabase"],
     mcpSlugs: ["supabase", "context7", "vercel"],
     rulePresetIds: ["code-style", "nextjs-conventions", "security"],
+    commandPresetIds: ["gsd-workflow", "code-review"],
   },
   {
     stacks: ["next.js", "shadcn"],
     mcpSlugs: ["context7", "shadcn", "vercel"],
     rulePresetIds: ["code-style", "nextjs-conventions"],
+    commandPresetIds: ["gsd-workflow"],
   },
 ];
 
@@ -169,6 +178,7 @@ export function getSuggestions(techStack: string[], targetAgent: AgentType): Sma
 
   const mcpSlugs = new Set<string>();
   const rulePresetIds = new Set<string>();
+  const commandPresetIds = new Set<string>();
   let permissionPresetId = "standard";
 
   // Check combo mappings first (more specific)
@@ -177,6 +187,7 @@ export function getSuggestions(techStack: string[], targetAgent: AgentType): Sma
     if (allMatch) {
       combo.mcpSlugs.forEach((slug) => mcpSlugs.add(slug));
       combo.rulePresetIds.forEach((id) => rulePresetIds.add(id));
+      combo.commandPresetIds?.forEach((id) => commandPresetIds.add(id));
     }
   }
 
@@ -186,10 +197,16 @@ export function getSuggestions(techStack: string[], targetAgent: AgentType): Sma
     if (mapping) {
       mapping.mcpSlugs.forEach((slug) => mcpSlugs.add(slug));
       mapping.rulePresetIds.forEach((id) => rulePresetIds.add(id));
+      mapping.commandPresetIds?.forEach((id) => commandPresetIds.add(id));
       if (mapping.permissionPresetId === "restrictive") {
         permissionPresetId = "restrictive";
       }
     }
+  }
+
+  // Suggest GSD workflow for complex multi-tech stacks (3+ technologies)
+  if (normalizedStack.length >= 3 && commandPresetIds.size === 0) {
+    commandPresetIds.add("gsd-workflow");
   }
 
   const mcpServers = Array.from(mcpSlugs)
@@ -199,6 +216,7 @@ export function getSuggestions(techStack: string[], targetAgent: AgentType): Sma
   return {
     mcpServers,
     rulePresetIds: Array.from(rulePresetIds),
+    commandPresetIds: Array.from(commandPresetIds),
     permissionPresetId,
   };
 }
@@ -306,6 +324,7 @@ export function getSuggestionsFromProfile(
   return {
     mcpServers,
     rulePresetIds: Array.from(rulePresetIds),
+    commandPresetIds: [],
     permissionPresetId,
   };
 }

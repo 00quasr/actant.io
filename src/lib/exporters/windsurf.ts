@@ -26,9 +26,52 @@ export function exportWindsurf(config: AgentConfig): ExportResult {
     }
   }
 
-  // .windsurf/rules/rules.md (full content)
-  if (combined) {
-    files.push({ path: ".windsurf/rules/rules.md", content: combined });
+  // .windsurf/rules/rules.md (full content, with workflow documentation appended)
+  let rulesContent = combined;
+
+  // Commands & Agent Definitions (appended as documentation)
+  const workflowSections: string[] = [];
+  if (config.commands?.length > 0) {
+    const lines: string[] = ["## Workflow Commands", ""];
+    for (const cmd of config.commands) {
+      lines.push(`### /${cmd.name}`);
+      lines.push("");
+      lines.push(cmd.description);
+      if (cmd.argumentHint) lines.push(`\nArgument: ${cmd.argumentHint}`);
+      lines.push(`\n${cmd.prompt}`);
+      lines.push("");
+    }
+    workflowSections.push(lines.join("\n"));
+    warnings.push(
+      "Windsurf does not natively support custom commands. Commands have been documented in rules for reference.",
+    );
+  }
+  if (config.agentDefinitions?.length > 0) {
+    const lines: string[] = ["## Agent Definitions", ""];
+    for (const agent of config.agentDefinitions) {
+      lines.push(`### ${agent.name}`);
+      lines.push("");
+      lines.push(`**Role:** ${agent.role}`);
+      lines.push("");
+      lines.push(agent.description);
+      lines.push(`\n${agent.instructions}`);
+      if (agent.tools?.length) {
+        lines.push(`\n**Tools:** ${agent.tools.join(", ")}`);
+      }
+      lines.push("");
+    }
+    workflowSections.push(lines.join("\n"));
+    warnings.push(
+      "Windsurf does not natively support agent definitions. Agents have been documented in rules for reference.",
+    );
+  }
+  if (workflowSections.length > 0) {
+    const appendedContent = workflowSections.join("\n\n");
+    rulesContent = rulesContent ? rulesContent + "\n\n" + appendedContent : appendedContent;
+  }
+
+  if (rulesContent) {
+    files.push({ path: ".windsurf/rules/rules.md", content: rulesContent });
   }
 
   // Docs

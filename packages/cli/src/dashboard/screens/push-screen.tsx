@@ -133,6 +133,18 @@ export function PushScreen({ onBack }: PushScreenProps) {
               <Text>{parsed.skills.length}</Text>
             </Text>
           )}
+          {parsed.commands.length > 0 && (
+            <Text>
+              <Text dimColor>{"Commands:".padEnd(16)}</Text>
+              <Text>{parsed.commands.length}</Text>
+            </Text>
+          )}
+          {parsed.agentDefinitions.length > 0 && (
+            <Text>
+              <Text dimColor>{"Agents:".padEnd(16)}</Text>
+              <Text>{parsed.agentDefinitions.length}</Text>
+            </Text>
+          )}
         </Box>
         <Box marginTop={1}>
           <Text dimColor>Press ↵ to push, ESC to cancel</Text>
